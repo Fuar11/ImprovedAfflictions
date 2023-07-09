@@ -54,9 +54,7 @@ namespace ImprovedAfflictions.Pain
                     if (__instance.m_SecondsSinceLastPulseFx > __instance.m_PulseFxFrequencySeconds)
                     {
 
-                        MelonLogger.Msg("Active intensity level: {0}", __instance.m_PulseFxIntensity);
-
-                        if (ph.HasConcussion()) effects.HeadTraumaPulse(2f);
+                        if (ph.HasConcussion()) effects.HeadTraumaPulse(__instance.m_PulseFxIntensity);
                         else if(__instance.m_PulseFxIntensity >= 1f)
                         {
                             effects.IntensePainPulse(__instance.m_PulseFxIntensity);
@@ -80,9 +78,7 @@ namespace ImprovedAfflictions.Pain
                     GameObject soundEmitterFromGameObject = GameAudioManager.GetSoundEmitterFromGameObject(GameManager.GetPlayerObject());
                     AkSoundEngine.SetRTPCValue(__instance.m_PulseFxWwiseRtpcName, in_value, soundEmitterFromGameObject);
                 }
-
             }
-
         }
 
 
@@ -171,6 +167,16 @@ namespace ImprovedAfflictions.Pain
 
         }
 
+        [HarmonyPatch(typeof(QualitySettingsManager), nameof(QualitySettingsManager.ApplyCurrentQualitySettings))]
+
+        public class UpdatePainEffectsOnLoad
+        {
+            public static void Postfix()
+            {
+                PainHelper ph = new PainHelper();
+                ph.UpdatePainEffects();
+            }
+        }
 
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.TakePainKillers))]
 
@@ -193,19 +199,8 @@ namespace ImprovedAfflictions.Pain
                     return;
                 }
 
-                SaveDataManager sdm = Implementation.sdm;
-
-                PainSaveDataProxy painInstance = new PainSaveDataProxy();
-                painInstance.m_RemedyApplied = true;
-                painInstance.m_PulseFxIntensity = __instance.m_PulseFxIntensity;
-                painInstance.m_PulseFxFrequencySeconds = __instance.m_PulseFxFrequencySeconds;
-
-                string dataToSave = JsonSerializer.Serialize(painInstance);
-                sdm.Save(dataToSave, index.ToString());
-
-                //update pain effects when painkillers are taken
-                PainHelper ph = new PainHelper();
-                ph.UpdatePainEffects();
+                //schedule painkillers to take effects in 20 minutes
+                Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 20), "takeEffectPainkiller", index.ToString()));
 
                 //schedule painkillers to last for x amount of hours
                 Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 10, 0), "wareOffPainkiller", index.ToString()));

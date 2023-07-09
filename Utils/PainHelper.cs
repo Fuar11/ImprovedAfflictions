@@ -1,5 +1,6 @@
 ﻿using Il2Cpp;
 using Il2Cppgw.proto.utils;
+using Il2CppSystem.Data;
 using MelonLoader;
 using System;
 using System.Collections.Generic;
@@ -93,5 +94,34 @@ namespace ImprovedAfflictions.Utils
             UpdatePainEffects();
 
         }
+
+        public void TakeEffectPainkillers(string index)
+        {
+
+            SaveDataManager sdm = Implementation.sdm;
+
+            var data = sdm.LoadPainData(index);
+
+            if (data == null)
+            {
+                MelonLogger.Error("Unable to ware off painkillers since data cannot be retrieved from Mod Data file");
+                return;
+            }
+
+            PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+
+            if(pain == null || pain.m_RemedyApplied == true) return;
+
+            pain.m_RemedyApplied = true;
+
+            string dataToSave = JsonSerializer.Serialize(pain);
+            sdm.Save(dataToSave, index.ToString());
+
+            //update pain effects when painkillers are taken
+            PainHelper ph = new PainHelper();
+            ph.UpdatePainEffects();
+
+        }
+
     }
 }

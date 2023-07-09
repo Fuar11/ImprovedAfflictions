@@ -13,11 +13,12 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
     public string ScheduledEventExecutorId => "Fuar.ImprovedAfflictions";
     public void Execute(TLDDateTime time, string eventType, string? eventId, string? eventData)
     {
+        PainHelper ph = new PainHelper();
+
         switch (eventType)
         {
             case "wareOffPainkiller":
 
-                PainHelper ph = new PainHelper();
 
                 if (eventId == null)
                 {
@@ -27,6 +28,19 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
 
                 ph.WareOffPainkillers(eventId);
                 break;
+            case "takeEffectPainkiller":
+
+
+                if (eventId == null)
+                {
+                    MelonLogger.Error("wareOffPainkillers event scheduled without ID");
+                    return;
+                }
+
+                ph.TakeEffectPainkillers(eventId);
+                break;
+
+
         }
     }
 

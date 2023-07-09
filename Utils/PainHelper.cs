@@ -8,25 +8,25 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Random = UnityEngine.Random;
+using HarmonyLib;
 
 namespace ImprovedAfflictions.Utils
 {
     internal class PainHelper
     {
 
-        public bool HasConcussion()
+        [HarmonyPatch(typeof(QualitySettingsManager), nameof(QualitySettingsManager.ApplyCurrentQualitySettings))]
+
+        public class UpdatePainEffectsOnLoad
         {
-            SprainPain painManager = GameManager.GetSprainPainComponent();
-            foreach(SprainPain.Instance inst in painManager.m_ActiveInstances)
+            public static void Postfix()
             {
-                if (inst.m_Cause.ToLowerInvariant() == "concussion") 
-                {
-                    MelonLogger.Msg("Has concussion!");
-                        return true; 
-                }
+                PainHelper ph = new PainHelper();
+                ph.UpdatePainEffects();
             }
-            return false;
         }
+
         public void UpdatePainEffects()
         {
 
@@ -40,14 +40,13 @@ namespace ImprovedAfflictions.Utils
 
                 if (data == null)
                 {
-                    MelonLogger.Error("Error retrieving data, might not be saved yet.");
                     continue;
                 }
 
                 PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
 
-                //if the pain instance isn't saved or it's remedied, skip to the next one
-                if (pain == null || pain.m_RemedyApplied) continue;
+                //if the pain instance isn't saved, skip to the next one
+                if (pain == null) continue;
 
                 //set the current pain effects to the most intense pain in the list
                 if (pain.m_PulseFxIntensity >= maxIntensity)
@@ -58,21 +57,30 @@ namespace ImprovedAfflictions.Utils
                 }
             }
 
-            //if all of the pain instances are remedied but not gone, set minimal pain effect
-            if(maxIntensity == 0f && painManager.HasSprainPain())
+            string data2 = sdm.LoadPainData("painkillers");
+
+            if (data2 == null) return;
+
+            PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data2);
+
+
+            //if painkillers have been taken, dull the pain effects
+            if (painkillerData != null && painkillerData.m_RemedyApplied)
             {
-                painManager.m_PulseFxIntensity = 0.3f;
+                MelonLogger.Msg("Dulling pain: {0}", painManager.m_PulseFxIntensity);
+                painManager.m_PulseFxIntensity /= 1.5f;
+                MelonLogger.Msg("Dulled pain to: {0}", painManager.m_PulseFxIntensity);
             }
 
-            
+
         }
 
-        public void WareOffPainkillers(string index)
+        public void WareOffPainkillers()
         {
 
             SaveDataManager sdm = Implementation.sdm;
 
-            var data = sdm.LoadPainData(index);
+            var data = sdm.LoadPainData("painkillers");
 
             if (data == null)
             {
@@ -80,27 +88,27 @@ namespace ImprovedAfflictions.Utils
                 return;
             }
 
-            PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+            PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
-            if (pain == null || pain.m_RemedyApplied == false) return;
+            if (painkillerData == null || painkillerData.m_RemedyApplied == false) return;
 
-            PainSaveDataProxy painToSave = pain;
+            PainkillerSaveDataProxy painToSave = painkillerData;
             painToSave.m_RemedyApplied = false;
 
             var dataToSave = JsonSerializer.Serialize(painToSave);
 
-            sdm.Save(dataToSave, index);
+            sdm.Save(dataToSave, "painkillers");
 
             UpdatePainEffects();
 
         }
 
-        public void TakeEffectPainkillers(string index)
+        public void TakeEffectPainkillers()
         {
 
             SaveDataManager sdm = Implementation.sdm;
 
-            var data = sdm.LoadPainData(index);
+            var data = sdm.LoadPainData("painkillers");
 
             if (data == null)
             {
@@ -108,19 +116,97 @@ namespace ImprovedAfflictions.Utils
                 return;
             }
 
-            PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+            PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
-            if(pain == null || pain.m_RemedyApplied == true) return;
+            if(painkillerData == null || painkillerData.m_RemedyApplied == true) return;
 
-            pain.m_RemedyApplied = true;
+            painkillerData.m_RemedyApplied = true;
 
-            string dataToSave = JsonSerializer.Serialize(pain);
-            sdm.Save(dataToSave, index.ToString());
+
+            string dataToSave = JsonSerializer.Serialize(painkillerData);
+            sdm.Save(dataToSave, "painkillers");
 
             //update pain effects when painkillers are taken
             PainHelper ph = new PainHelper();
             ph.UpdatePainEffects();
 
+        }
+
+        public bool HasPainAtLocation(AfflictionBodyArea location)
+        {
+            foreach(SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
+            {
+                if (pain.m_Location == location) return true;
+            }
+            return false;
+        }
+
+        public bool HasConcussion()
+        {
+            SprainPain painManager = GameManager.GetSprainPainComponent();
+            foreach (SprainPain.Instance inst in painManager.m_ActiveInstances)
+            {
+                if (inst.m_Cause.ToLowerInvariant() == "concussion")
+                {
+                    MelonLogger.Msg("Has concussion!");
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void MaybeConcuss()
+        {
+            SprainPain painManager = GameManager.GetSprainPainComponent();
+            SaveDataManager sdm = Implementation.sdm;
+
+            if (HasConcussion())
+            {
+                if (Il2Cpp.Utils.RollChance(40f))
+                {
+                    for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
+                    {
+                        SprainPain.Instance inst = painManager.m_ActiveInstances[i];
+
+                        if (inst.m_Location == AfflictionBodyArea.Head)
+                        {
+                            if (inst.m_Cause.ToLowerInvariant() == "concussion")
+                            {
+                                string data = sdm.LoadPainData(i.ToString());
+                                PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+
+                                if (pain == null) return;
+
+                                //if player already has concussion and a new one is triggered, simply reset the timer of the existing one and remove painkiller effect
+                                float newDuration = Random.Range(pain.m_PulseFxMaxDuration, 240f);
+
+                                inst.m_EndTime = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused() + newDuration;
+                                GameManager.GetCameraEffects().PainPulse(1f);
+
+                                pain.m_PulseFxMaxDuration = newDuration;
+                                pain.m_PulseFxIntensity += 0.2f;
+
+                                data = JsonSerializer.Serialize(pain);
+                                sdm.Save(data, i.ToString());
+
+                                PainkillerSaveDataProxy? painkiller = new PainkillerSaveDataProxy();
+                                painkiller.m_RemedyApplied = false;
+
+                                string data2 = JsonSerializer.Serialize(painkiller);
+                                sdm.Save(data2, "painkillers");
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (Il2Cpp.Utils.RollChance(60f))
+                {
+                    GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.Head, "concussion", AfflictionOptions.PlayFX | AfflictionOptions.DoAutoSave | AfflictionOptions.DisplayIcon);
+                    GameManager.GetCameraEffects().PainPulse(1f);
+                }
+            }
         }
 
     }

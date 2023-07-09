@@ -19,7 +19,7 @@ namespace ImprovedAfflictions
     internal class UIPatches
     {
 
-        [HarmonyPatch(typeof(Panel_Affliction), "Enable", new Type[] {typeof (bool), typeof(Il2CppSystem.Collections.Generic.List<Affliction>), typeof(FirstAidItem)})]
+        [HarmonyPatch(typeof(Panel_Affliction), "Enable", new Type[] { typeof(bool), typeof(Il2CppSystem.Collections.Generic.List<Affliction>), typeof(FirstAidItem) })]
 
         public class DisableAfflictionUI
         {
@@ -29,32 +29,21 @@ namespace ImprovedAfflictions
                 if (!enable) return true;
 
                 SaveDataManager sdm = Implementation.sdm;
-                List<bool> cures = new List<bool>();
+
+                string data = sdm.LoadPainData("painkillers");
+                PainkillerSaveDataProxy? painkillers = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
                 foreach (Affliction item in listAffliction)
                 {
                     //if there is any affliction other than pain, do show the menu
                     if (item.m_AfflictionType != AfflictionType.SprainPain) return true;
-
-                    var data = sdm.LoadPainData((item.m_Id.ToString()));
-
-                    if (data == null) continue;
-
-                    PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
-
-                    if (pain != null)
-                    {
-                        if (pain.m_RemedyApplied) cures.Add(true);
-                        else cures.Add(false);
-                    }
                 }
 
-                if (cures.Count == 0) return true;
-
-                //if all of the instances of pain are cured, do not show the menu
-                if (cures.All(val => val == true)) return false;
-                else return true;
-
+                //if there is only pain but painkillers are taken, do not show the menu
+                if (painkillers != null && painkillers.m_RemedyApplied) return false;
+              
+                //there is pain and no painkillers have been taken yet
+                return true;
             }
 
 
@@ -64,37 +53,33 @@ namespace ImprovedAfflictions
 
         public class AfflictionsUIUpdate
         {
-            
+
             public static void Postfix(Panel_Affliction __instance)
             {
 
                 SaveDataManager sdm = Implementation.sdm;
 
-               for (int i = 0; i < __instance.m_Afflictions.Count; i++)
-               {
-                   MelonLogger.Msg("In loop");
+                var data = sdm.LoadPainData("painkillers");
 
-                   if (__instance.m_Afflictions[i].m_AfflictionType != AfflictionType.SprainPain)
-                   {
-                       MelonLogger.Msg("Affliction is not pain, skipping");
-                       continue;
-                   }
+                PainkillerSaveDataProxy? painkillers = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
-                   var data = sdm.LoadPainData((__instance.m_Afflictions[i].m_Id.ToString()));
+                if (painkillers != null && !painkillers.m_RemedyApplied) return;
 
-                   PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+                Affliction painToKeep = new Affliction();
 
-                   if (pain != null)
-                   {
-                       if (pain.m_RemedyApplied)
-                       {
-                           MelonLogger.Msg("Removing from list teehee");
-                            __instance.m_Afflictions.RemoveAt(i);
-                            //__instance.m_CoverflowAfflictions.RemoveAt(i);
-                            //__instance.m_ScrollList.m_ScrollObjects.RemoveAt(i);
-                       }
-                   }
-               }
+
+
+                for (int i = 0; i < __instance.m_Afflictions.Count; i++)
+                {
+
+                    if (__instance.m_Afflictions[i].m_AfflictionType != AfflictionType.SprainPain)
+                    {
+                        continue;
+                    }
+                    __instance.m_Afflictions.RemoveAt(i);
+                    i--;
+                }
+
 
                 __instance.m_CoverflowAfflictions.Clear();
                 __instance.m_ScrollList.CleanUp();
@@ -552,29 +537,29 @@ namespace ImprovedAfflictions
 
                             SprainPain sprainPainComponent = GameManager.GetSprainPainComponent();
 
-                            string painJson = Implementation.sdm.LoadPainData(selectedAfflictionIndex.ToString());
-                            PainSaveDataProxy? painInstance;
+                            string painkillerData = Implementation.sdm.LoadPainData("painkillers");
+                            PainkillerSaveDataProxy? painkillers;
                             bool HasTakenPainkillers = false;
 
-                            if(painJson != null)
+                            if (painkillerData != null)
                             {
-                                painInstance = JsonSerializer.Deserialize<PainSaveDataProxy>(painJson);
+                                painkillers = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(painkillerData);
 
-                                if(painInstance != null)
+                                if (painkillers != null)
                                 {
-                                    HasTakenPainkillers = painInstance.m_RemedyApplied;
+                                    HasTakenPainkillers = painkillers.m_RemedyApplied;
                                 }
                             }
 
-                            //if painkillers have been taken for this instance of pain, the UI will show that accordingly
+                            //if painkillers have been taken, the UI will show that accordingly
 
                             __instance.m_LabelAfflictionDescriptionNoRest.text = "";
                             __instance.m_LabelAfflictionDescription.text = Localization.Get("GAMEPLAY_SprainPainDesc");
                             string[] remedySprites = new string[1] { "GEAR_BottlePainKillers" };
-                            bool[] remedyComplete = new bool[1] {HasTakenPainkillers};
+                            bool[] remedyComplete = new bool[1] { HasTakenPainkillers };
                             int[] remedyNumRequired = new int[1] { 2 };
                             string[] altRemedySprites = new string[1] { "GEAR_RoseHipTea" };
-                            bool[] altRemedyComplete = new bool[1] { HasTakenPainkillers }; 
+                            bool[] altRemedyComplete = new bool[1] { HasTakenPainkillers };
                             int[] altRemedyNumRequired = new int[1] { 1 };
                             __instance.SetItemsNeeded(remedySprites, remedyComplete, remedyNumRequired, altRemedySprites, altRemedyComplete, altRemedyNumRequired, 0f, 0f, 0f);
                             num = (int)sprainPainComponent.GetLocation(selectedAfflictionIndex);

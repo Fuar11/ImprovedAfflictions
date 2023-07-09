@@ -18,29 +18,11 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
         switch (eventType)
         {
             case "wareOffPainkiller":
-
-
-                if (eventId == null)
-                {
-                    MelonLogger.Error("wareOffPainkillers event scheduled without ID");
-                    return;
-                }
-
-                ph.WareOffPainkillers(eventId);
+                ph.WareOffPainkillers();
                 break;
             case "takeEffectPainkiller":
-
-
-                if (eventId == null)
-                {
-                    MelonLogger.Error("wareOffPainkillers event scheduled without ID");
-                    return;
-                }
-
-                ph.TakeEffectPainkillers(eventId);
+                ph.TakeEffectPainkillers();
                 break;
-
-
         }
     }
 

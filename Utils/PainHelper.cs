@@ -67,9 +67,7 @@ namespace ImprovedAfflictions.Utils
             //if painkillers have been taken, dull the pain effects
             if (painkillerData != null && painkillerData.m_RemedyApplied)
             {
-                MelonLogger.Msg("Dulling pain: {0}", painManager.m_PulseFxIntensity);
                 painManager.m_PulseFxIntensity /= 1.5f;
-                MelonLogger.Msg("Dulled pain to: {0}", painManager.m_PulseFxIntensity);
             }
 
 

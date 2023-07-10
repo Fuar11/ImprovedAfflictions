@@ -10,6 +10,7 @@ using Il2CppNewtonsoft.Json;
 using ImprovedAfflictions.Utils;
 using UnityEngine;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using MelonLoader;
 
 namespace ImprovedAfflictions.Pain
 {
@@ -83,6 +84,58 @@ namespace ImprovedAfflictions.Pain
                 }
             }
         }
+
+        [HarmonyPatch(typeof(vp_FPSController), nameof(vp_FPSController.GetSlopeMultiplier))]
+
+        public class MovementSpeedModifier
+        {
+            public static void Postfix(ref float __result)
+            {
+
+                PainHelper ph = new PainHelper();
+                SaveDataManager sdm = Implementation.sdm;
+
+                string data = sdm.LoadPainData("painkillers");
+
+                if (data == null) return;
+
+                PainkillerSaveDataProxy? pk = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
+
+                if (ph.HasPainAtLocation(AfflictionBodyArea.LegLeft) || ph.HasPainAtLocation(AfflictionBodyArea.LegRight))
+                {
+                    if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting())
+                    {
+                        float multi1 = pk.m_RemedyApplied ? 0.9f : 0.7f;
+
+                        __result *= multi1;
+                    }
+                    else if (GameManager.GetPlayerManagerComponent().PlayerIsWalking())
+                    {
+                        float multi2 = pk.m_RemedyApplied ? 0.9f : 0.8f;
+
+                        __result *= multi2;
+                    }
+                }
+
+                if (ph.HasPainAtLocation(AfflictionBodyArea.FootLeft) || ph.HasPainAtLocation(AfflictionBodyArea.FootRight))
+                {
+                    if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting())
+                    {
+                        float multi1 = pk.m_RemedyApplied ? 0.9f : 0.8f;
+
+                        __result *= multi1;
+                    }
+                    else if (GameManager.GetPlayerManagerComponent().PlayerIsWalking())
+                    {
+                        float multi2 = pk.m_RemedyApplied ? 0.9f : 0.8f;
+
+                        __result *= multi2;
+                    }
+                }
+            }
+
+        }
+
 
     }
 }

@@ -176,11 +176,7 @@ namespace ImprovedAfflictions.Pain
                 string dataToSave = JsonSerializer.Serialize(painInstance);
                 sdm.Save(dataToSave, suffix);
 
-                PainkillerSaveDataProxy painkiller = new PainkillerSaveDataProxy();
-                painkiller.m_RemedyApplied = false;
-
-                string dataToSave2 = JsonSerializer.Serialize(painkiller);
-                sdm.Save(dataToSave2, "painkillers");
+                Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 5), "wareOffPainkiller"));
 
                 //update pain effects when new pain is afflicted
                 PainHelper ph = new PainHelper();

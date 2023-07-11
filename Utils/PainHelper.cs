@@ -16,7 +16,7 @@ namespace ImprovedAfflictions.Utils
     internal class PainHelper
     {
 
-        [HarmonyPatch(typeof(QualitySettingsManager), nameof(QualitySettingsManager.ApplyCurrentQualitySettings))]
+        [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.Deserialize))]
 
         public class UpdatePainEffectsOnLoad
         {
@@ -31,6 +31,7 @@ namespace ImprovedAfflictions.Utils
         {
 
             SprainPain painManager = GameManager.GetSprainPainComponent();
+
             SaveDataManager sdm = Implementation.sdm;
             float maxIntensity = 0f;
 
@@ -51,24 +52,28 @@ namespace ImprovedAfflictions.Utils
                 //set the current pain effects to the most intense pain in the list
                 if (pain.m_PulseFxIntensity >= maxIntensity)
                 {
+                    MelonLogger.Msg("Pain instance {0}", num);
+                    MelonLogger.Msg("Highest pain so far {0}", maxIntensity);
+                    MelonLogger.Msg("Current instance pain {0}", pain.m_PulseFxIntensity);
+
                     painManager.m_PulseFxIntensity = pain.m_PulseFxIntensity;
                     painManager.m_PulseFxFrequencySeconds = pain.m_PulseFxFrequencySeconds;
                     maxIntensity = pain.m_PulseFxIntensity;
                 }
             }
 
+            MelonLogger.Msg("done");
+
+
             //if painkillers have been taken, dull the pain effects
             if (IsOnPainkillers())
             {
                 painManager.m_PulseFxIntensity *= 0.5f;
             }
-
-
         }
 
         public void WareOffPainkillers()
         {
-
             SaveDataManager sdm = Implementation.sdm;
 
             var data = sdm.LoadPainData("painkillers");
@@ -96,14 +101,14 @@ namespace ImprovedAfflictions.Utils
 
         public void TakeEffectPainkillers()
         {
-
+          
             SaveDataManager sdm = Implementation.sdm;
 
             var data = sdm.LoadPainData("painkillers");
 
             if (data == null)
             {
-                MelonLogger.Error("Unable to ware off painkillers since data cannot be retrieved from Mod Data file");
+                MelonLogger.Error("Unable to take painkillers since data cannot be retrieved from Mod Data file");
                 return;
             }
 
@@ -130,6 +135,9 @@ namespace ImprovedAfflictions.Utils
         }
         public bool IsOnPainkillers()
         {
+
+            if (GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu")) return false;
+
             SaveDataManager sdm = Implementation.sdm;
 
             var data = sdm.LoadPainData("painkillers");
@@ -159,7 +167,6 @@ namespace ImprovedAfflictions.Utils
         {
             if (IsOnPainkillers())
             {
-                MelonLogger.Msg("Can in fact climb rope");
                 return true;
             }
             if (HasPainAtLocation(AfflictionBodyArea.HandLeft) && HasPainAtLocation(AfflictionBodyArea.HandRight)) return false;
@@ -169,7 +176,6 @@ namespace ImprovedAfflictions.Utils
 
             if (HasPainAtLocation(AfflictionBodyArea.FootLeft) && HasPainAtLocation(AfflictionBodyArea.FootLeft)) return false;
 
-            MelonLogger.Msg("Can in fact climb rope");
             return true;
         }
 
@@ -180,7 +186,6 @@ namespace ImprovedAfflictions.Utils
             {
                 if (inst.m_Cause.ToLowerInvariant() == "concussion")
                 {
-                    MelonLogger.Msg("Has concussion!");
                     return true;
                 }
             }

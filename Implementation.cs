@@ -13,6 +13,7 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
     public string ScheduledEventExecutorId => "Fuar.ImprovedAfflictions";
     public void Execute(TLDDateTime time, string eventType, string? eventId, string? eventData)
     {
+
         PainHelper ph = new PainHelper();
 
         switch (eventType)

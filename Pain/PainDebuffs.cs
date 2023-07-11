@@ -155,8 +155,6 @@ namespace ImprovedAfflictions.Pain
                 {
                     if (!ph.CanClimbRope())
                     {
-                        MelonLogger.Msg("Cannot climb rope");
-
                         GameAudioManager.PlayGUIError();
                         HUDMessage.AddMessage("Can't climb rope when injured.");
                         return;

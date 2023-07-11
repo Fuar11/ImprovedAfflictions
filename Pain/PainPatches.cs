@@ -64,6 +64,7 @@ namespace ImprovedAfflictions.Pain
                             GameManager.GetCameraEffects().SprainPulse(__instance.m_PulseFxIntensity);
                         }
 
+                        __instance.m_PulseFxFrequencySeconds = Random.Range(__instance.m_SecondsSinceLastPulseFx, 30f);
                         __instance.m_SecondsSinceLastPulseFx = 0f;
                     }
                 }
@@ -74,7 +75,10 @@ namespace ImprovedAfflictions.Pain
                 }
                 if (!string.IsNullOrEmpty(__instance.m_PulseFxWwiseRtpcName))
                 {
-                    float in_value = GameManager.GetCameraStatusEffects().m_SprainAmountSin * 100f;
+
+                    float val = ph.IsOnPainkillers() ? 100f : 50f;
+
+                    float in_value = GameManager.GetCameraStatusEffects().m_SprainAmountSin * val;
                     GameObject soundEmitterFromGameObject = GameAudioManager.GetSoundEmitterFromGameObject(GameManager.GetPlayerObject());
                     AkSoundEngine.SetRTPCValue(__instance.m_PulseFxWwiseRtpcName, in_value, soundEmitterFromGameObject);
                 }

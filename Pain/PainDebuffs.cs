@@ -216,13 +216,7 @@ namespace ImprovedAfflictions.Pain
                 }
 
                 float multi = GetClimbSpeedMultiplier(__instance);
-
-                
                     __instance.m_ClimbSpeed *= multi;
-                
-
-
-
             }
 
             public static float GetClimbSpeedMultiplier(PlayerClimbRope inst)

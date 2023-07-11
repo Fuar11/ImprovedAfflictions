@@ -60,7 +60,7 @@ namespace ImprovedAfflictions.Utils
             //if painkillers have been taken, dull the pain effects
             if (IsOnPainkillers())
             {
-                painManager.m_PulseFxIntensity /= 1.5f;
+                painManager.m_PulseFxIntensity *= 0.5f;
             }
 
 

@@ -19,6 +19,8 @@ namespace ImprovedAfflictions.Pain
 
             GameManager.GetCameraStatusEffects().m_WaterTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_WaterTarget, amount * 1.1f);
             GameManager.GetCameraStatusEffects().m_SprainTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_SprainTarget, amount);
+            GameManager.GetCameraStatusEffects().m_HeadacheTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_HeadacheTarget, amount);
+
 
         }
 
@@ -26,6 +28,8 @@ namespace ImprovedAfflictions.Pain
         {
             GameManager.GetCameraStatusEffects().m_WaterTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_WaterTarget, amount * 2f);
             GameManager.GetCameraStatusEffects().m_SprainTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_SprainTarget, amount);
+            GameManager.GetCameraStatusEffects().m_HeadacheTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_HeadacheTarget, amount);
+
         }
 
         //overrides pain pulse allowing it to accept any value for the intensity

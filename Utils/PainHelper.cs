@@ -57,15 +57,8 @@ namespace ImprovedAfflictions.Utils
                 }
             }
 
-            string data2 = sdm.LoadPainData("painkillers");
-
-            if (data2 == null) return;
-
-            PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data2);
-
-
             //if painkillers have been taken, dull the pain effects
-            if (painkillerData != null && painkillerData.m_RemedyApplied)
+            if (IsOnPainkillers())
             {
                 painManager.m_PulseFxIntensity /= 1.5f;
             }
@@ -130,6 +123,29 @@ namespace ImprovedAfflictions.Utils
 
         }
 
+        public bool HasPain()
+        {
+            if (GameManager.GetSprainPainComponent().HasSprainPain()) return true;
+            return false;
+        }
+        public bool IsOnPainkillers()
+        {
+            SaveDataManager sdm = Implementation.sdm;
+
+            var data = sdm.LoadPainData("painkillers");
+
+            if (data == null)
+            {
+                MelonLogger.Error("Unable to ware off painkillers since data cannot be retrieved from Mod Data file");
+                return false;
+            }
+
+            PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
+
+            if (painkillerData == null || painkillerData.m_RemedyApplied) return true;
+
+            return false;
+        }
         public bool HasPainAtLocation(AfflictionBodyArea location)
         {
             foreach(SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
@@ -137,6 +153,24 @@ namespace ImprovedAfflictions.Utils
                 if (pain.m_Location == location) return true;
             }
             return false;
+        }
+
+        public bool CanClimbRope()
+        {
+            if (IsOnPainkillers())
+            {
+                MelonLogger.Msg("Can in fact climb rope");
+                return true;
+            }
+            if (HasPainAtLocation(AfflictionBodyArea.HandLeft) && HasPainAtLocation(AfflictionBodyArea.HandRight)) return false;
+            else if (HasPainAtLocation(AfflictionBodyArea.HandLeft) && HasPainAtLocation(AfflictionBodyArea.ArmLeft)) return false;
+            else if (HasPainAtLocation(AfflictionBodyArea.HandRight) && HasPainAtLocation(AfflictionBodyArea.ArmRight)) return false;
+            else if (HasPainAtLocation(AfflictionBodyArea.ArmLeft) && HasPainAtLocation(AfflictionBodyArea.ArmRight)) return false;
+
+            if (HasPainAtLocation(AfflictionBodyArea.FootLeft) && HasPainAtLocation(AfflictionBodyArea.FootLeft)) return false;
+
+            MelonLogger.Msg("Can in fact climb rope");
+            return true;
         }
 
         public bool HasConcussion()

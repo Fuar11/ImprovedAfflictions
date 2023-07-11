@@ -28,10 +28,7 @@ namespace ImprovedAfflictions
 
                 if (!enable) return true;
 
-                SaveDataManager sdm = Implementation.sdm;
-
-                string data = sdm.LoadPainData("painkillers");
-                PainkillerSaveDataProxy? painkillers = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
+                PainHelper ph = new PainHelper();
 
                 foreach (Affliction item in listAffliction)
                 {
@@ -40,7 +37,7 @@ namespace ImprovedAfflictions
                 }
 
                 //if there is only pain but painkillers are taken, do not show the menu
-                if (painkillers != null && painkillers.m_RemedyApplied) return false;
+                if (ph.IsOnPainkillers()) return false;
               
                 //there is pain and no painkillers have been taken yet
                 return true;
@@ -57,17 +54,11 @@ namespace ImprovedAfflictions
             public static void Postfix(Panel_Affliction __instance)
             {
 
-                SaveDataManager sdm = Implementation.sdm;
+                PainHelper ph = new PainHelper();
 
-                var data = sdm.LoadPainData("painkillers");
-
-                PainkillerSaveDataProxy? painkillers = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
-
-                if (painkillers != null && !painkillers.m_RemedyApplied) return;
+                if (!ph.IsOnPainkillers()) return;
 
                 Affliction painToKeep = new Affliction();
-
-
 
                 for (int i = 0; i < __instance.m_Afflictions.Count; i++)
                 {

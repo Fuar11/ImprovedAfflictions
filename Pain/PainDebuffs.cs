@@ -136,6 +136,154 @@ namespace ImprovedAfflictions.Pain
 
         }
 
+        [HarmonyPatch(typeof(RopeClimbPoint), nameof(RopeClimbPoint.PerformInteraction))]
 
+        public class RopeClimbRestriction
+        {
+
+            public static bool Prefix()
+            {
+                return false;
+            }
+
+            public static void Postfix(RopeClimbPoint __instance)
+            {
+
+                PainHelper ph = new PainHelper();
+
+                if (!GameManager.GetEmergencyStimComponent().GetEmergencyStimActive())
+                {
+                    if (!ph.CanClimbRope())
+                    {
+                        MelonLogger.Msg("Cannot climb rope");
+
+                        GameAudioManager.PlayGUIError();
+                        HUDMessage.AddMessage("Can't climb rope when injured.");
+                        return;
+                    }
+                    if (GameManager.GetSprainedWristComponent().HasSprainedWrist())
+                    {
+                        GameAudioManager.PlayGUIError();
+                        HUDMessage.AddMessage(Localization.Get("GAMEPLAY_CannotClimbWithSprainedWrist"));
+                        return;
+                    }
+                    if (GameManager.GetSprainedAnkleComponent().HasSprainedAnkle())
+                    {
+                        GameAudioManager.PlayGUIError();
+                        HUDMessage.AddMessage(Localization.Get("GAMEPLAY_CannotClimbWithSprainedAnkle"));
+                        return;
+                    }
+                    if (GameManager.GetBrokenRibComponent().HasBrokenRib())
+                    {
+                        GameAudioManager.PlayGUIError();
+                        HUDMessage.AddMessage(Localization.Get("GAMEPLAY_CannotClimbWithBrokenRib"));
+                        return;
+                    }
+                }
+                if (GameManager.GetEncumberComponent().IsEncumbered())
+                {
+                    GameAudioManager.PlayGUIError();
+                    HUDMessage.AddMessage(Localization.Get("GAMEPLAY_CannotClimbWhenEncumbered"));
+                    return;
+                }
+                if (GameManager.GetPlayerMovementComponent().IsCrouchOrLimpOrWalkForced())
+                {
+                    return;
+                }
+                GameManager.GetPlayerClimbRopeComponent().BeginClimbing(__instance.m_Rope);
+                return;
+
+            }
+
+        }
+
+        [HarmonyPatch(typeof(PlayerClimbRope), nameof(PlayerClimbRope.SetClimbSpeed))]
+
+        public class ClimbSpeedModifier
+        {
+            static PainHelper ph = new PainHelper();
+            public static void Postfix(PlayerClimbRope __instance)
+            {
+
+                if (__instance.m_ClimbingState == ClimbingState.Falling)
+                {
+                    __instance.m_ClimbSpeed = 0f;
+                    return;
+                }
+                else if(__instance.m_ClimbingState == ClimbingState.Holding)
+                {
+                    return;
+                }
+
+                float multi = GetClimbSpeedMultiplier(__instance);
+
+                
+                    __instance.m_ClimbSpeed *= multi;
+                
+
+
+
+            }
+
+            public static float GetClimbSpeedMultiplier(PlayerClimbRope inst)
+            {
+
+                float multiUp = 1f;
+                float multiDown = 1f;
+
+                if (ph.HasPain())
+                {
+
+                    if (ph.HasPainAtLocation(AfflictionBodyArea.Head) || ph.HasPainAtLocation(AfflictionBodyArea.Neck))
+                    {
+                        multiUp *= 1f;
+                        multiDown *= 1f;
+                    }
+                    if (ph.HasPainAtLocation(AfflictionBodyArea.ArmLeft) || ph.HasPainAtLocation(AfflictionBodyArea.ArmRight))
+                    {
+                        multiUp *= 0.7f;
+                        multiDown *= 0.75f;
+                    }
+                    if (ph.HasPainAtLocation(AfflictionBodyArea.LegLeft) || ph.HasPainAtLocation(AfflictionBodyArea.LegRight))
+                    {
+                        multiUp *= 0.8f;
+                        multiDown *= 0.85f;
+                    }
+                    if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft) || ph.HasPainAtLocation(AfflictionBodyArea.HandRight))
+                    {
+                        multiUp *= 0.8f;
+                        multiDown *= 0.85f;
+                    }
+                    if (ph.HasPainAtLocation(AfflictionBodyArea.FootLeft) || ph.HasPainAtLocation(AfflictionBodyArea.FootRight))
+                    {
+                        multiUp *= 0.9f;
+                        multiDown *= 0.95f;
+                    }
+                    if (ph.HasPainAtLocation(AfflictionBodyArea.Chest) || ph.HasPainAtLocation(AfflictionBodyArea.Stomach))
+                    {
+                        multiUp *= 0.9f;
+                        multiDown *= 0.95f;
+                    }
+                }
+
+                if (ph.HasPain() && ph.IsOnPainkillers())
+                {
+                    multiUp += 0.1f;
+                    multiDown += 0.2f;
+                }
+
+                if (inst.m_ClimbingState == ClimbingState.Up)
+                {
+                    return multiUp;
+                }
+                else if (inst.m_ClimbingState == ClimbingState.Down)
+                {
+                    return multiDown;
+                }
+
+                return 1f;
+            }
+        }
+       
     }
 }

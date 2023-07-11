@@ -116,6 +116,12 @@ namespace ImprovedAfflictions.Pain
                         __instance.m_PulseFxIntensity = 0.8f;
                         __instance.m_PulseFxFrequencySeconds = 14f;
                     }
+                    else if (location == AfflictionBodyArea.ArmRight || location == AfflictionBodyArea.ArmLeft)
+                    {
+                        __instance.m_AfflictionDurationHours = Random.Range(32f, 96f);
+                        __instance.m_PulseFxIntensity = 0.6f;
+                        __instance.m_PulseFxFrequencySeconds = 16f;
+                    }
                     else if (location == AfflictionBodyArea.LegRight || location == AfflictionBodyArea.LegLeft)
                     {
                         __instance.m_AfflictionDurationHours = Random.Range(48f, 96f);

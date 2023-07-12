@@ -321,7 +321,7 @@ namespace ImprovedAfflictions
                         }
                     case AfflictionType.FoodPoisioning:
                         {
-                            FoodPoisoning foodPoisoningComponent = GameManager.GetFoodPoisoningComponent();
+                            Il2Cpp.FoodPoisoning foodPoisoningComponent = GameManager.GetFoodPoisoningComponent();
                             __instance.m_LabelAfflictionDescriptionNoRest.text = "";
                             __instance.m_LabelAfflictionDescription.text = foodPoisoningComponent.m_Description;
                             string[] remedySprites = new string[1] { "GEAR_BottleAntibiotics" };

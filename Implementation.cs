@@ -3,6 +3,7 @@ using ModData;
 using ImprovedAfflictions.Utils;
 using Moment;
 using ImprovedAfflictions.Pain;
+using Il2Cpp;
 
 namespace ImprovedAfflictions;
 internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
@@ -24,6 +25,10 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
                 break;
             case "takeEffectPainkiller":
                 ph.TakeEffectPainkillers();
+                break;
+            case "takeEffectFoodPoisoning":
+                MelonLogger.Msg("Giving food poisoning!");
+                GameManager.GetFoodPoisoningComponent().FoodPoisoningStart(eventId, displayIcon: true);
                 break;
         }
     }

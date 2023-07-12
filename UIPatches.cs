@@ -13,6 +13,7 @@ using System.Text.Json;
 using Il2CppSystem.Data;
 using ImprovedAfflictions.Utils;
 using static Il2Cpp.Panel_Affliction;
+using ImprovedAfflictions.Pain;
 
 namespace ImprovedAfflictions
 {

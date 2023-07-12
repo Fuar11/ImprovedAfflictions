@@ -2,6 +2,7 @@
 using ModData;
 using ImprovedAfflictions.Utils;
 using Moment;
+using ImprovedAfflictions.Pain;
 
 namespace ImprovedAfflictions;
 internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor

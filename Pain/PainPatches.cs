@@ -90,9 +90,21 @@ namespace ImprovedAfflictions.Pain
 
         public class PainModifier
         {
-            public static void Prefix(ref AfflictionBodyArea location, ref string cause, SprainPain __instance)
+            public static bool Prefix(ref AfflictionBodyArea location, ref string cause, SprainPain __instance)
             {
+                PainHelper ph = new PainHelper();
+                int index = 0;
 
+                PainSaveDataProxy? existingInstance = (cause == "concussion") ? ph.GetConcussion() : ph.GetPainInstance(location, ref index);
+
+                if(existingInstance != null)
+                {
+                    MelonLogger.Msg("Player has pain");
+                    ph.UpdatePainInstance(index, existingInstance);
+                    ph.UpdatePainEffects();
+                    Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 2), "wareOffPainkiller"));
+                    return false;
+                }
 
                 if (cause.ToLowerInvariant() == "console" || cause.ToLowerInvariant().Contains("bite")) //animal bites
                 {
@@ -175,16 +187,14 @@ namespace ImprovedAfflictions.Pain
                     suffix = (__instance.m_ActiveInstances.Count).ToString();
                 }
 
-                
-
                 string dataToSave = JsonSerializer.Serialize(painInstance);
                 sdm.Save(dataToSave, suffix);
 
                 Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 5), "wareOffPainkiller"));
 
                 //update pain effects when new pain is afflicted
-                PainHelper ph = new PainHelper();
                 ph.UpdatePainEffects();
+                return true;
             }
 
         }
@@ -216,7 +226,7 @@ namespace ImprovedAfflictions.Pain
                 Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 20), "takeEffectPainkiller"));
 
                 //schedule painkillers to last for x amount of hours
-                Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 10, 0), "wareOffPainkiller"));
+                Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 10, 20), "wareOffPainkiller"));
 
             }
         }

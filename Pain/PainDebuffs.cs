@@ -25,7 +25,7 @@ namespace ImprovedAfflictions.Pain
                 PainHelper ph = new PainHelper();
                 SaveDataManager sdm = Implementation.sdm;
 
-                string data = sdm.LoadPainData("painkillers");
+                string data = sdm.LoadData("painkillers");
 
                 if (data == null) return;
 
@@ -70,7 +70,7 @@ namespace ImprovedAfflictions.Pain
                 PainHelper ph = new PainHelper();
                 SaveDataManager sdm = Implementation.sdm;
 
-                string data = sdm.LoadPainData("painkillers");
+                string data = sdm.LoadData("painkillers");
 
                 if (data == null) return;
 
@@ -95,7 +95,7 @@ namespace ImprovedAfflictions.Pain
                 PainHelper ph = new PainHelper();
                 SaveDataManager sdm = Implementation.sdm;
 
-                string data = sdm.LoadPainData("painkillers");
+                string data = sdm.LoadData("painkillers");
 
                 if (data == null) return;
 

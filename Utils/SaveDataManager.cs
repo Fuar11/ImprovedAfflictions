@@ -19,10 +19,10 @@ namespace ImprovedAfflictions.Utils
             dm.Save(data, suffix);
         }
 
-        public string LoadPainData(string suffix)
+        public string LoadData(string suffix)
         {
-            string? painState = dm.Load(suffix);
-            return painState;
+            string? data = dm.Load(suffix);
+            return data;
         }
 
     }

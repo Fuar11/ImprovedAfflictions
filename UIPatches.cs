@@ -14,6 +14,8 @@ using Il2CppSystem.Data;
 using ImprovedAfflictions.Utils;
 using static Il2Cpp.Panel_Affliction;
 using ImprovedAfflictions.Pain;
+using Il2CppSystem.Xml.Schema;
+using ImprovedAfflictions.FoodPoisoning;
 
 namespace ImprovedAfflictions
 {
@@ -330,8 +332,10 @@ namespace ImprovedAfflictions
                             string[] altRemedySprites = new string[1] { "GEAR_ReishiTea" };
                             bool[] altRemedyComplete = new bool[1] { foodPoisoningComponent.HasTakenAntibiotics() };
                             int[] altRemedyNumRequired = new int[1] { 1 };
-                            __instance.SetItemsNeeded(remedySprites, remedyComplete, remedyNumRequired, altRemedySprites, altRemedyComplete, altRemedyNumRequired, 0f, foodPoisoningComponent.GetRestAmountRemaining(), foodPoisoningComponent.m_NumHoursRestForCure);
+                            __instance.SetItemsNeeded(remedySprites, remedyComplete, remedyNumRequired, altRemedySprites, altRemedyComplete, altRemedyNumRequired, 0f, 0f, 0f);
                             num = (int)Panel_Affliction.GetAfflictionLocation(AfflictionType.FoodPoisioning, selectedAfflictionIndex);
+                            FoodPoisoningHelper foodPoisoningHelper = new FoodPoisoningHelper();
+                            num4 = Mathf.CeilToInt(foodPoisoningHelper.GetRemainingHours() * 60f);
                             break;
                         }
                     case AfflictionType.SprainedAnkle:
@@ -529,7 +533,7 @@ namespace ImprovedAfflictions
 
                             SprainPain sprainPainComponent = GameManager.GetSprainPainComponent();
 
-                            string painkillerData = Implementation.sdm.LoadPainData("painkillers");
+                            string painkillerData = Implementation.sdm.LoadData("painkillers");
                             PainkillerSaveDataProxy? painkillers;
                             bool HasTakenPainkillers = false;
 

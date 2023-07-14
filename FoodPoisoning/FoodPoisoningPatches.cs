@@ -19,6 +19,65 @@ namespace ImprovedAfflictions.FoodPoisoning
     internal class FoodPoisoningPatches
     {
 
+        [HarmonyPatch(typeof(Il2Cpp.FoodPoisoning), nameof(Il2Cpp.FoodPoisoning.FoodPoisoningStart))]
+
+        public class FoodPoisoningStartUpdate
+        {
+
+            public static void Prefix(Il2Cpp.FoodPoisoning __instance)
+            {
+                __instance.m_DurationHoursMax = 48f;
+                __instance.m_DurationHoursMin = 12f;
+            }
+
+            public static void Postfix(Il2Cpp.FoodPoisoning __instance)
+            {
+                __instance.m_NumHoursRestForCure = __instance.m_DurationHours;
+                __instance.m_DurationHours += GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused(); 
+                __instance.m_StopDegradingConditionAtPercent = 11f;
+            }
+        }
+
+        [HarmonyPatch(typeof(Il2Cpp.FoodPoisoning), nameof(Il2Cpp.FoodPoisoning.UpdateFoodPoisoning))]
+
+        public class FoodPoisoningUpdateUpdate
+        {
+
+            public static bool Prefix() { return false;}
+
+            public static void Postfix(Il2Cpp.FoodPoisoning __instance)
+            {
+
+                FoodPoisoningHelper foodPoisoningHelper = new FoodPoisoningHelper();
+
+                __instance.m_ElapsedHours = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
+                if (__instance.m_ElapsedHours > __instance.m_DurationHours)
+                {
+                    __instance.FoodPoisoningEnd();
+                    return;
+                }
+                bool flag = true;
+                if (__instance.m_AntibioticsTaken && GameManager.GetPlayerManagerComponent().PlayerIsSleeping())
+                {
+                    flag = true;
+                }
+                if (GameManager.GetConditionComponent().GetNormalizedCondition() < __instance.m_StopDegradingConditionAtPercent / 100f)
+                {
+                    flag = false;
+                }
+                if (flag)
+                {
+                    float num = foodPoisoningHelper.CalculateConditionToDrain() * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
+                    GameManager.GetConditionComponent().AddHealth(0f - num, DamageSource.FoodPoisoning);
+                }
+                if (!GameManager.GetPlayerManagerComponent().PlayerIsSleeping())
+                {
+                    float fatigueValue = __instance.m_FatigueIncreasePerHour * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
+                    GameManager.GetFatigueComponent().AddFatigue(fatigueValue);
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(GearItem), nameof(GearItem.RollForFoodPoisoning))]
 
         public class FoodPoisoningChanceUpdate

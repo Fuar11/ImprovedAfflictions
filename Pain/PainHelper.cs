@@ -41,7 +41,7 @@ namespace ImprovedAfflictions.Pain
 
             for (int num = painManager.m_ActiveInstances.Count - 1; num >= 0; num--)
             {
-                string data = sdm.LoadPainData(num.ToString());
+                string data = sdm.LoadData(num.ToString());
 
                 if (data == null)
                 {
@@ -84,7 +84,7 @@ namespace ImprovedAfflictions.Pain
 
                     if (inst.m_Cause == "concussion") continue;
 
-                    string data = sdm.LoadPainData(i.ToString());
+                    string data = sdm.LoadData(i.ToString());
                     PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
 
                     index = i;
@@ -113,7 +113,7 @@ namespace ImprovedAfflictions.Pain
         {
             SaveDataManager sdm = Implementation.sdm;
 
-            var data = sdm.LoadPainData("painkillers");
+            var data = sdm.LoadData("painkillers");
 
             if (data == null)
             {
@@ -141,7 +141,7 @@ namespace ImprovedAfflictions.Pain
 
             SaveDataManager sdm = Implementation.sdm;
 
-            var data = sdm.LoadPainData("painkillers");
+            var data = sdm.LoadData("painkillers");
 
             if (data == null)
             {
@@ -177,7 +177,7 @@ namespace ImprovedAfflictions.Pain
 
             SaveDataManager sdm = Implementation.sdm;
 
-            var data = sdm.LoadPainData("painkillers");
+            var data = sdm.LoadData("painkillers");
 
             if (data == null)
             {
@@ -240,7 +240,7 @@ namespace ImprovedAfflictions.Pain
 
                 if (inst.m_Cause == "concussion")
                 {
-                    string data = sdm.LoadPainData(i.ToString());
+                    string data = sdm.LoadData(i.ToString());
                     PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
 
                     return pain;

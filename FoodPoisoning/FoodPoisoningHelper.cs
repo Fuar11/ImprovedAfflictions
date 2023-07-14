@@ -37,7 +37,7 @@ namespace ImprovedAfflictions.FoodPoisoning
 
             if (GameManager.GetSprainPainComponent().GetAfflictionsCount() > 3) conditionPerHour += 0.5f;
 
-            if (GameManager.GetFoodPoisoningComponent().HasTakenAntibiotics()) conditionPerHour /= 2f;
+            if (GameManager.GetFoodPoisoningComponent().HasTakenAntibiotics()) conditionPerHour -= 2f;
 
             return conditionPerHour;
         }

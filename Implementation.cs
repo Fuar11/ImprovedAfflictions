@@ -31,9 +31,11 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
                 sdm.Save("false", "scheduledFoodPoisoning");
                 GameManager.GetFoodPoisoningComponent().FoodPoisoningStart(eventId, displayIcon: true);
                 break;
+
+            /** got inlined
             case "takeEffectAntibiotics":
                 GameManager.GetFoodPoisoningComponent().m_AntibioticsTaken = true;
-                break;
+                break; **/
         }
     }
 

@@ -32,11 +32,9 @@ namespace ImprovedAfflictions.FoodPoisoning
 
             public static void Postfix(Il2Cpp.FoodPoisoning __instance)
             {
-                __instance.m_NumHoursRestForCure = __instance.m_DurationHours;
+                __instance.m_NumHoursRestForCure = Random.Range(__instance.m_DurationHoursMin, __instance.m_DurationHours);
                 __instance.m_DurationHours += GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused(); 
                 __instance.m_StopDegradingConditionAtPercent = 11f;
-
-                
             }
         }
 
@@ -58,6 +56,11 @@ namespace ImprovedAfflictions.FoodPoisoning
                     __instance.FoodPoisoningEnd();
                     return;
                 }
+                if (__instance.m_AntibioticsTaken && __instance.m_ElapsedRest > __instance.m_NumHoursRestForCure - 0.1f)
+                {
+                    __instance.FoodPoisoningEnd();
+                    return;
+                }
                 bool flag = true;
                 if (__instance.m_AntibioticsTaken && GameManager.GetPlayerManagerComponent().PlayerIsSleeping())
                 {
@@ -74,13 +77,17 @@ namespace ImprovedAfflictions.FoodPoisoning
                 }
                 if (!GameManager.GetPlayerManagerComponent().PlayerIsSleeping())
                 {
-                    float fatigueValue = __instance.m_FatigueIncreasePerHour * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
+
+                    float fatigueIncreasePerHour = __instance.HasTakenAntibiotics() ? 20f : __instance.m_FatigueIncreasePerHour;
+
+                    float fatigueValue = fatigueIncreasePerHour * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
                     GameManager.GetFatigueComponent().AddFatigue(fatigueValue);
                 }
             }
         }
 
 
+        /** inlined
         [HarmonyPatch(typeof(Il2Cpp.FoodPoisoning), nameof(Il2Cpp.FoodPoisoning.TakeAntibiotics))]
 
         public class ScheduleAntibiotics
@@ -89,12 +96,14 @@ namespace ImprovedAfflictions.FoodPoisoning
             public static bool Prefix() { return false; }
             public static void Postfix()
             {
+
+                MelonLogger.Msg("Taking antibiotics");
+
                 int val = Random.Range(3, 8);
                 Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, val, 0), "takeEffectAntibiotics"));
-
             }
 
-        }
+        } **/
 
         [HarmonyPatch(typeof(GearItem), nameof(GearItem.RollForFoodPoisoning))]
 
@@ -112,17 +121,24 @@ namespace ImprovedAfflictions.FoodPoisoning
                 if (!__instance.m_FoodItem)
                 {
                     __result = false;
+                    return;
                 }
                 if (startingCalories < 35f)
                 {
                     __result =  false;
+                    return;
                 }
-                if (!__instance.m_FoodItem.m_IsRawMeat && __instance.GetNormalizedCondition() > 0.6f)
+                if (!__instance.m_FoodItem.m_IsRawMeat && __instance.GetNormalizedCondition() > 0.45f)
                 {
                     __result = false;
+                    return;
                 }
 
-                if (__instance.IsWornOut()) __result = true;
+                if (__instance.IsWornOut())
+                {
+                    __result = true;
+                    return;
+                } 
 
                 float percent = 100f - __instance.GetNormalizedCondition();
                 
@@ -210,20 +226,17 @@ namespace ImprovedAfflictions.FoodPoisoning
                 {
                     flag = true;
                 } **/
+                SaveDataManager sdm = Implementation.sdm;
                 if (!flag)
                 {
-                    if (__instance.m_FoodItemEaten.RollForFoodPoisoning(__instance.m_FoodItemEatenStartingCalories))
+                    if (__instance.m_FoodItemEaten.RollForFoodPoisoning(__instance.m_FoodItemEatenStartingCalories) && sdm.LoadData("scheduledFoodPoisoning") != "true" && !GameManager.GetFoodPoisoningComponent().HasTakenAntibiotics())
                     {
-
                         int val = Random.Range(16, 24);
-                        SaveDataManager sdm = Implementation.sdm;
                         sdm.Save("true", "scheduledFoodPoisoning");
                         Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, val, 0), "takeEffectFoodPoisoning", __instance.m_FoodItemEaten.DisplayName));
                     }
                     GameManager.GetIntestinalParasitesComponent().AddRiskPercent(__instance.m_FoodItemEaten.m_FoodItem.m_ParasiteRiskPercentIncrease);
                 }
-
-
             }
 
 

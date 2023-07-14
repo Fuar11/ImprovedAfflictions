@@ -58,6 +58,7 @@ namespace ImprovedAfflictions
             {
 
                 PainHelper ph = new PainHelper();
+                SaveDataManager sdm = Implementation.sdm;
 
                 if (!ph.IsOnPainkillers()) return;
 

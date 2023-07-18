@@ -25,7 +25,7 @@ namespace ImprovedAfflictions.FoodPoisoning
         public float CalculateConditionToDrain()
         {
 
-            float conditionPerHour = GameManager.GetPlayerManagerComponent().PlayerIsSleeping() ? 3f : 10f;
+            float conditionPerHour = GameManager.GetPlayerManagerComponent().PlayerIsSleeping() ? 7f : 10f;
 
             float fatigueAmt = GameManager.GetFatigueComponent().m_CurrentFatigue;
             float hungerAmt = GameManager.GetHungerComponent().m_CurrentReserveCalories;
@@ -33,7 +33,7 @@ namespace ImprovedAfflictions.FoodPoisoning
 
             if (fatigueAmt < 30f && !GameManager.GetPlayerManagerComponent().PlayerIsSleeping()) conditionPerHour += 1f;
             if (hungerAmt < 35f) conditionPerHour += 1f;
-            if(thirstAmt < 25f) conditionPerHour += 1f;
+            if (thirstAmt < 25f) conditionPerHour += 1f;
 
             if (GameManager.GetSprainPainComponent().GetAfflictionsCount() > 3) conditionPerHour += 0.5f;
 

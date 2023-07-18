@@ -62,10 +62,10 @@ namespace ImprovedAfflictions.FoodPoisoning
                     return;
                 }
                 bool flag = true;
-                if (__instance.m_AntibioticsTaken && GameManager.GetPlayerManagerComponent().PlayerIsSleeping())
+                /**if (__instance.m_AntibioticsTaken && GameManager.GetPlayerManagerComponent().PlayerIsSleeping())
                 {
                     flag = true;
-                }
+                } **/
                 if (GameManager.GetConditionComponent().GetNormalizedCondition() < __instance.m_StopDegradingConditionAtPercent / 100f)
                 {
                     flag = false;

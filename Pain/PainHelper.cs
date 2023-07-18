@@ -117,7 +117,6 @@ namespace ImprovedAfflictions.Pain
 
             if (data == null)
             {
-                MelonLogger.Error("Unable to ware off painkillers since data cannot be retrieved from Mod Data file");
                 return;
             }
 
@@ -145,7 +144,6 @@ namespace ImprovedAfflictions.Pain
 
             if (data == null)
             {
-                MelonLogger.Error("Unable to take painkillers since data cannot be retrieved from Mod Data file");
                 return;
             }
 
@@ -181,7 +179,6 @@ namespace ImprovedAfflictions.Pain
 
             if (data == null)
             {
-                MelonLogger.Error("Unable to ware off painkillers since data cannot be retrieved from Mod Data file");
                 return false;
             }
 
@@ -257,6 +254,28 @@ namespace ImprovedAfflictions.Pain
                 GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.Head, "concussion", AfflictionOptions.PlayFX | AfflictionOptions.DoAutoSave | AfflictionOptions.DisplayIcon);
                 GameManager.GetCameraEffects().PainPulse(1f);
             }
+
+        }
+
+        public PainSaveDataProxy GetBrokenRibPain()
+        {
+
+            SprainPain painManager = GameManager.GetSprainPainComponent();
+            SaveDataManager sdm = Implementation.sdm;
+
+            for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
+            {
+                SprainPain.Instance inst = painManager.m_ActiveInstances[i];
+
+                if (inst.m_Cause == "brokenrib")
+                {
+                    string data = sdm.LoadData(i.ToString());
+                    PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+
+                    return pain;
+                }
+            }
+            return null;
 
         }
 

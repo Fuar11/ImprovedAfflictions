@@ -220,16 +220,14 @@ namespace ImprovedAfflictions
                             BrokenRib brokenRibComponent = GameManager.GetBrokenRibComponent();
                             __instance.m_LabelAfflictionDescriptionNoRest.text = "";
                             __instance.m_LabelAfflictionDescription.text = brokenRibComponent.m_Description;
-                            string[] remedySprites = new string[2] { "GEAR_HeavyBandage", "GEAR_BottlePainKillers" };
-                            bool[] remedyComplete = new bool[2]
+                            string[] remedySprites = new string[1] { "GEAR_HeavyBandage"};
+                            bool[] remedyComplete = new bool[1]
                             {
-                            !brokenRibComponent.RequiresBandage(selectedAfflictionIndex),
-                            !brokenRibComponent.RequiresPainKiller(selectedAfflictionIndex)
+                            !brokenRibComponent.RequiresBandage(selectedAfflictionIndex)
                             };
-                            int[] remedyNumRequired = new int[2]
+                            int[] remedyNumRequired = new int[1]
                             {
-                            brokenRibComponent.GetRequiredBandages(selectedAfflictionIndex),
-                            brokenRibComponent.GetRequiredPainKiller(selectedAfflictionIndex)
+                            brokenRibComponent.GetRequiredBandages(selectedAfflictionIndex)
                             };
                             string[] altRemedySprites = null;
                             bool[] altRemedyComplete = null;
@@ -529,7 +527,7 @@ namespace ImprovedAfflictions
                         num4 = Mathf.CeilToInt(GameManager.GetHeadacheComponent().GetActiveHoursRemaining(selectedAfflictionIndex) * 60f);
                         __instance.m_BuffWindow.SetActive(true);
                         break;
-                    case AfflictionType.SprainPain: //CHANGE THIS SHIT
+                    case AfflictionType.SprainPain: 
                         {
 
                             SprainPain sprainPainComponent = GameManager.GetSprainPainComponent();
@@ -561,6 +559,12 @@ namespace ImprovedAfflictions
                             __instance.SetItemsNeeded(remedySprites, remedyComplete, remedyNumRequired, altRemedySprites, altRemedyComplete, altRemedyNumRequired, 0f, 0f, 0f);
                             num = (int)sprainPainComponent.GetLocation(selectedAfflictionIndex);
                             num4 = Mathf.CeilToInt(GameManager.GetSprainPainComponent().GetRemainingHours(selectedAfflictionIndex) * 60f);
+                            
+                            if(num4 >= 9999)
+                            {
+                                num4 = 0;
+                            }
+                            
                             break;
                         }
                     case AfflictionType.Anxiety:

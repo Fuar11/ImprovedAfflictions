@@ -64,7 +64,9 @@ namespace ImprovedAfflictions.Pain
                             GameManager.GetCameraEffects().SprainPulse(__instance.m_PulseFxIntensity);
                         }
 
-                        __instance.m_PulseFxFrequencySeconds = Random.Range(__instance.m_SecondsSinceLastPulseFx, 30f);
+
+                        //random variation between pain pulses
+                        //__instance.m_PulseFxFrequencySeconds = Random.Range(3f, __instance.m_PulseFxFrequencySeconds + 5f);
                         __instance.m_SecondsSinceLastPulseFx = 0f;
                     }
                 }
@@ -95,11 +97,14 @@ namespace ImprovedAfflictions.Pain
                 PainHelper ph = new PainHelper();
                 int index = 0;
 
-                PainSaveDataProxy? existingInstance = (cause == "concussion") ? ph.GetConcussion() : ph.GetPainInstance(location, ref index);
+                PainSaveDataProxy? existingInstance = null;
+
+                if (cause == "concussion") existingInstance = ph.GetConcussion();
+                else if (cause == "broken rib") existingInstance = ph.GetBrokenRibPain();
+                else existingInstance = ph.GetPainInstance(location, ref index);
 
                 if(existingInstance != null)
                 {
-                    MelonLogger.Msg("Player has pain");
                     ph.UpdatePainInstance(index, existingInstance);
                     ph.UpdatePainEffects();
                     Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 2), "wareOffPainkiller"));
@@ -168,6 +173,12 @@ namespace ImprovedAfflictions.Pain
                     __instance.m_AfflictionDurationHours = Random.Range(96f, 240f);
                     __instance.m_PulseFxIntensity = 2f;
                     __instance.m_PulseFxFrequencySeconds = 6f;
+                }
+                else if (cause.ToLowerInvariant() == "broken rib") //broken ribs
+                {
+                    __instance.m_AfflictionDurationHours = 999999999f;
+                    __instance.m_PulseFxIntensity = 1.7f;
+                    __instance.m_PulseFxFrequencySeconds = 3f;
                 }
 
                 SaveDataManager sdm = Implementation.sdm;

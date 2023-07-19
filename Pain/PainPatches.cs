@@ -100,7 +100,7 @@ namespace ImprovedAfflictions.Pain
                 PainSaveDataProxy? existingInstance = null;
 
                 if (cause == "concussion") existingInstance = ph.GetConcussion();
-                else if (cause == "broken rib") existingInstance = ph.GetBrokenRibPain();
+                else if (cause == "broken rib") existingInstance = ph.GetBrokenRibPain(ref index);
                 else existingInstance = ph.GetPainInstance(location, ref index);
 
                 if(existingInstance != null)

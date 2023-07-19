@@ -97,6 +97,7 @@ namespace ImprovedAfflictions.Pain
             return null;
         }
 
+       
         public void UpdatePainInstance(int index, PainSaveDataProxy instanceToUpdate)
         {
             float newDuration = Random.Range(instanceToUpdate.m_PulseFxMaxDuration, 240f);
@@ -109,6 +110,8 @@ namespace ImprovedAfflictions.Pain
             string dataToSave = JsonSerializer.Serialize(instanceToUpdate);
             sdm.Save(dataToSave, index.ToString());
         }
+
+        
         public void WareOffPainkillers()
         {
             SaveDataManager sdm = Implementation.sdm;
@@ -257,7 +260,7 @@ namespace ImprovedAfflictions.Pain
 
         }
 
-        public PainSaveDataProxy GetBrokenRibPain()
+        public PainSaveDataProxy GetBrokenRibPain(ref int index)
         {
 
             SprainPain painManager = GameManager.GetSprainPainComponent();
@@ -267,10 +270,12 @@ namespace ImprovedAfflictions.Pain
             {
                 SprainPain.Instance inst = painManager.m_ActiveInstances[i];
 
-                if (inst.m_Cause == "brokenrib")
+                if (inst.m_Cause == "broken rib")
                 {
                     string data = sdm.LoadData(i.ToString());
                     PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+
+                    index = i;
 
                     return pain;
                 }
@@ -289,7 +294,7 @@ namespace ImprovedAfflictions.Pain
             {
                 SprainPain.Instance inst = painManager.m_ActiveInstances[i];
 
-                if (inst.m_Cause == "brokenrib")
+                if (inst.m_Cause == "broken rib")
                 {
                     painManager.CureAffliction(inst);
                 }

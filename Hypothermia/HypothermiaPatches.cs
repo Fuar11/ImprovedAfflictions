@@ -11,6 +11,7 @@ using Random = UnityEngine.Random;
 using System.Text.Json;
 using Il2CppSystem.Data;
 using ImprovedAfflictions.Utils;
+using MelonLoader;
 
 namespace ImprovedAfflictions.Hypothermia
 {
@@ -27,7 +28,9 @@ namespace ImprovedAfflictions.Hypothermia
 
                 if (GameManager.GetHypothermiaComponent().HasHypothermia())
                 {
+                    MelonLogger.Msg("Current result: {0}", __result);
                     __result -= 5f;
+                    MelonLogger.Msg("New result: {0}", __result);
                 }
 
             }

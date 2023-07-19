@@ -46,13 +46,10 @@ namespace ImprovedAfflictions.BrokenRibs
 
         public class BrokenRibAddPain
         {
-
-            public static void Postfix()
+            public static void Postfix(BrokenRib __instance)
             {
                 GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.Chest, "broken rib", AfflictionOptions.PlayFX | AfflictionOptions.DoAutoSave | AfflictionOptions.DisplayIcon);
-
             }
-
         }
 
 
@@ -66,7 +63,6 @@ namespace ImprovedAfflictions.BrokenRibs
             public static void Postfix(BrokenRib __instance, ref float hours)
             {
 
-                PainHelper ph = new PainHelper();
 
                 for (int num = __instance.m_CausesLocIDs.Count - 1; num >= 0; num--)
                 {
@@ -74,13 +70,24 @@ namespace ImprovedAfflictions.BrokenRibs
                     if (__instance.m_BandagesApplied[num] >= __instance.m_BandagesRequiredPerInstance && __instance.m_ElapsedRestList[num] > __instance.m_NumHoursRestForCureList[num] - 0.1f)
                     {
                         __instance.BrokenRibEnd(num);
-                        ph.EndBrokenRibPain();
                     }
                 }
 
             }
         }
 
+        [HarmonyPatch(typeof(BrokenRib), nameof(BrokenRib.BrokenRibEnd))]
+
+        public class BrokenRibRemovePain
+        {
+
+            public static void Postfix(BrokenRib __instance)
+            {
+                PainHelper ph = new PainHelper();
+                if (!__instance.HasBrokenRib()) ph.EndBrokenRibPain();
+            }
+
+        }
 
         [HarmonyPatch(typeof(PlayerStruggle), nameof(PlayerStruggle.ApplyBearDamageAfterStruggleEnds))]
 

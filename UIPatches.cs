@@ -111,7 +111,7 @@ namespace ImprovedAfflictions
             public static bool Prefix(Panel_FirstAid __instance)
             {
 
-                if (!__instance.m_SelectedAffButton) return false;
+                if (!__instance.m_SelectedAffButton) return true;
 
                 if (__instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.Insomnia || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.InsomniaRisk || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.ResistInsomniaBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatDebuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityDebuff)
                 {
@@ -300,7 +300,7 @@ namespace ImprovedAfflictions
                         }
                     case AfflictionType.Dysentery:
                         {
-                            Dysentery dysenteryComponent = GameManager.GetDysenteryComponent();
+                            Il2Cpp.Dysentery dysenteryComponent = GameManager.GetDysenteryComponent();
                             __instance.m_LabelAfflictionDescriptionNoRest.text = "";
                             __instance.m_LabelAfflictionDescription.text = dysenteryComponent.m_Description;
                             string[] remedySprites = new string[2] { "GEAR_WaterSupplyPotable", "GEAR_BottleAntibiotics" };
@@ -317,8 +317,10 @@ namespace ImprovedAfflictions
             dysenteryComponent.HasTakenAntibiotics()
                             };
                             int[] altRemedyNumRequired = new int[2] { 1, 1 };
-                            __instance.SetItemsNeeded(remedySprites, remedyComplete, remedyNumRequired, altRemedySprites, altRemedyComplete, altRemedyNumRequired, dysenteryComponent.GetWaterAmountRemaining(), dysenteryComponent.GetRestAmountRemaining(), dysenteryComponent.m_NumHoursRestForCure);
+                            __instance.SetItemsNeeded(remedySprites, remedyComplete, remedyNumRequired, altRemedySprites, altRemedyComplete, altRemedyNumRequired, dysenteryComponent.GetWaterAmountRemaining(), 0f, 0f);
                             num = (int)Panel_Affliction.GetAfflictionLocation(AfflictionType.Dysentery, selectedAfflictionIndex);
+                            float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
+                            num4 = Mathf.CeilToInt((GameManager.GetDysenteryComponent().m_DurationHours - hoursPlayedNotPaused) * 60f);
                             break;
                         }
                     case AfflictionType.Infection:

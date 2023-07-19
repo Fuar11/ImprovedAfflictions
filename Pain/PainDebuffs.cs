@@ -78,7 +78,7 @@ namespace ImprovedAfflictions.Pain
 
                 if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft) || ph.HasPainAtLocation(AfflictionBodyArea.HandRight))
                 {
-                    float multi = pk.m_RemedyApplied ? 1.02f : 1.07f;
+                    float multi = pk.m_RemedyApplied ? 1.2f : 1.7f;
 
                     __result = (int)(__result * multi);
                 }

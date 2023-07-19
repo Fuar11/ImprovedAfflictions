@@ -57,6 +57,7 @@ namespace ImprovedAfflictions
             public static void Postfix(Panel_Affliction __instance)
             {
 
+
                 PainHelper ph = new PainHelper();
                 SaveDataManager sdm = Implementation.sdm;
 
@@ -107,13 +108,28 @@ namespace ImprovedAfflictions
         public class FirstAidUIUpdate
         {
 
-            public static bool Prefix()
+            public static bool Prefix(Panel_FirstAid __instance)
             {
+
+                if (!__instance.m_SelectedAffButton) return false;
+
+                if (__instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.Insomnia || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.InsomniaRisk || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.ResistInsomniaBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatDebuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityDebuff)
+                {
+                    return true;
+                }
+
                 return false;
             }
 
             public static void Postfix(Panel_FirstAid __instance)
             {
+
+                if (!__instance.m_SelectedAffButton) return;
+
+                if (__instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.Insomnia || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.InsomniaRisk || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.ResistInsomniaBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatDebuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatBuff ||  __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityDebuff) 
+                {
+                    return; 
+                }
 
                 for (int i = 0; i < __instance.m_FakButtons.Length; i++)
                 {

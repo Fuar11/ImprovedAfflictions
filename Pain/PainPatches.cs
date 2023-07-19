@@ -178,7 +178,7 @@ namespace ImprovedAfflictions.Pain
                 {
                     __instance.m_AfflictionDurationHours = 999999999f;
                     __instance.m_PulseFxIntensity = 1.7f;
-                    __instance.m_PulseFxFrequencySeconds = 3f;
+                    __instance.m_PulseFxFrequencySeconds = 8f;
                 }
 
                 SaveDataManager sdm = Implementation.sdm;

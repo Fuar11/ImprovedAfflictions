@@ -66,12 +66,15 @@ namespace ImprovedAfflictions.BrokenRibs
             public static void Postfix(BrokenRib __instance, ref float hours)
             {
 
+                PainHelper ph = new PainHelper();
+
                 for (int num = __instance.m_CausesLocIDs.Count - 1; num >= 0; num--)
                 {
                     __instance.m_ElapsedRestList[num] += hours;
                     if (__instance.m_BandagesApplied[num] >= __instance.m_BandagesRequiredPerInstance && __instance.m_ElapsedRestList[num] > __instance.m_NumHoursRestForCureList[num] - 0.1f)
                     {
                         __instance.BrokenRibEnd(num);
+                        ph.EndBrokenRibPain();
                     }
                 }
 
@@ -83,7 +86,7 @@ namespace ImprovedAfflictions.BrokenRibs
 
         public class BrokenRibTriggerBear
         {
-            public static void Postfix(ref string causeLocId)
+            public static void Postfix()
             {
 
                 float chance = GameManager.GetDamageProtection().HasBallisticVest() ? 15f : 25f;
@@ -93,7 +96,7 @@ namespace ImprovedAfflictions.BrokenRibs
                 if (Il2Cpp.Utils.RollChance(chance))
                 {
                     float recoveryTimeModifier = GameManager.GetDamageProtection().MaybeApplyBrokenRibModifier(DamageReason.Animals, WildlifeType.Moose);
-                    GameManager.GetBrokenRibComponent().BrokenRibStart(causeLocId, displayIcon: true, noVO: true, isMinor: true, autoSave: true, recoveryTimeModifier);
+                    GameManager.GetBrokenRibComponent().BrokenRibStart("Bear Attack", displayIcon: true, noVO: true, isMinor: true, autoSave: true, recoveryTimeModifier);
                     GameManager.GetCameraEffects().PainPulse(1f);
                 }   
             }

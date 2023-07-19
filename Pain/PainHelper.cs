@@ -279,5 +279,23 @@ namespace ImprovedAfflictions.Pain
 
         }
 
+        public void EndBrokenRibPain()
+        {
+
+            SprainPain painManager = GameManager.GetSprainPainComponent();
+
+
+            for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
+            {
+                SprainPain.Instance inst = painManager.m_ActiveInstances[i];
+
+                if (inst.m_Cause == "brokenrib")
+                {
+                    painManager.CureAffliction(inst);
+                }
+            }
+
+        }
+
     }
 }

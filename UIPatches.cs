@@ -236,7 +236,7 @@ namespace ImprovedAfflictions
                             BrokenRib brokenRibComponent = GameManager.GetBrokenRibComponent();
                             __instance.m_LabelAfflictionDescriptionNoRest.text = "";
                             __instance.m_LabelAfflictionDescription.text = brokenRibComponent.m_Description;
-                            string[] remedySprites = new string[1] { "GEAR_HeavyBandage"};
+                            string[] remedySprites = new string[1] { "GEAR_HeavyBandage" };
                             bool[] remedyComplete = new bool[1]
                             {
                             !brokenRibComponent.RequiresBandage(selectedAfflictionIndex)
@@ -300,9 +300,21 @@ namespace ImprovedAfflictions
                         }
                     case AfflictionType.Dysentery:
                         {
+
+                            SaveDataManager sdm = Implementation.sdm;
+
                             Il2Cpp.Dysentery dysenteryComponent = GameManager.GetDysenteryComponent();
                             __instance.m_LabelAfflictionDescriptionNoRest.text = "";
                             __instance.m_LabelAfflictionDescription.text = dysenteryComponent.m_Description;
+
+                            string cause = sdm.LoadData("dysenteryCause");
+
+                            if (cause != "" || cause is not null)
+                            {
+                                __instance.m_SelectedAffButton.m_LabelCause.text = cause;
+                            }
+
+
                             string[] remedySprites = new string[2] { "GEAR_WaterSupplyPotable", "GEAR_BottleAntibiotics" };
                             bool[] remedyComplete = new bool[2]
                             {

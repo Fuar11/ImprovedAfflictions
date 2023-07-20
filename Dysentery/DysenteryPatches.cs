@@ -12,6 +12,7 @@ using Il2CppSystem.Data;
 using ImprovedAfflictions.Utils;
 using MelonLoader;
 using UnityEngine;
+using Microsoft.Extensions.Logging;
 
 namespace ImprovedAfflictions.Dysentery
 {
@@ -34,6 +35,18 @@ namespace ImprovedAfflictions.Dysentery
 
         }
 
+        [HarmonyPatch(typeof(Il2Cpp.Dysentery), nameof(Il2Cpp.Dysentery.DysenteryEnd))]
+
+        public class DysenteryDescriptionReset
+        {
+
+            public static void Postfix(Il2Cpp.Dysentery __instance)
+            {
+                SaveDataManager sdm = Implementation.sdm;
+                sdm.Save("", "dysenteryCause");
+            }
+
+        }
 
     }
 }

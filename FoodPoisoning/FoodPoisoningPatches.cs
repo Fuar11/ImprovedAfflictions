@@ -123,6 +123,7 @@ namespace ImprovedAfflictions.FoodPoisoning
                     __result = false;
                     return;
                 }
+
                 if (startingCalories < 35f)
                 {
                     __result =  false;
@@ -231,7 +232,7 @@ namespace ImprovedAfflictions.FoodPoisoning
                 {
                     if (__instance.m_FoodItemEaten.RollForFoodPoisoning(__instance.m_FoodItemEatenStartingCalories) && sdm.LoadData("scheduledFoodPoisoning") != "true" && !GameManager.GetFoodPoisoningComponent().HasTakenAntibiotics())
                     {
-                        int val = Random.Range(16, 24);
+                        int val = Random.Range(1, 2);
                         sdm.Save("true", "scheduledFoodPoisoning");
                         Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, val, 0), "takeEffectFoodPoisoning", __instance.m_FoodItemEaten.DisplayName));
                     }

@@ -57,13 +57,10 @@ namespace ImprovedAfflictions
             public static void Postfix(Panel_Affliction __instance)
             {
 
-
                 PainHelper ph = new PainHelper();
                 SaveDataManager sdm = Implementation.sdm;
 
                 if (!ph.IsOnPainkillers()) return;
-
-                Affliction painToKeep = new Affliction();
 
                 for (int i = 0; i < __instance.m_Afflictions.Count; i++)
                 {
@@ -561,20 +558,11 @@ namespace ImprovedAfflictions
                         {
 
                             SprainPain sprainPainComponent = GameManager.GetSprainPainComponent();
+                            PainHelper ph = new PainHelper();
+                            
+                            bool HasTakenPainkillers = ph.IsOnPainkillers();
 
-                            string painkillerData = Implementation.sdm.LoadData("painkillers");
-                            PainkillerSaveDataProxy? painkillers;
-                            bool HasTakenPainkillers = false;
-
-                            if (painkillerData != null)
-                            {
-                                painkillers = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(painkillerData);
-
-                                if (painkillers != null)
-                                {
-                                    HasTakenPainkillers = painkillers.m_RemedyApplied;
-                                }
-                            }
+                            if (ph.ScheduledPainkillers()) HasTakenPainkillers = false;
 
                             //if painkillers have been taken, the UI will show that accordingly
 

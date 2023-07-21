@@ -34,6 +34,8 @@ namespace ImprovedAfflictions.Pain
         public void UpdatePainEffects()
         {
 
+            if (GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu")) return;
+
             SprainPain painManager = GameManager.GetSprainPainComponent();
 
             SaveDataManager sdm = Implementation.sdm;
@@ -133,7 +135,6 @@ namespace ImprovedAfflictions.Pain
             var dataToSave = JsonSerializer.Serialize(painToSave);
 
             sdm.Save(dataToSave, "painkillers");
-
             UpdatePainEffects();
 
         }
@@ -144,18 +145,13 @@ namespace ImprovedAfflictions.Pain
             SaveDataManager sdm = Implementation.sdm;
 
             var data = sdm.LoadData("painkillers");
+            PainkillerSaveDataProxy? painkillerData = null;
 
-            if (data == null)
-            {
-                return;
-            }
+            painkillerData = data == null ? new PainkillerSaveDataProxy() : JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
-            PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
-
-            if (painkillerData == null || painkillerData.m_RemedyApplied == true) return;
-
+            if (painkillerData.m_RemedyApplied) return; //if data exists and painkillers are taken, do not do anything (this probably never happens)
+            
             painkillerData.m_RemedyApplied = true;
-
 
             string dataToSave = JsonSerializer.Serialize(painkillerData);
             sdm.Save(dataToSave, "painkillers");
@@ -164,6 +160,8 @@ namespace ImprovedAfflictions.Pain
             PainHelper ph = new PainHelper();
             ph.UpdatePainEffects();
 
+            //schedule painkillers to last for x amount of hours
+            Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 10, 0), "wareOffPainkiller"));
         }
 
         public bool HasPain()
@@ -174,7 +172,10 @@ namespace ImprovedAfflictions.Pain
         public bool IsOnPainkillers()
         {
 
-            if (GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu")) return false;
+            if (ScheduledPainkillers())
+            {
+                return true;
+            }
 
             SaveDataManager sdm = Implementation.sdm;
 
@@ -187,9 +188,17 @@ namespace ImprovedAfflictions.Pain
 
             PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
-            if (painkillerData == null || painkillerData.m_RemedyApplied) return true;
+            if (painkillerData != null || painkillerData.m_RemedyApplied)
+            {
+                return true;
+            }
 
             return false;
+        }
+
+        public bool ScheduledPainkillers()
+        {
+            return Moment.Moment.IsScheduled(Implementation.Instance.ScheduledEventExecutorId, "takeEffectPainkiller");
         }
         public bool HasPainAtLocation(AfflictionBodyArea location)
         {

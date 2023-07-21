@@ -15,7 +15,7 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
     public string ScheduledEventExecutorId => "Fuar.ImprovedAfflictions";
     public void Execute(TLDDateTime time, string eventType, string? eventId, string? eventData)
     {
-
+        
         PainHelper ph = new PainHelper();
 
         switch (eventType)
@@ -27,7 +27,6 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
                 ph.TakeEffectPainkillers();
                 break;
             case "takeEffectFoodPoisoning":
-                SaveDataManager sdm = Implementation.sdm;
                 sdm.Save("false", "scheduledFoodPoisoning");
 
                 if (eventId.ToLowerInvariant().Contains("soda"))

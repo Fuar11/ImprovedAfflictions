@@ -201,6 +201,8 @@ namespace ImprovedAfflictions.Pain
                 string dataToSave = JsonSerializer.Serialize(painInstance);
                 sdm.Save(dataToSave, suffix);
 
+
+                Moment.Moment.Cancel(Implementation.Instance.ScheduledEventExecutorId, "wareOffPainkiller");
                 Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 5), "wareOffPainkiller"));
 
                 //update pain effects when new pain is afflicted
@@ -235,10 +237,6 @@ namespace ImprovedAfflictions.Pain
 
                 //schedule painkillers to take effects in 20 minutes
                 Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 20), "takeEffectPainkiller"));
-
-                //schedule painkillers to last for x amount of hours
-                Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 10, 20), "wareOffPainkiller"));
-
             }
         }
 

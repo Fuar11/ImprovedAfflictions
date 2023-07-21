@@ -40,7 +40,7 @@ namespace ImprovedAfflictions
                 }
 
                 //if there is only pain but painkillers are taken, do not show the menu
-                if (ph.IsOnPainkillers()) return false;
+                if (ph.IsOnPainkillers() || ph.ScheduledPainkillers()) return false;
               
                 //there is pain and no painkillers have been taken yet
                 return true;
@@ -60,7 +60,9 @@ namespace ImprovedAfflictions
                 PainHelper ph = new PainHelper();
                 SaveDataManager sdm = Implementation.sdm;
 
-                if (!ph.IsOnPainkillers()) return;
+                if (!ph.IsOnPainkillers() && !ph.ScheduledPainkillers()) return;
+
+                
 
                 for (int i = 0; i < __instance.m_Afflictions.Count; i++)
                 {
@@ -559,11 +561,9 @@ namespace ImprovedAfflictions
 
                             SprainPain sprainPainComponent = GameManager.GetSprainPainComponent();
                             PainHelper ph = new PainHelper();
-                            
+
                             bool HasTakenPainkillers = ph.IsOnPainkillers();
-
-                            if (ph.ScheduledPainkillers()) HasTakenPainkillers = false;
-
+                           
                             //if painkillers have been taken, the UI will show that accordingly
 
                             __instance.m_LabelAfflictionDescriptionNoRest.text = "";

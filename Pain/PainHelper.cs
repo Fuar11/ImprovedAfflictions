@@ -31,6 +31,7 @@ namespace ImprovedAfflictions.Pain
             }
         }
 
+
         public void UpdatePainEffects()
         {
 
@@ -116,23 +117,19 @@ namespace ImprovedAfflictions.Pain
         
         public void WareOffPainkillers()
         {
+
             SaveDataManager sdm = Implementation.sdm;
 
             var data = sdm.LoadData("painkillers");
+            PainkillerSaveDataProxy? painkillerData = null;
 
-            if (data == null)
-            {
-                return;
-            }
+            painkillerData = data == null ? new PainkillerSaveDataProxy() : JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
-            PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
+            if (!painkillerData.m_RemedyApplied) return; //if data exists and painkillers are not taken, do not do anything (this probably never happens)
 
-            if (painkillerData == null || painkillerData.m_RemedyApplied == false) return;
+            painkillerData.m_RemedyApplied = false;
 
-            PainkillerSaveDataProxy painToSave = painkillerData;
-            painToSave.m_RemedyApplied = false;
-
-            var dataToSave = JsonSerializer.Serialize(painToSave);
+            string dataToSave = JsonSerializer.Serialize(painkillerData);
 
             sdm.Save(dataToSave, "painkillers");
             UpdatePainEffects();
@@ -141,7 +138,6 @@ namespace ImprovedAfflictions.Pain
 
         public void TakeEffectPainkillers()
         {
-
             SaveDataManager sdm = Implementation.sdm;
 
             var data = sdm.LoadData("painkillers");
@@ -161,21 +157,12 @@ namespace ImprovedAfflictions.Pain
             ph.UpdatePainEffects();
 
             //schedule painkillers to last for x amount of hours
-            Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 10, 0), "wareOffPainkiller"));
+            Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 2, 0), "wareOffPainkiller"));
         }
 
-        public bool HasPain()
-        {
-            if (GameManager.GetSprainPainComponent().HasSprainPain()) return true;
-            return false;
-        }
+       
         public bool IsOnPainkillers()
         {
-
-            if (ScheduledPainkillers())
-            {
-                return true;
-            }
 
             SaveDataManager sdm = Implementation.sdm;
 
@@ -188,7 +175,7 @@ namespace ImprovedAfflictions.Pain
 
             PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
-            if (painkillerData != null || painkillerData.m_RemedyApplied)
+            if (painkillerData != null && painkillerData.m_RemedyApplied)
             {
                 return true;
             }
@@ -208,7 +195,11 @@ namespace ImprovedAfflictions.Pain
             }
             return false;
         }
-
+        public bool HasPain()
+        {
+            if (GameManager.GetSprainPainComponent().HasSprainPain()) return true;
+            return false;
+        }
         public bool CanClimbRope()
         {
             if (IsOnPainkillers())

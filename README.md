@@ -1,4 +1,4 @@
-# ImprovedAfflictions
+# Improved Afflictions
 
 Improved Afflictions is a gameplay mod for **The Long Dark** by Hinterland Studios
 
@@ -56,5 +56,6 @@ While under the cold grip of hypothermia, you will feel colder all around and wa
 * Install the following dependencies in your mods folder: 
 
 - [ModData](https://github.com/dommrogers/ModData/releases/latest)
+- [Moment](https://github.com/No3371/TLD-Moment/releases/latest)
 
 * Install the latest release and drop it in your mods folder

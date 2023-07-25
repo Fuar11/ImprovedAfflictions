@@ -28,9 +28,7 @@ namespace ImprovedAfflictions.Hypothermia
 
                 if (GameManager.GetHypothermiaComponent().HasHypothermia())
                 {
-                    MelonLogger.Msg("Current result: {0}", __result);
                     __result -= 5f;
-                    MelonLogger.Msg("New result: {0}", __result);
                 }
 
             }

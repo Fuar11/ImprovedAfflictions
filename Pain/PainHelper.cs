@@ -157,7 +157,7 @@ namespace ImprovedAfflictions.Pain
             ph.UpdatePainEffects();
 
             //schedule painkillers to last for x amount of hours
-            Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 2, 0), "wareOffPainkiller"));
+            Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 10, 0), "wareOffPainkiller"));
         }
 
        

@@ -149,10 +149,13 @@ namespace ImprovedAfflictions.FoodPoisoning
 
         }
 
+        
+        /**
         [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.EatingComplete_Internal))]
 
         public class FoodPoisoningContractDelay
         {
+
             public static bool Prefix() { return false; }
             public static void Postfix(ref bool success, ref bool playerCancel, ref float progress, PlayerManager __instance) 
             {
@@ -223,10 +226,10 @@ namespace ImprovedAfflictions.FoodPoisoning
                 }
                 __instance.m_FoodItemEaten.ApplyBuffs(num);
                 bool flag = false;
-                /**if (GameManager.GetSkillCooking().NoParasitesOrFoodPosioning() && !__instance.m_FoodItemEaten.m_FoodItem.m_IsRawMeat)
-                {
-                    flag = true;
-                } **/
+                //if (GameManager.GetSkillCooking().NoParasitesOrFoodPosioning() && !__instance.m_FoodItemEaten.m_FoodItem.m_IsRawMeat)
+                //{
+                  //  flag = true;
+                //}
                 SaveDataManager sdm = Implementation.sdm;
                 if (!flag)
                 {
@@ -267,7 +270,7 @@ namespace ImprovedAfflictions.FoodPoisoning
 
 
         }
-
-
+        **/
+        
     }
 }

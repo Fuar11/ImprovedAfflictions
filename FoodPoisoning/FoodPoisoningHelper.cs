@@ -42,5 +42,31 @@ namespace ImprovedAfflictions.FoodPoisoning
             return conditionPerHour;
         }
 
+        public bool RollFoodPoisoningChance(GearItem gi, float startingCalories)
+        {
+
+                if (!gi.m_FoodItem)
+                {
+                    return false; 
+                }
+
+                if (startingCalories < 35f)
+                {
+                    return false;
+                }
+                if (!gi.m_FoodItem.m_IsRawMeat && gi.GetNormalizedCondition() > 0.45f)
+                {
+                    return false;
+                }
+
+                if (gi.IsWornOut())
+                {
+                    return true;
+                }
+
+                float percent = 100f - gi.GetNormalizedCondition();
+
+                return Il2Cpp.Utils.RollChance(percent);
+        }
     }
 }

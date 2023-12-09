@@ -43,6 +43,17 @@ namespace ImprovedAfflictions.Pain
                         __instance.m_DurationHours *= 1.02f;
                     }
                 }
+                else if(ph.HasPainAtLocation(AfflictionBodyArea.HandLeft, "Corrosive Chemical Burns") || ph.HasPainAtLocation(AfflictionBodyArea.HandRight, "Corrosive Chemical Burns"))
+                {
+                    if (!pk.m_RemedyApplied)
+                    {
+                        __instance.m_DurationHours *= 1.3f;
+                    }
+                    else
+                    {
+                        __instance.m_DurationHours *= 1.12f;
+                    }
+                }
                 else if(ph.HasPainAtLocation(AfflictionBodyArea.ArmLeft) || ph.HasPainAtLocation(AfflictionBodyArea.ArmRight))
                 {
                     if (__instance.m_BreakDown.name.Contains("Limb") || __instance.m_BreakDown.name.Contains("Crate") || __instance.m_BreakDown.name.Contains("PalletPile") || __instance.m_BreakDown.name.Contains("Plank"))
@@ -79,6 +90,12 @@ namespace ImprovedAfflictions.Pain
                 if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft) || ph.HasPainAtLocation(AfflictionBodyArea.HandRight))
                 {
                     float multi = pk.m_RemedyApplied ? 1.2f : 1.7f;
+
+                    __result = (int)(__result * multi);
+                }
+                else if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft, "Corrosive Chemical Burns") || ph.HasPainAtLocation(AfflictionBodyArea.HandRight, "Corrosive Chemical Burns"))
+                {
+                    float multi = pk.m_RemedyApplied ? 1.4f : 1.9f;
 
                     __result = (int)(__result * multi);
                 }

@@ -253,7 +253,7 @@ namespace ImprovedAfflictions
                         }
                     case AfflictionType.Burns:
                         {
-                            Burns burnsComponent = GameManager.GetBurnsComponent();
+                            Il2Cpp.Burns burnsComponent = GameManager.GetBurnsComponent();
                             __instance.m_LabelAfflictionDescriptionNoRest.text = burnsComponent.m_LocalizedDescription.Text();
                             __instance.m_LabelAfflictionDescription.text = "";
                             string[] remedySprites = new string[2] { "GEAR_HeavyBandage", "GEAR_BottlePainKillers" };
@@ -577,8 +577,8 @@ namespace ImprovedAfflictions
                             __instance.SetItemsNeeded(remedySprites, remedyComplete, remedyNumRequired, altRemedySprites, altRemedyComplete, altRemedyNumRequired, 0f, 0f, 0f);
                             num = (int)sprainPainComponent.GetLocation(selectedAfflictionIndex);
                             num4 = Mathf.CeilToInt(GameManager.GetSprainPainComponent().GetRemainingHours(selectedAfflictionIndex) * 60f);
-                            
-                            if(num4 >= 9999)
+
+                            if(num4 >= 9999999)
                             {
                                 num4 = 0;
                             }

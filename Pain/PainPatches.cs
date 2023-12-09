@@ -110,7 +110,7 @@ namespace ImprovedAfflictions.Pain
                     Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 2), "wareOffPainkiller"));
                     return false;
                 }
-
+                
                 if (cause.ToLowerInvariant() == "console" || cause.ToLowerInvariant().Contains("bite")) //animal bites
                 {
                     if (location == AfflictionBodyArea.Head)
@@ -180,6 +180,15 @@ namespace ImprovedAfflictions.Pain
                     __instance.m_PulseFxIntensity = 1.7f;
                     __instance.m_PulseFxFrequencySeconds = 8f;
                 }
+                else if(cause.ToLowerInvariant() == "corrosive chemical burns") //chemical burns
+                {
+                    if(location == AfflictionBodyArea.FootLeft || location == AfflictionBodyArea.FootRight) __instance.m_AfflictionDurationHours = Random.Range(96f, 240f);
+                    else __instance.m_AfflictionDurationHours = Random.Range(72f, 120f);
+
+
+                    __instance.m_PulseFxIntensity = 0.9f;
+                    __instance.m_PulseFxFrequencySeconds = 10f;
+                }
 
                 SaveDataManager sdm = Implementation.sdm;
 
@@ -189,18 +198,20 @@ namespace ImprovedAfflictions.Pain
                 painInstance.m_PulseFxMaxDuration = __instance.m_AfflictionDurationHours;
 
                 string suffix = "";
-                if (__instance.m_ActiveInstances.Count > 0)
+                suffix = (__instance.m_ActiveInstances.Count).ToString();
+
+                /**
+                if (__instance.m_ActiveInstances.Count + 1 > 0)
                 {
-                   suffix = (__instance.m_ActiveInstances.Count + 1).ToString();
+                   suffix = (__instance.m_ActiveInstances.Count).ToString();
                 }
                 else
                 {
                     suffix = (__instance.m_ActiveInstances.Count).ToString();
-                }
+                } **/
 
                 string dataToSave = JsonSerializer.Serialize(painInstance);
                 sdm.Save(dataToSave, suffix);
-
 
                 Moment.Moment.Cancel(Implementation.Instance.ScheduledEventExecutorId, "wareOffPainkiller");
                 Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 5), "wareOffPainkiller"));

@@ -88,6 +88,12 @@ namespace ImprovedAfflictions.Pain
                     if (inst.m_Cause == "concussion") continue;
 
                     string data = sdm.LoadData(i.ToString());
+
+                    if (data is null)
+                    {
+                        return null;
+                    }
+
                     PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
 
                     index = i;
@@ -104,17 +110,21 @@ namespace ImprovedAfflictions.Pain
         public void UpdatePainInstance(int index, PainSaveDataProxy instanceToUpdate)
         {
             float newDuration = Random.Range(instanceToUpdate.m_PulseFxMaxDuration, 240f);
-
             SprainPain painManager = GameManager.GetSprainPainComponent();
-            painManager.m_ActiveInstances[index].m_EndTime = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused() + newDuration;
+
+            SprainPain.Instance newInstance = new SprainPain.Instance();
+            newInstance.m_Location = painManager.m_ActiveInstances[index].m_Location;
+            newInstance.m_Cause = painManager.m_ActiveInstances[index].m_Cause;
+            newInstance.m_EndTime = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused() + newDuration;
+
+            painManager.m_ActiveInstances[index] = newInstance;
+
             instanceToUpdate.m_PulseFxMaxDuration = newDuration;
 
             SaveDataManager sdm = Implementation.sdm;
             string dataToSave = JsonSerializer.Serialize(instanceToUpdate);
             sdm.Save(dataToSave, index.ToString());
         }
-
-        
         public void WareOffPainkillers()
         {
 
@@ -195,6 +205,34 @@ namespace ImprovedAfflictions.Pain
             }
             return false;
         }
+
+        public bool HasPainAtLocation(AfflictionBodyArea location, string cause)
+        {
+            foreach (SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
+            {
+                if (pain.m_Location == location && pain.m_Cause == cause)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void UpdatePainAtLocation(AfflictionBodyArea location, string cause)
+        {
+
+            float newDuration = Random.Range(96f, 240f);
+
+            foreach (SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
+            {
+                if (pain.m_Location == location && pain.m_Cause == cause)
+                {
+                    pain.m_EndTime = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused() + newDuration;
+                }
+            }
+
+        }
+
         public bool HasPain()
         {
             if (GameManager.GetSprainPainComponent().HasSprainPain()) return true;

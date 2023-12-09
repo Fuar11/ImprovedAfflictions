@@ -66,6 +66,9 @@ namespace ImprovedAfflictions.FoodPoisoning
 
                 float percent = 100f - gi.GetNormalizedCondition();
 
+                //if player has scurvy, they have a much higher chance of getting food poisoning, regardless of food type
+                if (GameManager.GetScurvyComponent().HasAffliction()) percent += 25;
+
                 return Il2Cpp.Utils.RollChance(percent);
         }
     }

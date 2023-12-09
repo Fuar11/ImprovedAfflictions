@@ -112,7 +112,7 @@ namespace ImprovedAfflictions
 
                 if (!__instance.m_SelectedAffButton) return true;
 
-                if (__instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.Insomnia || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.InsomniaRisk || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.ResistInsomniaBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatDebuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityDebuff)
+                if (__instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.Insomnia || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.InsomniaRisk || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.ChemicalPoisoning || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.ChemicalPoisoningRisk || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.ScurvyRisk || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.Scurvy || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.ResistInsomniaBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatDebuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.FoodStatBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityBuff || __instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.CarryCapacityDebuff)
                 {
                     return true;
                 }

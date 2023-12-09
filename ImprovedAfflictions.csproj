@@ -19,10 +19,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="STBlade.Modding.TLD.Il2CppAssemblies.Windows" Version="2.23.0" />
+		<PackageReference Include="STBlade.Modding.TLD.Il2CppAssemblies.Windows" Version="2.25.0" />
 		<PackageReference Include="stblade.Modding.TLD.ModData" Version="1.5.1" />
 		<Reference Include="Moment.dll">
 			<HintPath>$(ModsPath)\Moment.dll</HintPath>
 		</Reference>
 	</ItemGroup>
+
+	<!-- This is a build event. It will copy your dll to the currently defined TheLongDarkPath's Mods folder -->
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<!-- This copies the mods files to the games mod dir -->
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TheLongDarkPath)/Mods" />
+	</Target>
+	
 </Project>

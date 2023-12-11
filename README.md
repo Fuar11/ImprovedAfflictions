@@ -50,6 +50,17 @@ The amount of condition you lose while sick from food poisoning will depends on 
 
 While under the cold grip of hypothermia, you will feel colder all around and warming up will take slightly more time.
 
+## Scurvy
+
+Scurvy is now more deadly. A low vitamin c diet has resulted in any vitamin c devoid foods being far less nutritious. Foods without vitamin c or low vitamin c will give 50% less calories. In addition,
+you will get tired and colder much quicker. Along with a slight increase the carry capacity penalty. 
+
+## Chemical Poisoning
+
+Taking a stroll through clouds of corrosive fumes will affect you much quicker, so you have less time to stand around those chemical barrels. The vanilla affliction has some harsh debuffs alone, so alongside that you may also acquire chemical burns on your hands and feet. The toxic chemicals will eat away at your footwear, including socks, in vanilla. But there is no penalty to not wearing any. Not anymore! When your chemical poisoning risk reaches 25% or higher, you will get corrosive chemical burns on your feet if you're not wearing protection. At 35%, your hands can get burned too if you're not wearing any gloves (hand coverings do not decay as of 1.1.0). These burns affect your ability to climb ropes, break down objects, craft, etc... either by outright preventing or slowing down the process. 
+
+Note: Chemical burns are in the form of Pain.
+
 ## Installation
 
 * Install MelonLoader by downloading and running [MelonLoader.Installer.exe](https://github.com/HerpDerpinstine/MelonLoader/releases/latest/download/MelonLoader.Installer.exe)

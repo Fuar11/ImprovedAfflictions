@@ -11,6 +11,7 @@ using ImprovedAfflictions.Utils;
 using UnityEngine;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using MelonLoader;
+using ImprovedAfflictions.Pain.Component;
 
 namespace ImprovedAfflictions.Pain
 {
@@ -23,18 +24,12 @@ namespace ImprovedAfflictions.Pain
             private static void Postfix(Panel_BreakDown __instance)
             {
                 PainHelper ph = new PainHelper();
-                SaveDataManager sdm = Implementation.sdm;
-
-                string data = sdm.LoadData("painkillers");
-
-                if (data == null) return;
-
-                PainkillerSaveDataProxy? pk = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
 
                 if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft) || ph.HasPainAtLocation(AfflictionBodyArea.HandRight))
                 {
-                    if(!pk.m_RemedyApplied)
+                    if(!ac.PainkillersInEffect())
                     {
                         __instance.m_DurationHours *= 1.1f;
                     }
@@ -45,7 +40,7 @@ namespace ImprovedAfflictions.Pain
                 }
                 else if(ph.HasPainAtLocation(AfflictionBodyArea.HandLeft, "Corrosive Chemical Burns") || ph.HasPainAtLocation(AfflictionBodyArea.HandRight, "Corrosive Chemical Burns"))
                 {
-                    if (!pk.m_RemedyApplied)
+                    if (!ac.PainkillersInEffect())
                     {
                         __instance.m_DurationHours *= 1.3f;
                     }
@@ -58,7 +53,7 @@ namespace ImprovedAfflictions.Pain
                 {
                     if (__instance.m_BreakDown.name.Contains("Limb") || __instance.m_BreakDown.name.Contains("Crate") || __instance.m_BreakDown.name.Contains("PalletPile") || __instance.m_BreakDown.name.Contains("Plank"))
                     {
-                        if (!pk.m_RemedyApplied)
+                        if (!ac.PainkillersInEffect())
                         {
                             __instance.m_DurationHours *= 1.25f;
                         }
@@ -79,23 +74,18 @@ namespace ImprovedAfflictions.Pain
             {
 
                 PainHelper ph = new PainHelper();
-                SaveDataManager sdm = Implementation.sdm;
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-                string data = sdm.LoadData("painkillers");
-
-                if (data == null) return;
-
-                PainkillerSaveDataProxy? pk = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
                 if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft) || ph.HasPainAtLocation(AfflictionBodyArea.HandRight))
                 {
-                    float multi = pk.m_RemedyApplied ? 1.2f : 1.7f;
+                    float multi = ac.PainkillersInEffect() ? 1.2f : 1.7f;
 
                     __result = (int)(__result * multi);
                 }
                 else if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft, "Corrosive Chemical Burns") || ph.HasPainAtLocation(AfflictionBodyArea.HandRight, "Corrosive Chemical Burns"))
                 {
-                    float multi = pk.m_RemedyApplied ? 1.4f : 1.9f;
+                    float multi = ac.PainkillersInEffect() ? 1.4f : 1.9f;
 
                     __result = (int)(__result * multi);
                 }
@@ -110,25 +100,20 @@ namespace ImprovedAfflictions.Pain
             {
 
                 PainHelper ph = new PainHelper();
-                SaveDataManager sdm = Implementation.sdm;
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-                string data = sdm.LoadData("painkillers");
-
-                if (data == null) return;
-
-                PainkillerSaveDataProxy? pk = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
 
                 if (ph.HasPainAtLocation(AfflictionBodyArea.LegLeft) || ph.HasPainAtLocation(AfflictionBodyArea.LegRight))
                 {
                     if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting())
                     {
-                        float multi1 = pk.m_RemedyApplied ? 0.9f : 0.7f;
+                        float multi1 = ac.PainkillersInEffect() ? 0.9f : 0.7f;
 
                         __result *= multi1;
                     }
                     else if (GameManager.GetPlayerManagerComponent().PlayerIsWalking())
                     {
-                        float multi2 = pk.m_RemedyApplied ? 0.9f : 0.8f;
+                        float multi2 = ac.PainkillersInEffect() ? 0.9f : 0.8f;
 
                         __result *= multi2;
                     }
@@ -138,13 +123,13 @@ namespace ImprovedAfflictions.Pain
                 {
                     if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting())
                     {
-                        float multi1 = pk.m_RemedyApplied ? 0.9f : 0.8f;
+                        float multi1 = ac.PainkillersInEffect() ? 0.9f : 0.8f;
 
                         __result *= multi1;
                     }
                     else if (GameManager.GetPlayerManagerComponent().PlayerIsWalking())
                     {
-                        float multi2 = pk.m_RemedyApplied ? 0.9f : 0.8f;
+                        float multi2 = ac.PainkillersInEffect() ? 0.9f : 0.8f;
 
                         __result *= multi2;
                     }

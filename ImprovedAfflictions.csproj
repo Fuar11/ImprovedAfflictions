@@ -21,6 +21,7 @@
 	<ItemGroup>
 		<PackageReference Include="STBlade.Modding.TLD.Il2CppAssemblies.Windows" Version="2.25.0" />
 		<PackageReference Include="stblade.Modding.TLD.ModData" Version="1.5.1" />
+		<PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0" />
 		<Reference Include="Moment.dll">
 			<HintPath>$(ModsPath)\Moment.dll</HintPath>
 		</Reference>

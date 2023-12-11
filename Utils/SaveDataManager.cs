@@ -12,7 +12,7 @@ namespace ImprovedAfflictions.Utils
     internal class SaveDataManager
     {
 
-        ModDataManager dm = new ModDataManager("Improved Afflictions", false);
+        ModDataManager dm = new ModDataManager("Improved Afflictions", true);
 
         public void Save(string data, string suffix)
         {

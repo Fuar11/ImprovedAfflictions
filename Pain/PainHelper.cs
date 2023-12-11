@@ -1,33 +1,26 @@
 ﻿using Il2Cpp;
-using Il2Cppgw.proto.utils;
-using Il2CppSystem.Data;
-using MelonLoader;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Random = UnityEngine.Random;
 using HarmonyLib;
-using Il2CppSWS;
-using Il2CppRewired.Utils.Platforms.Windows;
-using ImprovedAfflictions.Utils;
 using static Il2Cpp.Panel_Debug;
+using ImprovedAfflictions.Component;
+using ImprovedAfflictions.Pain.Component;
+using UnityEngine;
+using MelonLoader;
 
 namespace ImprovedAfflictions.Pain
 {
     internal class PainHelper
     {
 
+        //may no longer be needed
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.Deserialize))]
 
         public class UpdatePainEffectsOnLoad
         {
             public static void Postfix()
             {
-                PainHelper ph = new PainHelper();
-                ph.UpdatePainEffects();
+               //PainHelper ph = new PainHelper();
+               //ph.UpdatePainEffects();
             }
         }
 
@@ -38,20 +31,13 @@ namespace ImprovedAfflictions.Pain
             if (GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu")) return;
 
             SprainPain painManager = GameManager.GetSprainPainComponent();
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-            SaveDataManager sdm = Implementation.sdm;
             float maxIntensity = 0f;
 
             for (int num = painManager.m_ActiveInstances.Count - 1; num >= 0; num--)
             {
-                string data = sdm.LoadData(num.ToString());
-
-                if (data == null)
-                {
-                    continue;
-                }
-
-                PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+                PainAffliction pain = ac.GetPainInstance(num);
 
                 //if the pain instance isn't saved, skip to the next one
                 if (pain == null) continue;
@@ -65,17 +51,16 @@ namespace ImprovedAfflictions.Pain
                 }
             }
 
-            //if painkillers have been taken, dull the pain effects
-            if (IsOnPainkillers())
-            {
-                painManager.m_PulseFxIntensity *= 0.5f;
-            }
+            //if painkillers have been taken, dull the pain effects by how much drugs are in your system
+           
+            painManager.m_PulseFxIntensity /= ac.GetPainkillerLevel() / 10;
+            
         }
 
-        public PainSaveDataProxy GetPainInstance(AfflictionBodyArea location, ref int index)
+        public PainAffliction GetPainInstance(AfflictionBodyArea location, ref int index)
         {
             SprainPain painManager = GameManager.GetSprainPainComponent();
-            SaveDataManager sdm = Implementation.sdm;
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
             for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
             {
@@ -87,14 +72,7 @@ namespace ImprovedAfflictions.Pain
 
                     if (inst.m_Cause == "concussion") continue;
 
-                    string data = sdm.LoadData(i.ToString());
-
-                    if (data is null)
-                    {
-                        return null;
-                    }
-
-                    PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+                    PainAffliction pain = ac.GetPainInstance(i);
 
                     index = i;
 
@@ -107,10 +85,11 @@ namespace ImprovedAfflictions.Pain
         }
 
        
-        public void UpdatePainInstance(int index, PainSaveDataProxy instanceToUpdate)
+        public void UpdatePainInstance(int index, PainAffliction instanceToUpdate)
         {
             float newDuration = Random.Range(instanceToUpdate.m_PulseFxMaxDuration, 240f);
             SprainPain painManager = GameManager.GetSprainPainComponent();
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
             SprainPain.Instance newInstance = new SprainPain.Instance();
             newInstance.m_Location = painManager.m_ActiveInstances[index].m_Location;
@@ -121,71 +100,16 @@ namespace ImprovedAfflictions.Pain
 
             instanceToUpdate.m_PulseFxMaxDuration = newDuration;
 
-            SaveDataManager sdm = Implementation.sdm;
-            string dataToSave = JsonSerializer.Serialize(instanceToUpdate);
-            sdm.Save(dataToSave, index.ToString());
+            ac.m_PainInstances[index] = instanceToUpdate;
         }
-        public void WareOffPainkillers()
-        {
+        
 
-            SaveDataManager sdm = Implementation.sdm;
-
-            var data = sdm.LoadData("painkillers");
-            PainkillerSaveDataProxy? painkillerData = null;
-
-            painkillerData = data == null ? new PainkillerSaveDataProxy() : JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
-
-            if (!painkillerData.m_RemedyApplied) return; //if data exists and painkillers are not taken, do not do anything (this probably never happens)
-
-            painkillerData.m_RemedyApplied = false;
-
-            string dataToSave = JsonSerializer.Serialize(painkillerData);
-
-            sdm.Save(dataToSave, "painkillers");
-            UpdatePainEffects();
-
-        }
-
-        public void TakeEffectPainkillers()
-        {
-            SaveDataManager sdm = Implementation.sdm;
-
-            var data = sdm.LoadData("painkillers");
-            PainkillerSaveDataProxy? painkillerData = null;
-
-            painkillerData = data == null ? new PainkillerSaveDataProxy() : JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
-
-            if (painkillerData.m_RemedyApplied) return; //if data exists and painkillers are taken, do not do anything (this probably never happens)
-            
-            painkillerData.m_RemedyApplied = true;
-
-            string dataToSave = JsonSerializer.Serialize(painkillerData);
-            sdm.Save(dataToSave, "painkillers");
-
-            //update pain effects when painkillers are taken
-            PainHelper ph = new PainHelper();
-            ph.UpdatePainEffects();
-
-            //schedule painkillers to last for x amount of hours
-            Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 10, 0), "wareOffPainkiller"));
-        }
-
-       
         public bool IsOnPainkillers()
         {
 
-            SaveDataManager sdm = Implementation.sdm;
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-            var data = sdm.LoadData("painkillers");
-
-            if (data == null)
-            {
-                return false;
-            }
-
-            PainkillerSaveDataProxy? painkillerData = JsonSerializer.Deserialize<PainkillerSaveDataProxy>(data);
-
-            if (painkillerData != null && painkillerData.m_RemedyApplied)
+            if (ac.PainkillersInEffect())
             {
                 return true;
             }
@@ -193,10 +117,7 @@ namespace ImprovedAfflictions.Pain
             return false;
         }
 
-        public bool ScheduledPainkillers()
-        {
-            return Moment.Moment.IsScheduled(Implementation.Instance.ScheduledEventExecutorId, "takeEffectPainkiller");
-        }
+        
         public bool HasPainAtLocation(AfflictionBodyArea location)
         {
             foreach (SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
@@ -267,10 +188,10 @@ namespace ImprovedAfflictions.Pain
             return false;
         }
 
-        public PainSaveDataProxy GetConcussion()
+        public PainAffliction GetConcussion()
         {
             SprainPain painManager = GameManager.GetSprainPainComponent();
-            SaveDataManager sdm = Implementation.sdm;
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
             for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
             {
@@ -278,8 +199,8 @@ namespace ImprovedAfflictions.Pain
 
                 if (inst.m_Cause == "concussion")
                 {
-                    string data = sdm.LoadData(i.ToString());
-                    PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+
+                    PainAffliction pain = ac.GetPainInstance(i);
 
                     return pain;
                 }
@@ -298,11 +219,11 @@ namespace ImprovedAfflictions.Pain
 
         }
 
-        public PainSaveDataProxy GetBrokenRibPain(ref int index)
+        public PainAffliction GetBrokenRibPain(ref int index)
         {
 
             SprainPain painManager = GameManager.GetSprainPainComponent();
-            SaveDataManager sdm = Implementation.sdm;
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
             for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
             {
@@ -310,8 +231,8 @@ namespace ImprovedAfflictions.Pain
 
                 if (inst.m_Cause == "broken rib")
                 {
-                    string data = sdm.LoadData(i.ToString());
-                    PainSaveDataProxy? pain = JsonSerializer.Deserialize<PainSaveDataProxy>(data);
+
+                    PainAffliction pain = ac.GetPainInstance(i);
 
                     index = i;
 

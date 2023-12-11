@@ -12,7 +12,9 @@ using Random = UnityEngine.Random;
 using System.Text.Json;
 using Il2CppSystem.Data;
 using ImprovedAfflictions.Utils;
-
+using ImprovedAfflictions.Pain.Component;
+using ImprovedAfflictions.Component;
+using UnityEngine.Analytics;
 
 namespace ImprovedAfflictions.Pain
 {
@@ -33,12 +35,11 @@ namespace ImprovedAfflictions.Pain
             {
                 PainHelper ph = new PainHelper();
                 PainEffects effects = new PainEffects();
-
-                if (GameManager.m_IsPaused || GameManager.s_IsGameplaySuspended)
+                if (GameManager.m_IsPaused || GameManager.s_IsGameplaySuspended || GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("boot") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("empty"))
                 {
                     return;
                 }
-                
+
                 float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
                 for (int num = __instance.m_ActiveInstances.Count - 1; num >= 0; num--)
                 {
@@ -55,7 +56,7 @@ namespace ImprovedAfflictions.Pain
                     {
 
                         if (ph.HasConcussion()) effects.HeadTraumaPulse(__instance.m_PulseFxIntensity);
-                        else if(__instance.m_PulseFxIntensity >= 1f)
+                        else if (__instance.m_PulseFxIntensity >= 1f)
                         {
                             effects.IntensePainPulse(__instance.m_PulseFxIntensity);
                         }
@@ -95,35 +96,42 @@ namespace ImprovedAfflictions.Pain
             public static bool Prefix(ref AfflictionBodyArea location, ref string cause, SprainPain __instance)
             {
                 PainHelper ph = new PainHelper();
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
                 int index = 0;
 
-                PainSaveDataProxy? existingInstance = null;
+                PainAffliction existingInstance = null;
 
                 if (cause == "concussion") existingInstance = ph.GetConcussion();
                 else if (cause == "broken rib") existingInstance = ph.GetBrokenRibPain(ref index);
                 else existingInstance = ph.GetPainInstance(location, ref index);
 
-                if(existingInstance != null)
+                if (existingInstance != null)
                 {
                     ph.UpdatePainInstance(index, existingInstance);
                     ph.UpdatePainEffects();
-                    Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 2), "wareOffPainkiller"));
+                    //Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 2), "wareOffPainkiller"));
                     return false;
                 }
-                
+
+                float painLevel = 0;
+
                 if (cause.ToLowerInvariant() == "console" || cause.ToLowerInvariant().Contains("bite")) //animal bites
                 {
+                    painLevel = 15f;
+
                     if (location == AfflictionBodyArea.Head)
                     {
                         __instance.m_AfflictionDurationHours = Random.Range(96f, 124f);
                         __instance.m_PulseFxIntensity = 1.1f;
                         __instance.m_PulseFxFrequencySeconds = 8f;
+                        painLevel = 20f;
                     }
                     else if (location == AfflictionBodyArea.Neck)
                     {
                         __instance.m_AfflictionDurationHours = Random.Range(48f, 96f);
                         __instance.m_PulseFxIntensity = 1f;
                         __instance.m_PulseFxFrequencySeconds = 9.5f;
+                        painLevel = 20f;
                     }
                     else if (location == AfflictionBodyArea.Chest)
                     {
@@ -133,25 +141,25 @@ namespace ImprovedAfflictions.Pain
                     }
                     else if (location == AfflictionBodyArea.HandRight || location == AfflictionBodyArea.HandLeft)
                     {
-                        __instance.m_AfflictionDurationHours = Random.Range(24f, 96f);
+                        __instance.m_AfflictionDurationHours = Random.Range(5f, 6f);
                         __instance.m_PulseFxIntensity = 0.8f;
                         __instance.m_PulseFxFrequencySeconds = 14f;
                     }
                     else if (location == AfflictionBodyArea.ArmRight || location == AfflictionBodyArea.ArmLeft)
                     {
-                        __instance.m_AfflictionDurationHours = Random.Range(32f, 96f);
+                        __instance.m_AfflictionDurationHours = Random.Range(24f, 96f);
                         __instance.m_PulseFxIntensity = 0.6f;
                         __instance.m_PulseFxFrequencySeconds = 16f;
                     }
                     else if (location == AfflictionBodyArea.LegRight || location == AfflictionBodyArea.LegLeft)
                     {
-                        __instance.m_AfflictionDurationHours = Random.Range(48f, 96f);
+                        __instance.m_AfflictionDurationHours = Random.Range(32f, 96f);
                         __instance.m_PulseFxIntensity = 0.6f;
                         __instance.m_PulseFxFrequencySeconds = 16f;
                     }
                     else if (location == AfflictionBodyArea.FootRight || location == AfflictionBodyArea.FootLeft)
                     {
-                        __instance.m_AfflictionDurationHours = Random.Range(24f, 96f);
+                        __instance.m_AfflictionDurationHours = Random.Range(48f, 96f);
                         __instance.m_PulseFxIntensity = 0.85f;
                         __instance.m_PulseFxFrequencySeconds = 12f;
                     }
@@ -162,59 +170,38 @@ namespace ImprovedAfflictions.Pain
                         __instance.m_PulseFxFrequencySeconds = 18f;
                     }
                 }
-                else if(cause.ToLowerInvariant() == "fall") //sprains
+                else if (cause.ToLowerInvariant() == "fall") //sprains
                 {
                     __instance.m_AfflictionDurationHours = Random.Range(96f, 124f);
                     __instance.m_PulseFxIntensity = 0.65f;
                     __instance.m_PulseFxFrequencySeconds = 15f;
+                    painLevel = 10f;
                 }
                 else if (cause.ToLowerInvariant() == "concussion") //head trauma or concussion
                 {
                     __instance.m_AfflictionDurationHours = Random.Range(96f, 240f);
                     __instance.m_PulseFxIntensity = 2f;
                     __instance.m_PulseFxFrequencySeconds = 6f;
+                    painLevel = 20f;
                 }
                 else if (cause.ToLowerInvariant() == "broken rib") //broken ribs
                 {
                     __instance.m_AfflictionDurationHours = 999999999f;
                     __instance.m_PulseFxIntensity = 1.7f;
                     __instance.m_PulseFxFrequencySeconds = 8f;
+                    painLevel = 30f;
                 }
-                else if(cause.ToLowerInvariant() == "corrosive chemical burns") //chemical burns
+                else if (cause.ToLowerInvariant() == "corrosive chemical burns") //chemical burns
                 {
-                    if(location == AfflictionBodyArea.FootLeft || location == AfflictionBodyArea.FootRight) __instance.m_AfflictionDurationHours = Random.Range(96f, 240f);
+                    painLevel = 25f;
+                    if (location == AfflictionBodyArea.FootLeft || location == AfflictionBodyArea.FootRight) __instance.m_AfflictionDurationHours = Random.Range(96f, 240f);
                     else __instance.m_AfflictionDurationHours = Random.Range(72f, 120f);
-
 
                     __instance.m_PulseFxIntensity = 0.9f;
                     __instance.m_PulseFxFrequencySeconds = 10f;
                 }
 
-                SaveDataManager sdm = Implementation.sdm;
-
-                PainSaveDataProxy painInstance = new PainSaveDataProxy();
-                painInstance.m_PulseFxIntensity = __instance.m_PulseFxIntensity;
-                painInstance.m_PulseFxFrequencySeconds = __instance.m_PulseFxFrequencySeconds;
-                painInstance.m_PulseFxMaxDuration = __instance.m_AfflictionDurationHours;
-
-                string suffix = "";
-                suffix = (__instance.m_ActiveInstances.Count).ToString();
-
-                /**
-                if (__instance.m_ActiveInstances.Count + 1 > 0)
-                {
-                   suffix = (__instance.m_ActiveInstances.Count).ToString();
-                }
-                else
-                {
-                    suffix = (__instance.m_ActiveInstances.Count).ToString();
-                } **/
-
-                string dataToSave = JsonSerializer.Serialize(painInstance);
-                sdm.Save(dataToSave, suffix);
-
-                Moment.Moment.Cancel(Implementation.Instance.ScheduledEventExecutorId, "wareOffPainkiller");
-                Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 5), "wareOffPainkiller"));
+                ac.AddPainInstance(cause, location, __instance.m_AfflictionDurationHours, painLevel, __instance.m_PulseFxIntensity, __instance.m_PulseFxFrequencySeconds);
 
                 //update pain effects when new pain is afflicted
                 ph.UpdatePainEffects();
@@ -223,7 +210,7 @@ namespace ImprovedAfflictions.Pain
 
         }
 
-        
+
 
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.TakePainKillers))]
 
@@ -235,8 +222,8 @@ namespace ImprovedAfflictions.Pain
             }
             public static void Postfix(SprainPain __instance, ref int index)
             {
-                float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
 
+                /**
                 if (__instance.GetRemainingHours(index) <= 12f) //if there's 12 hours or less left on the pain area, painkiller will instantly relieve it
                 {
                     var value = __instance.m_ActiveInstances[index];
@@ -244,226 +231,204 @@ namespace ImprovedAfflictions.Pain
                     value.m_EndTime = hoursPlayedNotPaused + num;
                     __instance.m_ActiveInstances[index] = value;
                     return;
+                } **/
+
+               AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                ac.m_PainkillerIncrementAmount += ac.m_PainkillerIncrementAmount != 0 ? 10f : ac.m_PainkillerLevel + 10f; 
+            }
+
+            [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.CureAffliction))]
+
+            public class RemovePainData
+            {
+                public static bool Prefix()
+                {
+                    return false;
+                }
+                public static void Postfix(SprainPain __instance, ref SprainPain.Instance inst)
+                {
+                    PainHelper ph = new PainHelper();
+                    AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                    int index = __instance.m_ActiveInstances.IndexOf(inst);
+
+                    ac.m_PainInstances.RemoveAt(index);
+
+                    __instance.m_ActiveInstances.Remove(inst);
+                    PlayerDamageEvent.SpawnAfflictionEvent("GAMEPLAY_SprainPain", "GAMEPLAY_Healed", "ico_injury_pain", InterfaceManager.m_FirstAidBuffColor);
+                    InterfaceManager.GetPanel<Panel_FirstAid>().UpdateDueToAfflictionHealed();
+
+                    ph.UpdatePainEffects();
                 }
 
-                //schedule painkillers to take effects in 20 minutes
-                Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 20), "takeEffectPainkiller"));
-            }
-        }
-
-        [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.CureAffliction))]
-
-        public class RemovePainData
-        {
-            public static bool Prefix()
-            {
-                return false;
-            }
-            public static void Postfix(SprainPain __instance, ref SprainPain.Instance inst)
-            {
-
-                SaveDataManager sdm = Implementation.sdm;
-
-                string suffix = __instance.m_ActiveInstances.IndexOf(inst).ToString();
-
-                PainSaveDataProxy pain = new PainSaveDataProxy();
-
-                pain.m_PulseFxIntensity = 0f;
-                pain.m_PulseFxFrequencySeconds = 0f;
-                
-                string dataToSave = JsonSerializer.Serialize(pain);
-
-                //overwrites the pain instance about to be removed with a blank slate
-                sdm.Save(dataToSave, suffix);
-
-                __instance.m_ActiveInstances.Remove(inst);
-                PlayerDamageEvent.SpawnAfflictionEvent("GAMEPLAY_SprainPain", "GAMEPLAY_Healed", "ico_injury_pain", InterfaceManager.m_FirstAidBuffColor);
-                InterfaceManager.GetPanel<Panel_FirstAid>().UpdateDueToAfflictionHealed();
-
-                PainHelper ph = new PainHelper();
-                ph.UpdatePainEffects();
             }
 
-        }
+            //adds pain whenever blood loss is contracted
+            [HarmonyPatch(typeof(BloodLoss), nameof(BloodLoss.BloodLossStart))]
 
-        //adds pain whenever blood loss is contracted
-        [HarmonyPatch(typeof(BloodLoss), nameof(BloodLoss.BloodLossStart))]
-
-        public class BloodLossPain
-        {
-
-            public static bool Prefix()
-            {
-                return false;
-            }
-
-            public static void Postfix(ref string cause, ref bool displayIcon, ref AfflictionOptions options, BloodLoss __instance)
+            public class BloodLossPain
             {
 
-                if (GameManager.GetPlayerManagerComponent().PlayerIsDead() || InterfaceManager.IsPanelEnabled<Panel_ChallengeComplete>())
+                public static bool Prefix()
                 {
-                    return;
+                    return false;
                 }
 
-                Il2CppSystem.Collections.Generic.List<AfflictionBodyArea> bodyAreasToPreventBloodLoss = GameManager.GetDamageProtection().GetBodyAreasToPreventBloodLoss();
-                StatsManager.IncrementValue(StatID.BloodLoss);
-                if (__instance.m_ShouldOverrideArea)
+                public static void Postfix(ref string cause, ref bool displayIcon, ref AfflictionOptions options, BloodLoss __instance)
                 {
-                    if (bodyAreasToPreventBloodLoss.Contains(__instance.m_OverrideArea))
+
+                    if (GameManager.GetPlayerManagerComponent().PlayerIsDead() || InterfaceManager.IsPanelEnabled<Panel_ChallengeComplete>())
                     {
                         return;
                     }
-                    __instance.m_ShouldOverrideArea = false;
-                    if (__instance.m_Locations.Contains((int)__instance.m_OverrideArea))
+
+                    Il2CppSystem.Collections.Generic.List<AfflictionBodyArea> bodyAreasToPreventBloodLoss = GameManager.GetDamageProtection().GetBodyAreasToPreventBloodLoss();
+                    StatsManager.IncrementValue(StatID.BloodLoss);
+                    if (__instance.m_ShouldOverrideArea)
                     {
-                        return;
+                        if (bodyAreasToPreventBloodLoss.Contains(__instance.m_OverrideArea))
+                        {
+                            return;
+                        }
+                        __instance.m_ShouldOverrideArea = false;
+                        if (__instance.m_Locations.Contains((int)__instance.m_OverrideArea))
+                        {
+                            return;
+                        }
+                        __instance.m_Locations.Add((int)__instance.m_OverrideArea);
                     }
-                    __instance.m_Locations.Add((int)__instance.m_OverrideArea);
-                }
-                else
-                {
-                    List<AfflictionBodyArea> list = new List<AfflictionBodyArea>((AfflictionBodyArea[])Enum.GetValues(typeof(AfflictionBodyArea)));
-                    foreach (AfflictionBodyArea item in bodyAreasToPreventBloodLoss)
+                    else
                     {
-                        list.Remove(item);
+                        List<AfflictionBodyArea> list = new List<AfflictionBodyArea>((AfflictionBodyArea[])Enum.GetValues(typeof(AfflictionBodyArea)));
+                        foreach (AfflictionBodyArea item in bodyAreasToPreventBloodLoss)
+                        {
+                            list.Remove(item);
+                        }
+                        for (int i = 0; i < __instance.m_Locations.Count; i++)
+                        {
+                            list.Remove((AfflictionBodyArea)__instance.m_Locations[i]);
+                        }
+                        if (list.Count <= 0)
+                        {
+                            return;
+                        }
+                        __instance.m_Locations.Add((int)list[Random.Range(0, list.Count)]);
                     }
-                    for (int i = 0; i < __instance.m_Locations.Count; i++)
+                    __instance.m_CausesLocIDs.Add(cause);
+                    __instance.m_ElapsedHoursList.Add(0f);
+                    __instance.m_DurationHoursList.Add(Random.Range(__instance.m_DurationHoursMin, __instance.m_DurationHoursMax));
+                    if (displayIcon && Condition.ShouldPlayFx(options))
                     {
-                        list.Remove((AfflictionBodyArea)__instance.m_Locations[i]);
+                        PlayerDamageEvent.SpawnDamageEvent(__instance.m_LocalizedDisplayName.m_LocalizationID, "GAMEPLAY_Affliction", "ico_injury_bloodLoss", InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
                     }
-                    if (list.Count <= 0)
+                    GameManager.GetLogComponent().AddAffliction(AfflictionType.BloodLoss, cause);
+
+                    GameManager.GetSprainPainComponent().ApplyAffliction(__instance.GetLocationOfLastAdded(), cause, options);
+
+                    if (ExperienceModeManager.GetCurrentExperienceModeType() == ExperienceModeType.ChallengeHunted)
                     {
-                        return;
+                        if (Time.timeSinceLevelLoad > 120f && Condition.ShouldDoAutoSave(options))
+                        {
+                            GameManager.TriggerSurvivalSaveAndDisplayHUDMessage();
+                        }
                     }
-                    __instance.m_Locations.Add((int)list[Random.Range(0, list.Count)]);
-                }
-                __instance.m_CausesLocIDs.Add(cause);
-                __instance.m_ElapsedHoursList.Add(0f);
-                __instance.m_DurationHoursList.Add(Random.Range(__instance.m_DurationHoursMin, __instance.m_DurationHoursMax));
-                if (displayIcon && Condition.ShouldPlayFx(options))
-                {
-                    PlayerDamageEvent.SpawnDamageEvent(__instance.m_LocalizedDisplayName.m_LocalizationID, "GAMEPLAY_Affliction", "ico_injury_bloodLoss", InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
-                }
-                GameManager.GetLogComponent().AddAffliction(AfflictionType.BloodLoss, cause);
-            
-                GameManager.GetSprainPainComponent().ApplyAffliction(__instance.GetLocationOfLastAdded(), cause, options);
-               
-                if (ExperienceModeManager.GetCurrentExperienceModeType() == ExperienceModeType.ChallengeHunted)
-                {
-                    if (Time.timeSinceLevelLoad > 120f && Condition.ShouldDoAutoSave(options))
+                    else if (Condition.ShouldDoAutoSave(options))
                     {
                         GameManager.TriggerSurvivalSaveAndDisplayHUDMessage();
                     }
-                }
-                else if (Condition.ShouldDoAutoSave(options))
-                {
-                    GameManager.TriggerSurvivalSaveAndDisplayHUDMessage();
-                }
-                if (Condition.ShouldPlayFx(options))
-                {
-                    string eventName = __instance.m_SoundToPlayAboveThreshold;
-                    if (GameManager.GetConditionComponent().m_CurrentHP < __instance.m_HPThresholdForSound)
+                    if (Condition.ShouldPlayFx(options))
                     {
-                        eventName = __instance.m_SoundToPlayBelowThreshold;
+                        string eventName = __instance.m_SoundToPlayAboveThreshold;
+                        if (GameManager.GetConditionComponent().m_CurrentHP < __instance.m_HPThresholdForSound)
+                        {
+                            eventName = __instance.m_SoundToPlayBelowThreshold;
+                        }
+                        GameManager.GetPlayerVoiceComponent().Play(eventName, Il2CppVoice.Priority.Critical);
                     }
-                    GameManager.GetPlayerVoiceComponent().Play(eventName, Il2CppVoice.Priority.Critical);
                 }
+
+
             }
 
-
-        }
-
-        //adds concussion on chance when falling off rope
-        [HarmonyPatch(typeof(FallDamage), nameof(FallDamage.ApplyFallDamage))]
-        public class ConcussionTrigger
-        {
-
-            public static bool Prefix() { return false; }
-
-            public static void Postfix(ref float height, ref float damageOverride, FallDamage __instance)
+            //adds concussion on chance when falling off rope
+            [HarmonyPatch(typeof(FallDamage), nameof(FallDamage.ApplyFallDamage))]
+            public class ConcussionTrigger
             {
 
-                PainHelper ph = new PainHelper();
+                public static bool Prefix() { return false; }
 
-                if (GameManager.GetPlayerManagerComponent().m_God)
+                public static void Postfix(ref float height, ref float damageOverride, FallDamage __instance)
                 {
-                    return;
-                }
-                float num = Mathf.Abs(height);
-                if (num < __instance.m_HeightStartDamage)
-                {
-                    if (num > 0.5f)
+
+                    PainHelper ph = new PainHelper();
+
+                    if (GameManager.GetPlayerManagerComponent().m_God)
                     {
-                        GameManager.GetPlayerVoiceComponent().Play(__instance.m_NoDamage, Il2CppVoice.Priority.Critical);
+                        return;
                     }
-                    return;
-                }
-                Condition conditionComponent = GameManager.GetConditionComponent();
-                float num2 = (num - __instance.m_HeightStartDamage) * (__instance.m_FallFromRope ? __instance.m_DamagePerMeterFromRope : __instance.m_DamagePerMeter);
-                if (__instance.m_DieOnNextFall)
-                {
-                    if (__instance.m_FallFromRope)
+                    float num = Mathf.Abs(height);
+                    if (num < __instance.m_HeightStartDamage)
                     {
-                        num2 = conditionComponent.m_CurrentHP * __instance.m_FatalRopeFallHealthDropPercentage * 0.01f;
-                    }
-                    else
-                    {
-                        num2 = float.PositiveInfinity;
-                        __instance.m_IgnoreDamageReduction = true;
-                    }
-                    __instance.m_DieOnNextFall = false;
-                }
-                else if (__instance.m_FallFromRope)
-                {
-                    num2 = Mathf.Min(num2, Mathf.Min(conditionComponent.m_CurrentHP * __instance.m_FatalRopeFallHealthDropPercentage * 0.01f, conditionComponent.m_MaxHP * __instance.m_MaxRopeDamagePercentage * 0.01f));
-                }
-                if (!Il2Cpp.Utils.IsZero(damageOverride))
-                {
-                    num2 = damageOverride;
-                }
-                float num3 = Mathf.Clamp01(num2 / (conditionComponent.m_MaxHP * 0.5f));
-                if (num3 > 0.25f)
-                {
-                    GameManager.GetCameraEffects().PainPulse(num3);
-                }
-                if (!__instance.m_FallFromRope)
-                {
-                    GameManager.GetFootStepSoundsComponent().LeaveFootPrint(GameManager.GetPlayerTransform().position, isLeft: false, bothFeet: true, num3);
-                }
-                GameManager.GetConditionComponent().AddHealth(0f - num2, DamageSource.Falling);
-                __instance.ResetIgnoreDamageReduction();
-                if (num2 > 0f)
-                {
-                    if (__instance.m_FallFromRope)
-                    {
-                        StatsManager.IncrementValue(StatID.NumRopeFalls);
-                    }
-                    else
-                    {
-                        StatsManager.IncrementValue(StatID.FallCount);
-                    }
-                }
-                if (!GameManager.GetPlayerManagerComponent().PlayerIsDead() && !GameManager.GetConditionComponent().IsConsideredDead())
-                {
-                    PlayerDamageEvent.SpawnDamageEvent("GAMEPLAY_DamageEventMinorBruising", "GAMEPLAY_Affliction", "ico_injury_minorBruising", InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
-                    bool flag = false;
-                    bool flag2 = false;
-                    bool flag3 = false;
-                    if (Il2Cpp.Utils.IsZero(damageOverride))
-                    {
-                        if (__instance.MaybeSprainAnkle())
+                        if (num > 0.5f)
                         {
-                            flag = true;
+                            GameManager.GetPlayerVoiceComponent().Play(__instance.m_NoDamage, Il2CppVoice.Priority.Critical);
                         }
-                        if (__instance.MaybeSprainWrist())
-                        {
-                            flag2 = true;
-                        }
+                        return;
+                    }
+                    Condition conditionComponent = GameManager.GetConditionComponent();
+                    float num2 = (num - __instance.m_HeightStartDamage) * (__instance.m_FallFromRope ? __instance.m_DamagePerMeterFromRope : __instance.m_DamagePerMeter);
+                    if (__instance.m_DieOnNextFall)
+                    {
                         if (__instance.m_FallFromRope)
                         {
-                            //maybe add concussion to player when falling from rope
-                            ph.MaybeConcuss();
-
+                            num2 = conditionComponent.m_CurrentHP * __instance.m_FatalRopeFallHealthDropPercentage * 0.01f;
+                        }
+                        else
+                        {
+                            num2 = float.PositiveInfinity;
+                            __instance.m_IgnoreDamageReduction = true;
+                        }
+                        __instance.m_DieOnNextFall = false;
+                    }
+                    else if (__instance.m_FallFromRope)
+                    {
+                        num2 = Mathf.Min(num2, Mathf.Min(conditionComponent.m_CurrentHP * __instance.m_FatalRopeFallHealthDropPercentage * 0.01f, conditionComponent.m_MaxHP * __instance.m_MaxRopeDamagePercentage * 0.01f));
+                    }
+                    if (!Il2Cpp.Utils.IsZero(damageOverride))
+                    {
+                        num2 = damageOverride;
+                    }
+                    float num3 = Mathf.Clamp01(num2 / (conditionComponent.m_MaxHP * 0.5f));
+                    if (num3 > 0.25f)
+                    {
+                        GameManager.GetCameraEffects().PainPulse(num3);
+                    }
+                    if (!__instance.m_FallFromRope)
+                    {
+                        GameManager.GetFootStepSoundsComponent().LeaveFootPrint(GameManager.GetPlayerTransform().position, isLeft: false, bothFeet: true, num3);
+                    }
+                    GameManager.GetConditionComponent().AddHealth(0f - num2, DamageSource.Falling);
+                    __instance.ResetIgnoreDamageReduction();
+                    if (num2 > 0f)
+                    {
+                        if (__instance.m_FallFromRope)
+                        {
+                            StatsManager.IncrementValue(StatID.NumRopeFalls);
+                        }
+                        else
+                        {
+                            StatsManager.IncrementValue(StatID.FallCount);
+                        }
+                    }
+                    if (!GameManager.GetPlayerManagerComponent().PlayerIsDead() && !GameManager.GetConditionComponent().IsConsideredDead())
+                    {
+                        PlayerDamageEvent.SpawnDamageEvent("GAMEPLAY_DamageEventMinorBruising", "GAMEPLAY_Affliction", "ico_injury_minorBruising", InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
+                        bool flag = false;
+                        bool flag2 = false;
+                        bool flag3 = false;
+                        if (Il2Cpp.Utils.IsZero(damageOverride))
+                        {
                             if (__instance.MaybeSprainAnkle())
                             {
                                 flag = true;
@@ -472,67 +437,81 @@ namespace ImprovedAfflictions.Pain
                             {
                                 flag2 = true;
                             }
-                            if (__instance.MaybeBloodLoss())
+                            if (__instance.m_FallFromRope)
                             {
-                                flag3 = true;
+                                //maybe add concussion to player when falling from rope
+                                ph.MaybeConcuss();
+
+                                if (__instance.MaybeSprainAnkle())
+                                {
+                                    flag = true;
+                                }
+                                if (__instance.MaybeSprainWrist())
+                                {
+                                    flag2 = true;
+                                }
+                                if (__instance.MaybeBloodLoss())
+                                {
+                                    flag3 = true;
+                                }
                             }
-                        }   
+                        }
+                        if (flag)
+                        {
+                            GameManager.GetPlayerVoiceComponent().Play(__instance.m_AnkleSprain, Il2CppVoice.Priority.Critical);
+                        }
+                        else if (flag2)
+                        {
+                            GameManager.GetPlayerVoiceComponent().Play(__instance.m_WristSprain, Il2CppVoice.Priority.Critical);
+                        }
+                        else if (flag3)
+                        {
+                            GameManager.GetPlayerVoiceComponent().Play(__instance.m_BloodLoss, Il2CppVoice.Priority.Critical);
+                        }
+                        else if (num2 > 50f)
+                        {
+                            GameManager.GetPlayerVoiceComponent().Play(__instance.m_HeavyDamage, Il2CppVoice.Priority.Critical);
+                        }
+                        else if (num2 > 20f)
+                        {
+                            GameManager.GetPlayerVoiceComponent().Play(__instance.m_MediumDamage, Il2CppVoice.Priority.Critical);
+                        }
+                        else
+                        {
+                            GameManager.GetPlayerVoiceComponent().Play(__instance.m_LightDamage, Il2CppVoice.Priority.Critical);
+                        }
                     }
-                    if (flag)
+                    if (Il2Cpp.Utils.IsZero(damageOverride))
                     {
-                        GameManager.GetPlayerVoiceComponent().Play(__instance.m_AnkleSprain, Il2CppVoice.Priority.Critical);
+                        __instance.ApplyClothingDamage(num);
                     }
-                    else if (flag2)
-                    {
-                        GameManager.GetPlayerVoiceComponent().Play(__instance.m_WristSprain, Il2CppVoice.Priority.Critical);
-                    }
-                    else if (flag3)
-                    {
-                        GameManager.GetPlayerVoiceComponent().Play(__instance.m_BloodLoss, Il2CppVoice.Priority.Critical);
-                    }
-                    else if (num2 > 50f)
-                    {
-                        GameManager.GetPlayerVoiceComponent().Play(__instance.m_HeavyDamage, Il2CppVoice.Priority.Critical);
-                    }
-                    else if (num2 > 20f)
-                    {
-                        GameManager.GetPlayerVoiceComponent().Play(__instance.m_MediumDamage, Il2CppVoice.Priority.Critical);
-                    }
-                    else
-                    {
-                        GameManager.GetPlayerVoiceComponent().Play(__instance.m_LightDamage, Il2CppVoice.Priority.Critical);
-                    }
+                    __instance.m_FallFromRope = false;
                 }
-                if (Il2Cpp.Utils.IsZero(damageOverride))
+            }
+
+            [HarmonyPatch(typeof(PlayerStruggle), nameof(PlayerStruggle.ApplyDamageAfterMooseAttack))]
+
+            public class ConcussionTriggerMoose
+            {
+                public static void Postfix()
                 {
-                    __instance.ApplyClothingDamage(num);
+                    PainHelper ph = new PainHelper();
+                    ph.MaybeConcuss();
                 }
-                __instance.m_FallFromRope = false;
             }
-        }
 
-        [HarmonyPatch(typeof(PlayerStruggle), nameof(PlayerStruggle.ApplyDamageAfterMooseAttack))]
+            [HarmonyPatch(typeof(PlayerStruggle), nameof(PlayerStruggle.ApplyBearDamageAfterStruggleEnds))]
 
-        public class ConcussionTriggerMoose
-        {
-            public static void Postfix()
+            public class ConcussionTriggerBear
             {
-                PainHelper ph = new PainHelper();
-                ph.MaybeConcuss();
-            }
-        }
+                public static void Postfix()
+                {
+                    PainHelper ph = new PainHelper();
+                    ph.MaybeConcuss();
+                }
 
-        [HarmonyPatch(typeof(PlayerStruggle), nameof(PlayerStruggle.ApplyBearDamageAfterStruggleEnds))]
-
-        public class ConcussionTriggerBear
-        {
-            public static void Postfix()
-            {
-                PainHelper ph = new PainHelper();
-                ph.MaybeConcuss();
             }
 
         }
-
     }
 }

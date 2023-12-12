@@ -26,45 +26,53 @@ namespace ImprovedAfflictions.Pain
                 PainHelper ph = new PainHelper();
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
+                AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
+                AfflictionBodyArea[] arms = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmLeft };
+                AfflictionBodyArea[] upperLimbs = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight, AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmLeft };
 
-                if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft) || ph.HasPainAtLocation(AfflictionBodyArea.HandRight))
+                //just hands
+                float handsPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands);
+                float handsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands, true);
+                float handsPainDifference = (handsPainLevel / handsStartingPainLevel) * 100;
+
+                //hands and arms
+
+                float upperLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(upperLimbs);
+                float upperLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(upperLimbs, true);
+                float upperLimbsPainDifference = (upperLimbsPainLevel / upperLimbsStartingPainLevel) * 100;
+
+                if (__instance.m_BreakDown.name.Contains("Limb") || __instance.m_BreakDown.name.Contains("Crate") || __instance.m_BreakDown.name.Contains("PalletPile") || __instance.m_BreakDown.name.Contains("Plank") || __instance.m_BreakDown.name.Contains("Shelf") || __instance.m_BreakDown.name.Contains("Cart") || __instance.m_BreakDown.name.Contains("Ladder") || __instance.m_BreakDown.name.Contains("Chair") || __instance.m_BreakDown.name.Contains("Table"))
                 {
-                    if(!ac.PainkillersInEffect())
+                    if (upperLimbsPainDifference > 0)
                     {
-                        __instance.m_DurationHours *= 1.1f;
-                    }
-                    else
-                    {
-                        __instance.m_DurationHours *= 1.02f;
-                    }
-                }
-                else if(ph.HasPainAtLocation(AfflictionBodyArea.HandLeft, "Corrosive Chemical Burns") || ph.HasPainAtLocation(AfflictionBodyArea.HandRight, "Corrosive Chemical Burns"))
-                {
-                    if (!ac.PainkillersInEffect())
-                    {
-                        __instance.m_DurationHours *= 1.3f;
-                    }
-                    else
-                    {
-                        __instance.m_DurationHours *= 1.12f;
-                    }
-                }
-                else if(ph.HasPainAtLocation(AfflictionBodyArea.ArmLeft) || ph.HasPainAtLocation(AfflictionBodyArea.ArmRight))
-                {
-                    if (__instance.m_BreakDown.name.Contains("Limb") || __instance.m_BreakDown.name.Contains("Crate") || __instance.m_BreakDown.name.Contains("PalletPile") || __instance.m_BreakDown.name.Contains("Plank"))
-                    {
-                        if (!ac.PainkillersInEffect())
+                        if (!ac.PainkillersInEffect(upperLimbsPainLevel))
                         {
-                            __instance.m_DurationHours *= 1.25f;
+                            __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(upperLimbsPainDifference);
                         }
                         else
                         {
-                            __instance.m_DurationHours *= 1.05f;
+                            __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(upperLimbsPainDifference / 2);
                         }
                     }
                 }
-
+                else //anything breaking down not in the list above (usually doesn't involve arm swinging actions)
+                {
+                    if (handsPainDifference > 0)
+                    {
+                        if (!ac.PainkillersInEffect(handsPainLevel))
+                        {
+                            __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(handsPainDifference);
+                        }
+                        else
+                        {
+                            __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2);
+                        }
+                    }
+                }
             }
+
+            
+
         }
 
         [HarmonyPatch(typeof(Panel_Crafting), nameof(Panel_Crafting.GetModifiedCraftingDuration))]
@@ -76,16 +84,16 @@ namespace ImprovedAfflictions.Pain
                 PainHelper ph = new PainHelper();
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
+                AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
 
-                if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft) || ph.HasPainAtLocation(AfflictionBodyArea.HandRight))
-                {
-                    float multi = ac.PainkillersInEffect() ? 1.2f : 1.7f;
+                //just hands
+                float handsPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands);
+                float handsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands, true);
+                float handsPainDifference = (handsPainLevel / handsStartingPainLevel) * 100;
 
-                    __result = (int)(__result * multi);
-                }
-                else if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft, "Corrosive Chemical Burns") || ph.HasPainAtLocation(AfflictionBodyArea.HandRight, "Corrosive Chemical Burns"))
+                if (handsPainDifference > 0)
                 {
-                    float multi = ac.PainkillersInEffect() ? 1.4f : 1.9f;
+                    float multi = ac.PainkillersInEffect(handsPainLevel) ? UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2) : UtilityFunctions.MapPercentageToVariable(handsPainDifference);
 
                     __result = (int)(__result * multi);
                 }
@@ -102,36 +110,20 @@ namespace ImprovedAfflictions.Pain
                 PainHelper ph = new PainHelper();
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
+                AfflictionBodyArea[] feetAndLegs = { AfflictionBodyArea.FootLeft, AfflictionBodyArea.FootRight, AfflictionBodyArea.LegLeft, AfflictionBodyArea.LegRight };
 
-                if (ph.HasPainAtLocation(AfflictionBodyArea.LegLeft) || ph.HasPainAtLocation(AfflictionBodyArea.LegRight))
+                float lowerLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(feetAndLegs);
+                float lowerLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(feetAndLegs, true);
+                float lowerLimbsPainLevelDifference = (lowerLimbsPainLevel / lowerLimbsStartingPainLevel) * 100;
+
+             
+                if (lowerLimbsPainLevelDifference > 0)
                 {
-                    if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting())
+                    if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting() || GameManager.GetPlayerManagerComponent().PlayerIsWalking())
                     {
-                        float multi1 = ac.PainkillersInEffect() ? 0.9f : 0.7f;
+                        float multi1 = ac.PainkillersInEffect(lowerLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference / 2) : UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference);
 
-                        __result *= multi1;
-                    }
-                    else if (GameManager.GetPlayerManagerComponent().PlayerIsWalking())
-                    {
-                        float multi2 = ac.PainkillersInEffect() ? 0.9f : 0.8f;
-
-                        __result *= multi2;
-                    }
-                }
-
-                if (ph.HasPainAtLocation(AfflictionBodyArea.FootLeft) || ph.HasPainAtLocation(AfflictionBodyArea.FootRight))
-                {
-                    if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting())
-                    {
-                        float multi1 = ac.PainkillersInEffect() ? 0.9f : 0.8f;
-
-                        __result *= multi1;
-                    }
-                    else if (GameManager.GetPlayerManagerComponent().PlayerIsWalking())
-                    {
-                        float multi2 = ac.PainkillersInEffect() ? 0.9f : 0.8f;
-
-                        __result *= multi2;
+                        __result /= multi1;
                     }
                 }
             }
@@ -222,50 +214,91 @@ namespace ImprovedAfflictions.Pain
             public static float GetClimbSpeedMultiplier(PlayerClimbRope inst)
             {
 
+
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+
+                AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
+
+                //just hands
+                float handsPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands);
+                float handsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands, true);
+                float handsPainDifference = (handsPainLevel / handsStartingPainLevel) * 100;
+
+                AfflictionBodyArea[] rLimbs = { AfflictionBodyArea.ArmRight, AfflictionBodyArea.HandRight };
+
+                //right arm and hand
+                float rLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(rLimbs);
+                float rLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(rLimbs, true);
+                float rLimbsPainDifference = (rLimbsPainLevel / rLimbsStartingPainLevel) * 100;
+
+                AfflictionBodyArea[] lLimbs = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.HandLeft };
+
+                //left arm and hand
+                float lLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(lLimbs);
+                float lLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(lLimbs, true);
+                float lLimbsPainDifference = (lLimbsPainLevel / lLimbsStartingPainLevel) * 100;
+
+                AfflictionBodyArea[] arms = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmRight };
+
+                //just arms
+                float armsPainLevel = ac.GetTotalPainLevelForPainAtLocations(arms);
+                float armsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(arms, true);
+                float armsPainDifference = (armsPainLevel / armsStartingPainLevel) * 100;
+
+                AfflictionBodyArea[] legs = { AfflictionBodyArea.LegLeft, AfflictionBodyArea.LegRight };
+
+                //just legs
+                float legsPainLevel = ac.GetTotalPainLevelForPainAtLocations(legs);
+                float legsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(legs, true);
+                float legsPainDifference = (legsPainLevel / legsStartingPainLevel) * 100;
+
+                AfflictionBodyArea[] torso = { AfflictionBodyArea.Chest, AfflictionBodyArea.Stomach };
+
+                //just torso
+                float torsoPainLevel = ac.GetTotalPainLevelForPainAtLocations(torso);
+                float torsoStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(torso, true);
+                float torsoPainDifference = (torsoPainLevel / torsoStartingPainLevel) * 100;
+
                 float multiUp = 1f;
                 float multiDown = 1f;
 
                 if (ph.HasPain())
                 {
 
-                    if (ph.HasPainAtLocation(AfflictionBodyArea.Head) || ph.HasPainAtLocation(AfflictionBodyArea.Neck))
+                    if (armsPainDifference > 30)
                     {
-                        multiUp *= 1f;
-                        multiDown *= 1f;
+                        multiUp /= ac.PainkillersInEffect(armsPainLevel) ? UtilityFunctions.MapPercentageToVariable(armsPainDifference / 2, 1.0f, 1.3f) : UtilityFunctions.MapPercentageToVariable(armsPainDifference, 1.0f, 1.3f);
+                        multiDown /= ac.PainkillersInEffect(armsPainLevel) ? UtilityFunctions.MapPercentageToVariable(armsPainDifference / 2, 1.0f, 1.25f) : UtilityFunctions.MapPercentageToVariable(armsPainDifference, 1.0f, 1.25f); 
                     }
-                    if (ph.HasPainAtLocation(AfflictionBodyArea.ArmLeft) || ph.HasPainAtLocation(AfflictionBodyArea.ArmRight))
+                    if (handsPainDifference > 30)
                     {
-                        multiUp *= 0.7f;
-                        multiDown *= 0.75f;
+                        multiUp /= ac.PainkillersInEffect(handsPainLevel) ? UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2, 1.0f, 1.3f) : UtilityFunctions.MapPercentageToVariable(handsPainDifference, 1.0f, 1.3f);
+                        multiDown /= ac.PainkillersInEffect(handsPainLevel) ? UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2, 1.0f, 1.25f) : UtilityFunctions.MapPercentageToVariable(handsPainDifference, 1.0f, 1.25f);
                     }
-                    if (ph.HasPainAtLocation(AfflictionBodyArea.LegLeft) || ph.HasPainAtLocation(AfflictionBodyArea.LegRight))
+                    if (rLimbsPainDifference > 30)
                     {
-                        multiUp *= 0.8f;
-                        multiDown *= 0.85f;
+                        multiUp /= ac.PainkillersInEffect(rLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference / 2, 1.0f, 1.2f) : UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference, 1.0f, 1.2f);
+                        multiDown /= ac.PainkillersInEffect(rLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference / 2, 1.0f, 1.15f) : UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference, 1.0f, 1.15f);
                     }
-                    if (ph.HasPainAtLocation(AfflictionBodyArea.HandLeft) || ph.HasPainAtLocation(AfflictionBodyArea.HandRight))
+                    if (lLimbsPainDifference > 30)
                     {
-                        multiUp *= 0.8f;
-                        multiDown *= 0.85f;
+                        multiUp /= ac.PainkillersInEffect(lLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference / 2, 1.0f, 1.2f) : UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference, 1.0f, 1.2f);
+                        multiDown /= ac.PainkillersInEffect(lLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference / 2, 1.0f, 1.15f) : UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference, 1.0f, 1.15f);
                     }
-                    if (ph.HasPainAtLocation(AfflictionBodyArea.FootLeft) || ph.HasPainAtLocation(AfflictionBodyArea.FootRight))
+                    if (legsPainDifference > 30)
                     {
-                        multiUp *= 0.9f;
-                        multiDown *= 0.95f;
+                        multiUp /= ac.PainkillersInEffect(legsPainLevel) ? UtilityFunctions.MapPercentageToVariable(legsPainDifference / 2, 1.0f, 1.1f) : UtilityFunctions.MapPercentageToVariable(legsPainDifference, 1.0f, 1.1f);
+                        multiDown /= ac.PainkillersInEffect(legsPainLevel) ? UtilityFunctions.MapPercentageToVariable(legsPainDifference / 2, 1.0f, 1.05f) : UtilityFunctions.MapPercentageToVariable(legsPainDifference, 1.0f, 1.05f);
                     }
-                    if (ph.HasPainAtLocation(AfflictionBodyArea.Chest) || ph.HasPainAtLocation(AfflictionBodyArea.Stomach))
+                    if (torsoPainDifference > 30)
                     {
-                        multiUp *= 0.9f;
-                        multiDown *= 0.95f;
+                        multiUp /= ac.PainkillersInEffect(torsoPainLevel) ? UtilityFunctions.MapPercentageToVariable(torsoPainDifference / 2, 1.0f, 1.1f) : UtilityFunctions.MapPercentageToVariable(torsoPainDifference, 1.0f, 1.1f);
+                        multiDown /= ac.PainkillersInEffect(torsoPainLevel) ? UtilityFunctions.MapPercentageToVariable(torsoPainDifference / 2, 1.0f, 1.05f) : UtilityFunctions.MapPercentageToVariable(torsoPainDifference, 1.0f, 1.05f);
                     }
                 }
-
-                if (ph.HasPain() && ph.IsOnPainkillers())
-                {
-                    multiUp += 0.1f;
-                    multiDown += 0.2f;
-                }
-
+                
+       
                 if (inst.m_ClimbingState == ClimbingState.Up)
                 {
                     return multiUp;

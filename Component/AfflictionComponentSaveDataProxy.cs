@@ -17,7 +17,6 @@ namespace ImprovedAfflictions.Component
         public float m_ConcussionDrugLevel { get; set; }
         public float m_InsomniaDrugLevel { get; set; }
         public float m_PainkillerIncrementAmount { get; set; }
-
         public float m_PainkillerDecrementStartingAmount { get; set; }
         public bool m_HasConcussion { get; set; }
 

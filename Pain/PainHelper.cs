@@ -28,14 +28,14 @@ namespace ImprovedAfflictions.Pain
         public void UpdatePainEffects()
         {
 
-            if (GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu")) return;
+            if (GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("boot")) return;
 
             SprainPain painManager = GameManager.GetSprainPainComponent();
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
             float maxIntensity = 0f;
 
-            for (int num = painManager.m_ActiveInstances.Count - 1; num >= 0; num--)
+            for (int num = ac.m_PainInstances.Count - 1; num >= 0; num--)
             {
                 PainAffliction pain = ac.GetPainInstance(num);
 
@@ -57,7 +57,8 @@ namespace ImprovedAfflictions.Pain
             
         }
 
-        public PainAffliction GetPainInstance(AfflictionBodyArea location, ref int index)
+        
+        public PainAffliction GetPainInstance(AfflictionBodyArea location, string cause, ref int index)
         {
             SprainPain painManager = GameManager.GetSprainPainComponent();
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
@@ -66,8 +67,7 @@ namespace ImprovedAfflictions.Pain
             {
                 SprainPain.Instance inst = painManager.m_ActiveInstances[i];
 
-
-                if (inst.m_Location == location)
+                if (inst.m_Location == location && inst.m_Cause == cause)
                 {
 
                     if (inst.m_Cause == "concussion") continue;
@@ -117,16 +117,6 @@ namespace ImprovedAfflictions.Pain
             return false;
         }
 
-        
-        public bool HasPainAtLocation(AfflictionBodyArea location)
-        {
-            foreach (SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
-            {
-                if (pain.m_Location == location) return true;
-            }
-            return false;
-        }
-
         public bool HasPainAtLocation(AfflictionBodyArea location, string cause)
         {
             foreach (SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
@@ -161,16 +151,52 @@ namespace ImprovedAfflictions.Pain
         }
         public bool CanClimbRope()
         {
-            if (IsOnPainkillers())
-            {
-                return true;
-            }
-            if (HasPainAtLocation(AfflictionBodyArea.HandLeft) && HasPainAtLocation(AfflictionBodyArea.HandRight)) return false;
-            else if (HasPainAtLocation(AfflictionBodyArea.HandLeft) && HasPainAtLocation(AfflictionBodyArea.ArmLeft)) return false;
-            else if (HasPainAtLocation(AfflictionBodyArea.HandRight) && HasPainAtLocation(AfflictionBodyArea.ArmRight)) return false;
-            else if (HasPainAtLocation(AfflictionBodyArea.ArmLeft) && HasPainAtLocation(AfflictionBodyArea.ArmRight)) return false;
 
-            if (HasPainAtLocation(AfflictionBodyArea.FootLeft) && HasPainAtLocation(AfflictionBodyArea.FootLeft)) return false;
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+
+            AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
+
+            //just hands
+            float handsPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands);
+            float handsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands, true);
+            float handsPainDifference = (handsPainLevel / handsStartingPainLevel) * 100;
+            
+            AfflictionBodyArea[] rLimbs = { AfflictionBodyArea.ArmRight, AfflictionBodyArea.HandRight };
+
+            //right arm and hand
+            float rLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(rLimbs);
+            float rLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(rLimbs, true);
+            float rLimbsPainDifference = (rLimbsPainLevel / rLimbsStartingPainLevel) * 100;
+
+            AfflictionBodyArea[] lLimbs = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.HandLeft };
+
+            //left arm and hand
+            float lLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(lLimbs);
+            float lLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(lLimbs, true);
+            float lLimbsPainDifference = (lLimbsPainLevel / lLimbsStartingPainLevel) * 100;
+
+            AfflictionBodyArea[] arms = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmRight };
+
+            //just arms
+            float armsPainLevel = ac.GetTotalPainLevelForPainAtLocations(arms);
+            float armsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(arms, true);
+            float armsPainDifference = (armsPainLevel / armsStartingPainLevel) * 100;
+
+            AfflictionBodyArea[] legs = { AfflictionBodyArea.LegLeft, AfflictionBodyArea.LegRight };
+
+            //just arms
+            float legsPainLevel = ac.GetTotalPainLevelForPainAtLocations(legs);
+            float legsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(legs, true);
+            float legsPainDifference = (legsPainLevel / legsStartingPainLevel) * 100;
+
+            
+            if (handsPainDifference > 30 && !ac.PainkillersInEffect(handsPainLevel)) return false;
+            else if (lLimbsPainDifference > 30 && !ac.PainkillersInEffect(lLimbsPainLevel)) return false;
+            else if (rLimbsPainDifference > 30 && !ac.PainkillersInEffect(rLimbsPainLevel)) return false;
+            else if (armsPainDifference > 30 && !ac.PainkillersInEffect(armsPainLevel)) return false;
+
+            if (legsPainDifference > 30 && !ac.PainkillersInEffect(legsPainLevel)) return false;
 
             return true;
         }

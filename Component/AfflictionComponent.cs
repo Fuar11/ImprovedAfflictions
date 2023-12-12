@@ -24,6 +24,7 @@ namespace ImprovedAfflictions.Pain.Component
         public float m_PainkillerLevel = 0;
 
         public bool m_PainkillerEffectsCheck;
+        public float m_PainkillerStandardAmount = 20f;
 
         public float m_ConcussionDrugLevel;
         public float m_InsomniaDrugLevel;
@@ -61,9 +62,8 @@ namespace ImprovedAfflictions.Pain.Component
                 IncrementPainkillerLevel(tODMinutes / 20);
                 m_PainkillerEffectsCheck = false;
             }
-            else
+            else if (IsOnPainkillers())
             {
-                m_PainkillerDecrementStartingAmount = m_PainkillerIncrementAmount;
                 m_PainkillerIncrementAmount = 0;
 
                 if (!m_PainkillerEffectsCheck)
@@ -71,10 +71,15 @@ namespace ImprovedAfflictions.Pain.Component
                     ph.UpdatePainEffects();
                     m_PainkillerEffectsCheck = true;
                 }
-                
+
                 DecrementPainkillerLevel(tODHours);
 
             }
+            else 
+            { 
+                m_PainkillerDecrementStartingAmount = 0;
+            }
+
 
 
         }
@@ -129,7 +134,8 @@ namespace ImprovedAfflictions.Pain.Component
 
         public void DecrementPainkillerLevel(float numHoursDelta)
         {
-            m_PainkillerLevel -= 1f * numHoursDelta;
+                      
+            m_PainkillerLevel -= (m_PainkillerDecrementStartingAmount / (m_PainkillerDecrementStartingAmount / 2)) * numHoursDelta;
 
             m_PainkillerLevel = Mathf.Clamp(m_PainkillerLevel, 0f, 100f);
 
@@ -138,6 +144,11 @@ namespace ImprovedAfflictions.Pain.Component
         public bool PainkillersInEffect()
         {
             return m_PainkillerLevel >= m_PainLevel;
+        }
+
+        public bool PainkillersInEffect(float amount)
+        {
+            return m_PainkillerLevel >= amount;
         }
 
         public bool IsOnPainkillers()
@@ -170,20 +181,45 @@ namespace ImprovedAfflictions.Pain.Component
             return m_PainInstances[index];
         }
 
+        public PainAffliction GetPainInstanceAtLocation(AfflictionBodyArea location)
+        {
+            if (m_PainInstances.Count == 0) return null;
+            else return m_PainInstances.Find(p => p.m_Location == location);
+        }
+
+        public PainAffliction GetPainInstanceAtLocationWithCause(AfflictionBodyArea location, string cause)
+        {
+            if (m_PainInstances.Count == 0) return null;
+            else return m_PainInstances.Find(p => p.m_Location == location && p.m_Cause == cause);
+        }
+
+
         public float GetTotalPainLevel()
         {
             if (m_PainInstances.Count == 0) return 0;
 
             float total = 0;
 
-            foreach(var pain in m_PainInstances)
+            foreach (var pain in m_PainInstances)
             {
                 total += pain.m_PainLevel;
             }
 
             return total;
         }
+        public float GetTotalPainLevelForPainAtLocations(AfflictionBodyArea[] locations, bool checkForStartingLevel = false)
+        {
+            if (m_PainInstances.Count == 0) return 0;
 
+            float total = 0;
 
+            foreach (var pain in m_PainInstances)
+            {
+                if(locations.Contains(pain.m_Location)) total += checkForStartingLevel ? pain.m_StartingPainLevel : pain.m_PainLevel;
+            }
+
+            return total;
+
+        }
     }
 }

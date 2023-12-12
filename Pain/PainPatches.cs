@@ -103,13 +103,12 @@ namespace ImprovedAfflictions.Pain
 
                 if (cause == "concussion") existingInstance = ph.GetConcussion();
                 else if (cause == "broken rib") existingInstance = ph.GetBrokenRibPain(ref index);
-                else existingInstance = ph.GetPainInstance(location, ref index);
+                else existingInstance = ph.GetPainInstance(location, cause, ref index);
 
                 if (existingInstance != null)
                 {
                     ph.UpdatePainInstance(index, existingInstance);
                     ph.UpdatePainEffects();
-                    //Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, 0, 2), "wareOffPainkiller"));
                     return false;
                 }
 
@@ -124,7 +123,7 @@ namespace ImprovedAfflictions.Pain
                         __instance.m_AfflictionDurationHours = Random.Range(96f, 124f);
                         __instance.m_PulseFxIntensity = 1.1f;
                         __instance.m_PulseFxFrequencySeconds = 8f;
-                        painLevel = 20f;
+                        painLevel = 21f;
                     }
                     else if (location == AfflictionBodyArea.Neck)
                     {
@@ -141,24 +140,40 @@ namespace ImprovedAfflictions.Pain
                     }
                     else if (location == AfflictionBodyArea.HandRight || location == AfflictionBodyArea.HandLeft)
                     {
-                        __instance.m_AfflictionDurationHours = Random.Range(5f, 6f);
+
+                        AfflictionBodyArea locationToCheck = location == AfflictionBodyArea.HandRight ? AfflictionBodyArea.ArmRight : AfflictionBodyArea.ArmLeft;
+                        if (ac.GetPainInstanceAtLocationWithCause(locationToCheck, cause) != null) painLevel -= 5;
+
+                        __instance.m_AfflictionDurationHours = Random.Range(24f, 96f);
                         __instance.m_PulseFxIntensity = 0.8f;
                         __instance.m_PulseFxFrequencySeconds = 14f;
                     }
                     else if (location == AfflictionBodyArea.ArmRight || location == AfflictionBodyArea.ArmLeft)
                     {
+
+                        AfflictionBodyArea locationToCheck = location == AfflictionBodyArea.ArmRight ? AfflictionBodyArea.HandRight : AfflictionBodyArea.HandLeft;
+                        if (ac.GetPainInstanceAtLocationWithCause(locationToCheck, cause) != null) painLevel -= 5;
+
                         __instance.m_AfflictionDurationHours = Random.Range(24f, 96f);
                         __instance.m_PulseFxIntensity = 0.6f;
                         __instance.m_PulseFxFrequencySeconds = 16f;
                     }
                     else if (location == AfflictionBodyArea.LegRight || location == AfflictionBodyArea.LegLeft)
                     {
+
+                        AfflictionBodyArea locationToCheck = location == AfflictionBodyArea.LegRight ? AfflictionBodyArea.FootRight : AfflictionBodyArea.FootLeft;
+                        if (ac.GetPainInstanceAtLocationWithCause(locationToCheck, cause) != null) painLevel -= 5;
+
                         __instance.m_AfflictionDurationHours = Random.Range(32f, 96f);
                         __instance.m_PulseFxIntensity = 0.6f;
                         __instance.m_PulseFxFrequencySeconds = 16f;
                     }
                     else if (location == AfflictionBodyArea.FootRight || location == AfflictionBodyArea.FootLeft)
                     {
+
+                        AfflictionBodyArea locationToCheck = location == AfflictionBodyArea.FootRight ? AfflictionBodyArea.LegRight : AfflictionBodyArea.LegLeft;
+                        if (ac.GetPainInstanceAtLocationWithCause(locationToCheck, cause) != null) painLevel -= 5;
+
                         __instance.m_AfflictionDurationHours = Random.Range(48f, 96f);
                         __instance.m_PulseFxIntensity = 0.85f;
                         __instance.m_PulseFxFrequencySeconds = 12f;
@@ -168,6 +183,7 @@ namespace ImprovedAfflictions.Pain
                         __instance.m_AfflictionDurationHours = Random.Range(48f, 72f);
                         __instance.m_PulseFxIntensity = 0.5f;
                         __instance.m_PulseFxFrequencySeconds = 18f;
+                        painLevel = 5f;
                     }
                 }
                 else if (cause.ToLowerInvariant() == "fall") //sprains
@@ -182,14 +198,14 @@ namespace ImprovedAfflictions.Pain
                     __instance.m_AfflictionDurationHours = Random.Range(96f, 240f);
                     __instance.m_PulseFxIntensity = 2f;
                     __instance.m_PulseFxFrequencySeconds = 6f;
-                    painLevel = 20f;
+                    painLevel = 40f;
                 }
                 else if (cause.ToLowerInvariant() == "broken rib") //broken ribs
                 {
                     __instance.m_AfflictionDurationHours = 999999999f;
                     __instance.m_PulseFxIntensity = 1.7f;
                     __instance.m_PulseFxFrequencySeconds = 8f;
-                    painLevel = 30f;
+                    painLevel = 35f;
                 }
                 else if (cause.ToLowerInvariant() == "corrosive chemical burns") //chemical burns
                 {
@@ -235,7 +251,8 @@ namespace ImprovedAfflictions.Pain
 
                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-                ac.m_PainkillerIncrementAmount += ac.m_PainkillerIncrementAmount != 0 ? 10f : ac.m_PainkillerLevel + 10f; 
+                ac.m_PainkillerIncrementAmount += ac.m_PainkillerIncrementAmount != 0 ? ac.m_PainkillerStandardAmount : ac.m_PainkillerLevel + ac.m_PainkillerStandardAmount;
+                ac.m_PainkillerDecrementStartingAmount = ac.m_PainkillerIncrementAmount;
             }
 
             [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.CureAffliction))]

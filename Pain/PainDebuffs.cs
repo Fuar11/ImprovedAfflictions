@@ -18,12 +18,13 @@ namespace ImprovedAfflictions.Pain
     internal class PainDebuffs
     {
 
+        //pain debuffs
+
         [HarmonyPatch(typeof(Panel_BreakDown), nameof(Panel_BreakDown.UpdateDurationLabel))]
         public class UpdateBreakdownLabel
         {
             private static void Postfix(Panel_BreakDown __instance)
             {
-                PainHelper ph = new PainHelper();
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
                 AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
@@ -43,15 +44,16 @@ namespace ImprovedAfflictions.Pain
 
                 if (__instance.m_BreakDown.name.Contains("Limb") || __instance.m_BreakDown.name.Contains("Crate") || __instance.m_BreakDown.name.Contains("PalletPile") || __instance.m_BreakDown.name.Contains("Plank") || __instance.m_BreakDown.name.Contains("Shelf") || __instance.m_BreakDown.name.Contains("Cart") || __instance.m_BreakDown.name.Contains("Ladder") || __instance.m_BreakDown.name.Contains("Chair") || __instance.m_BreakDown.name.Contains("Table"))
                 {
+
                     if (upperLimbsPainDifference > 0)
                     {
                         if (!ac.PainkillersInEffect(upperLimbsPainLevel))
                         {
-                            __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(upperLimbsPainDifference);
+                            __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(upperLimbsPainDifference, 1f, 1.5f);
                         }
                         else
                         {
-                            __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(upperLimbsPainDifference / 2);
+                            __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(upperLimbsPainDifference / 2, 1f, 1.5f);
                         }
                     }
                 }
@@ -69,10 +71,9 @@ namespace ImprovedAfflictions.Pain
                         }
                     }
                 }
+                __instance.m_DurationLabel.text = Il2Cpp.Utils.GetExpandedDurationString(Mathf.RoundToInt(__instance.m_DurationHours * 60f));
+
             }
-
-            
-
         }
 
         [HarmonyPatch(typeof(Panel_Crafting), nameof(Panel_Crafting.GetModifiedCraftingDuration))]
@@ -107,7 +108,6 @@ namespace ImprovedAfflictions.Pain
             public static void Postfix(ref float __result)
             {
 
-                PainHelper ph = new PainHelper();
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
                 AfflictionBodyArea[] feetAndLegs = { AfflictionBodyArea.FootLeft, AfflictionBodyArea.FootRight, AfflictionBodyArea.LegLeft, AfflictionBodyArea.LegRight };
@@ -121,13 +121,12 @@ namespace ImprovedAfflictions.Pain
                 {
                     if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting() || GameManager.GetPlayerManagerComponent().PlayerIsWalking())
                     {
-                        float multi1 = ac.PainkillersInEffect(lowerLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference / 2) : UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference);
+                        float multi1 = ac.PainkillersInEffect(lowerLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference / 2, 1f, 1.5f) : UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference, 1f, 1.5f);
 
                         __result /= multi1;
                     }
                 }
             }
-
         }
 
         [HarmonyPatch(typeof(RopeClimbPoint), nameof(RopeClimbPoint.PerformInteraction))]
@@ -263,7 +262,7 @@ namespace ImprovedAfflictions.Pain
                 float multiUp = 1f;
                 float multiDown = 1f;
 
-                if (ph.HasPain())
+                if (ac.GetTotalPainLevel() > 0)
                 {
 
                     if (armsPainDifference > 30)
@@ -311,6 +310,12 @@ namespace ImprovedAfflictions.Pain
                 return 1f;
             }
         }
+
+        //painkiller debuffs
+
+        
        
+        
+
     }
 }

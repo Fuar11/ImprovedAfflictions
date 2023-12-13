@@ -7,6 +7,7 @@ using MelonLoader;
 using HarmonyLib;
 using Il2Cpp;
 using UnityEngine;
+using ImprovedAfflictions.Pain.Component;
 
 namespace ImprovedAfflictions.Pain
 {
@@ -17,19 +18,36 @@ namespace ImprovedAfflictions.Pain
         public void IntensePainPulse(float amount)
         {
 
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+            MelonLogger.Msg("Intense pain pulse");
+
+
             GameManager.GetCameraStatusEffects().m_WaterTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_WaterTarget, amount * 1.1f);
             GameManager.GetCameraStatusEffects().m_SprainTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_SprainTarget, amount);
-            GameManager.GetCameraStatusEffects().m_HeadacheTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_HeadacheTarget, amount);
+            if(ac.m_PainkillerLevel < 60f) GameManager.GetCameraStatusEffects().m_HeadacheTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_HeadacheTarget, amount);
             GameManager.GetCameraStatusEffects().m_SprainVignetteColor = Color.white;
 
         }
 
         public void HeadTraumaPulse(float amount)
         {
+
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+            MelonLogger.Msg("Head trauma pulse");
+
             GameManager.GetCameraStatusEffects().m_WaterTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_WaterTarget, amount * 2f);
             GameManager.GetCameraStatusEffects().m_SprainTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_SprainTarget, amount);
+            if (ac.m_PainkillerLevel < 60f) GameManager.GetCameraStatusEffects().m_HeadacheTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_HeadacheTarget, amount);
+            GameManager.GetCameraStatusEffects().m_SprainVignetteColor = ac.m_PainkillerLevel < 60f ? Color.black : Color.white;
+        }
+
+        public void OverdoseVignette(float amount)
+        {
             GameManager.GetCameraStatusEffects().m_HeadacheTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_HeadacheTarget, amount);
-            GameManager.GetCameraStatusEffects().m_SprainVignetteColor = Color.black;
+            GameManager.GetCameraStatusEffects().m_HeadacheSinSpeed = 2.5f;
+            GameManager.GetCameraStatusEffects().m_HeadacheVignetteIntensity = 0.2f;
         }
 
         //overrides pain pulse allowing it to accept any value for the intensity

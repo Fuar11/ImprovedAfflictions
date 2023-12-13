@@ -46,26 +46,7 @@ namespace ImprovedAfflictions.Scurvy
 
         }
 
-        /**
-        [HarmonyPatch(typeof(Fatigue), nameof(Fatigue.AddFatigue))]
-
-        public class ScurvyMaxFatigueReduction
-        {
-            public static void Postfix(Fatigue __instance)
-            {
-                float num = GameManager.GetHungerComponent().GetFatiguePenalty();
-                if (GameManager.GetIntestinalParasitesComponent().HasIntestinalParasites())
-                {
-                    num += GameManager.GetIntestinalParasitesComponent().GetTotalFatigueReduction();
-                    num = Mathf.Clamp(num, 0f, __instance.m_MaxFatigue);
-                }
-
-                if (GameManager.GetScurvyComponent().HasAffliction()) num += 20;
-
-                __instance.m_CurrentFatigue = Mathf.Clamp(__instance.m_CurrentFatigue, num, __instance.m_MaxFatigue);
-            }
-        }
-        **/
+        
 
         [HarmonyPatch(typeof(Freezing), nameof(Freezing.CalculateBodyTemperature))]
 

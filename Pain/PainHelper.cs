@@ -12,19 +12,6 @@ namespace ImprovedAfflictions.Pain
     internal class PainHelper
     {
 
-        //may no longer be needed
-        [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.Deserialize))]
-
-        public class UpdatePainEffectsOnLoad
-        {
-            public static void Postfix()
-            {
-               //PainHelper ph = new PainHelper();
-               //ph.UpdatePainEffects();
-            }
-        }
-
-
         public void UpdatePainEffects()
         {
 
@@ -56,8 +43,7 @@ namespace ImprovedAfflictions.Pain
             painManager.m_PulseFxIntensity /= ac.GetPainkillerLevel() / 10;
             
         }
-
-        
+ 
         public PainAffliction GetPainInstance(AfflictionBodyArea location, string cause, ref int index)
         {
             SprainPain painManager = GameManager.GetSprainPainComponent();
@@ -144,11 +130,6 @@ namespace ImprovedAfflictions.Pain
 
         }
 
-        public bool HasPain()
-        {
-            if (GameManager.GetSprainPainComponent().HasSprainPain()) return true;
-            return false;
-        }
         public bool CanClimbRope()
         {
 
@@ -283,6 +264,27 @@ namespace ImprovedAfflictions.Pain
                 {
                     painManager.CureAffliction(inst);
                 }
+            }
+
+        }
+
+        public string GetAfflictionDescription(string cause)
+        {
+            switch (cause.ToLowerInvariant())
+            {
+                case "wolf bite":
+                    return "You are suffering from a wolf bite. Take painkillers to numb the pain and wait for the wound to heal.";
+                case "bear bite":
+                    return "You are suffering from a bear bite. Take painkillers to numb the pain and wait for the wound to heal.";
+                case "fall":
+                    return "You're suffering from a sprain, while the sprain can be stabilized, the pain will last for a while. Taking painkillers can numb the effects of the pain.";
+                case "broken rib":
+                    return "You've broken one or more of your ribs, the pain will last for a while. Movement and mobility will be hindered while suffering from the pain, take painkillers to numb the effects.";
+                case "concussion":
+                    return "You've hit your head and are suffering from a concussion. Take painkillers to numb the debilitating effects while your head rests to heal.";
+                case "corrosive chemical burns":
+                    return "You've exposed your hands or feet to corrosive chemicals and have suffered severe burns. Take painkillers to numb the pain and wait for them to heal.";
+                default: return Localization.Get("GAMEPLAY_SprainPainDesc");
             }
 
         }

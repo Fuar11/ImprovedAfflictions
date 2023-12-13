@@ -16,15 +16,63 @@ using static Il2Cpp.Panel_Affliction;
 using ImprovedAfflictions.Pain;
 using Il2CppSystem.Xml.Schema;
 using ImprovedAfflictions.FoodPoisoning;
+using ImprovedAfflictions.Pain.Component;
+using ImprovedAfflictions.Component;
 
 namespace ImprovedAfflictions
 {
     internal class UIPatches
     {
 
-        [HarmonyPatch(typeof(Panel_FirstAid), nameof(Panel_FirstAid.RefreshRightPage))]
+        [HarmonyPatch(typeof(AfflictionButton), nameof(AfflictionButton.SetCauseAndEffect))]
 
         public class FirstAidUIUpdate
+        {
+
+            public static bool Prefix(ref string causeStr, ref AfflictionType affType, ref AfflictionBodyArea location, ref int index, ref string effectName, ref string spriteName)
+            {
+                return (affType != AfflictionType.SprainPain || (affType == AfflictionType.SprainPain && causeStr.ToLowerInvariant().Contains("broken rib"))) ? true : false;
+            }
+
+            public static void Postfix(ref string causeStr, ref AfflictionType affType, ref AfflictionBodyArea location, ref int index, ref string effectName, ref string spriteName, AfflictionButton __instance)
+            {
+                if(affType != AfflictionType.SprainPain || (affType == AfflictionType.SprainPain && causeStr.ToLowerInvariant().Contains("broken rib"))) return;
+
+                __instance.m_LabelCause.text = causeStr;
+                __instance.m_LabelCause.color = __instance.m_CauseColor;
+                __instance.m_AfflictionType = affType;
+                __instance.m_AfflictionLocation = location;
+                __instance.m_Index = index;
+                Color colorBasedOnAffliction = __instance.GetColorBasedOnAffliction(__instance.m_AfflictionType, isHovering: false);
+                
+                
+                
+                __instance.m_SpriteEffect.spriteName = spriteName;
+                __instance.m_LabelEffect.text = effectName;
+                __instance.UpdateFillBar();
+                __instance.m_SpriteEffect.color = colorBasedOnAffliction;
+                __instance.m_LabelEffect.color = colorBasedOnAffliction;
+            }
+
+            private void GetTextureBasedOnCause()
+            {
+                //return UISprite here
+            }
+
+            private void GetAfflictionNameBasedOnCause(string cause)
+            {
+
+                if (cause.ToLowerInvariant().Contains("corrosive chemical burns")) return "Chemical Burns";
+                //keep working on this
+
+            }
+
+        }
+
+
+        [HarmonyPatch(typeof(Panel_FirstAid), nameof(Panel_FirstAid.RefreshRightPage))]
+
+        public class FirstAidInstanceUIUpdate
         {
 
             public static bool Prefix(Panel_FirstAid __instance)
@@ -479,15 +527,17 @@ namespace ImprovedAfflictions
                     case AfflictionType.SprainPain: 
                         {
 
+                            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+                            PainAffliction selectedPainInstance = ac.GetPainInstance(selectedAfflictionIndex);
                             SprainPain sprainPainComponent = GameManager.GetSprainPainComponent();
                             PainHelper ph = new PainHelper();
 
-                            bool HasTakenPainkillers = ph.IsOnPainkillers();
-                           
+                            bool HasTakenPainkillers = ac.PainkillersInEffect(selectedAfflictionIndex, true);
+
                             //if painkillers have been taken, the UI will show that accordingly
 
                             __instance.m_LabelAfflictionDescriptionNoRest.text = "";
-                            __instance.m_LabelAfflictionDescription.text = Localization.Get("GAMEPLAY_SprainPainDesc");
+                            __instance.m_LabelAfflictionDescription.text = ph.GetAfflictionDescription(selectedPainInstance.m_Cause);
                             string[] remedySprites = new string[1] { "GEAR_BottlePainKillers" };
                             bool[] remedyComplete = new bool[1] { HasTakenPainkillers };
                             int[] remedyNumRequired = new int[1] { 2 };
@@ -584,6 +634,13 @@ namespace ImprovedAfflictions
                     Il2Cpp.Utils.SetActive(__instance.m_DurationWidgetParentObj, active: false);
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(AfflictionButton), nameof(AfflictionButton.UpdateFillBar))]
+
+        public class PainkillerFillBar
+        {
+            //to-do
         }
     }
 }

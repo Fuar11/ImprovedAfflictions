@@ -9,7 +9,7 @@ namespace ImprovedAfflictions.Utils
     internal class UtilityFunctions
     {
 
-        public static float MapPercentageToVariable(double percentage, float minVariableValue = 1.0f, float maxVariableValue = 1.0f)
+        public static float MapPercentageToVariable(double percentage, float minVariableValue = 1.0f, float maxVariableValue = 2.0f)
         {
 
             double minPercentage = 0;

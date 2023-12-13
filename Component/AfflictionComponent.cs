@@ -23,8 +23,12 @@ namespace ImprovedAfflictions.Pain.Component
         public float m_PainLevel = 0;
         public float m_PainkillerLevel = 0;
 
-        public bool m_PainkillerEffectsCheck;
+        public bool m_PainEffectsCheck;
         public float m_PainkillerStandardAmount = 20f;
+
+        public float m_SecondsSinceLastODFx;
+        public float m_ODPulseFxFrequencySeconds = 4f;
+        public float m_ODPulseFxIntensity = 2f; //default, might change
 
         public float m_ConcussionDrugLevel;
         public float m_InsomniaDrugLevel;
@@ -38,7 +42,7 @@ namespace ImprovedAfflictions.Pain.Component
         {
 
             LoadData();
-            m_PainkillerEffectsCheck = false;
+            m_PainEffectsCheck = false;
 
         }
 
@@ -59,25 +63,33 @@ namespace ImprovedAfflictions.Pain.Component
 
             if (m_PainkillerLevel < m_PainkillerIncrementAmount)
             {
+                m_SecondsSinceLastODFx += Time.deltaTime;
                 IncrementPainkillerLevel(tODMinutes / 20);
-                m_PainkillerEffectsCheck = false;
+                MaybeDoOverdoseEffects();
+                m_PainEffectsCheck = false;
             }
             else if (IsOnPainkillers())
             {
                 m_PainkillerIncrementAmount = 0;
 
-                if (!m_PainkillerEffectsCheck)
+                if (!m_PainEffectsCheck)
                 {
                     ph.UpdatePainEffects();
-                    m_PainkillerEffectsCheck = true;
+                    m_PainEffectsCheck = true;
                 }
 
+                m_SecondsSinceLastODFx += Time.deltaTime;
+                MaybeDoOverdoseEffects();
                 DecrementPainkillerLevel(tODHours);
 
             }
             else 
             { 
                 m_PainkillerDecrementStartingAmount = 0;
+
+                //reset back to normal values
+                GameManager.GetCameraStatusEffects().m_HeadacheSinSpeed = 3;
+                GameManager.GetCameraStatusEffects().m_HeadacheVignetteIntensity = 0.3f;
             }
 
 
@@ -146,9 +158,16 @@ namespace ImprovedAfflictions.Pain.Component
             return m_PainkillerLevel >= m_PainLevel;
         }
 
-        public bool PainkillersInEffect(float amount)
+        public bool PainkillersInEffect(float num, bool forIndex = false)
         {
-            return m_PainkillerLevel >= amount;
+
+            //if forIndex is true then the value passed is being used as index and not value to check for. 
+            if (forIndex)
+            {
+                return m_PainkillerLevel >= m_PainInstances[(int)num].m_PainLevel;
+            }
+
+            return m_PainkillerLevel >= num;
         }
 
         public bool IsOnPainkillers()
@@ -156,9 +175,31 @@ namespace ImprovedAfflictions.Pain.Component
             return m_PainkillerLevel > 0;
         }
 
+        public bool IsHighOnPainkillers()
+        {
+            return m_PainkillerLevel > 60f;
+        }
+        public bool IsOverdosing()
+        {
+            return m_PainkillerLevel > 80f;
+        }
         public float GetPainkillerLevel()
         {
             return m_PainkillerLevel;
+        }
+
+        public void AdministerPainkillers(float amount, bool instant = false)
+        {
+
+            if (instant)
+            {
+                m_PainkillerLevel += amount;
+                m_PainkillerLevel = Mathf.Clamp(m_PainkillerLevel, 0f, 100f);
+                return;
+            }
+
+            m_PainkillerIncrementAmount += m_PainkillerIncrementAmount != 0 ? amount : m_PainkillerLevel + m_PainkillerStandardAmount;
+            m_PainkillerDecrementStartingAmount = m_PainkillerIncrementAmount;
         }
 
         public void AddPainInstance(string cause, AfflictionBodyArea location, float duration, float painLevel, float pulseFxIntensity, float pulseFxFrequencySeconds)
@@ -181,16 +222,14 @@ namespace ImprovedAfflictions.Pain.Component
             return m_PainInstances[index];
         }
 
-        public PainAffliction GetPainInstanceAtLocation(AfflictionBodyArea location)
+        public PainAffliction? GetPainInstanceAtLocation(AfflictionBodyArea location)
         {
-            if (m_PainInstances.Count == 0) return null;
-            else return m_PainInstances.Find(p => p.m_Location == location);
+            return (m_PainInstances.Count == 0) ? null : m_PainInstances.Find(p => p.m_Location == location);
         }
 
-        public PainAffliction GetPainInstanceAtLocationWithCause(AfflictionBodyArea location, string cause)
+        public PainAffliction? GetPainInstanceAtLocationWithCause(AfflictionBodyArea location, string cause)
         {
-            if (m_PainInstances.Count == 0) return null;
-            else return m_PainInstances.Find(p => p.m_Location == location && p.m_Cause == cause);
+            return (m_PainInstances.Count == 0) ? null : m_PainInstances.Find(p => p.m_Location == location && p.m_Cause == cause);
         }
 
 
@@ -221,5 +260,35 @@ namespace ImprovedAfflictions.Pain.Component
             return total;
 
         }
+
+        public void MaybeDoOverdoseEffects()
+        {
+
+            PainEffects effects = new PainEffects();
+
+            if (IsHighOnPainkillers())
+            {
+
+                AddOverdoseFatigueDebuff();
+
+                if(m_SecondsSinceLastODFx > m_ODPulseFxFrequencySeconds)
+                {
+                    effects.OverdoseVignette(m_ODPulseFxIntensity);
+                    m_SecondsSinceLastODFx = 0;
+                }
+            }
+
+        }
+
+        public void AddOverdoseFatigueDebuff()
+        {
+            int decreaseMultiplier = IsOverdosing() ? 45 : 30;
+            float fatigueValue = decreaseMultiplier * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
+
+            GameManager.GetFatigueComponent().AddFatigue(fatigueValue);
+
+        }
+
+
     }
 }

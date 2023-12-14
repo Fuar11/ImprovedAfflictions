@@ -15,6 +15,7 @@ using ImprovedAfflictions.Utils;
 using ImprovedAfflictions.Pain.Component;
 using ImprovedAfflictions.Component;
 using UnityEngine.Analytics;
+using Il2CppRewired.Utils.Platforms.Windows;
 
 namespace ImprovedAfflictions.Pain
 {
@@ -26,7 +27,7 @@ namespace ImprovedAfflictions.Pain
         public class UpdateOverride
         {
 
-            public static bool Prefix()
+            public static bool Prefix(SprainPain __instance)
             {
                 return false;
             }
@@ -34,16 +35,15 @@ namespace ImprovedAfflictions.Pain
             public static void Postfix(SprainPain __instance)
             {
 
-                if (GameManager.m_IsPaused || GameManager.s_IsGameplaySuspended || GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("boot")) return;
+                if (GameManager.m_IsPaused || GameManager.s_IsGameplaySuspended || GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("boot") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("empty"))
+                {
+                    return;
+                }
 
                 PainHelper ph = new PainHelper();
                 PainEffects effects = new PainEffects();
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-                if (GameManager.m_IsPaused || GameManager.s_IsGameplaySuspended || GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("boot") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("empty"))
-                {
-                    return;
-                }
 
                 float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
                 for (int num = __instance.m_ActiveInstances.Count - 1; num >= 0; num--)
@@ -51,19 +51,23 @@ namespace ImprovedAfflictions.Pain
                     SprainPain.Instance inst = __instance.m_ActiveInstances[num];
                     if (hoursPlayedNotPaused > inst.m_EndTime)
                     {
+                        ac.CurePainInstance(num);
                         __instance.CureAffliction(inst);
                     }
                 }
 
-                //overall pain level is not less than 30 percent of the most recent highest pain level
-                if ((ac.GetTotalPainLevel() / ac.m_PainkillerDecrementStartingAmount) > 30)
+                //overall pain level is not less than 20 percent of the most recent highest pain level
+                if ((ac.m_PainLevel / ac.m_PainStartingLevel) * 100 > 20)
                 {
                     __instance.m_SecondsSinceLastPulseFx += Time.deltaTime;
                     if (__instance.m_SecondsSinceLastPulseFx > __instance.m_PulseFxFrequencySeconds)
                     {
 
-                        if (ph.HasConcussion()) effects.HeadTraumaPulse(__instance.m_PulseFxIntensity);
-                        else if (__instance.m_PulseFxIntensity >= 1f)
+                        if (ph.HasConcussion())
+                        {
+                            effects.HeadTraumaPulse(__instance.m_PulseFxIntensity);
+                        }
+                        else if (__instance.m_PulseFxIntensity > 1f)
                         {
                             effects.IntensePainPulse(__instance.m_PulseFxIntensity);
                         }
@@ -193,7 +197,7 @@ namespace ImprovedAfflictions.Pain
                         painLevel = 5f;
                     }
                 }
-                else if (cause.ToLowerInvariant() == "fall") //sprains
+                else if (cause.ToLowerInvariant().Contains("fall")) //sprains
                 {
                     __instance.m_AfflictionDurationHours = Random.Range(96f, 124f);
                     __instance.m_PulseFxIntensity = 0.65f;
@@ -306,10 +310,10 @@ namespace ImprovedAfflictions.Pain
 
                 int index = __instance.m_ActiveInstances.IndexOf(inst);
 
-                ac.m_PainInstances.RemoveAt(index);
+                ac.CurePainInstance(index);
 
                 __instance.m_ActiveInstances.Remove(inst);
-                PlayerDamageEvent.SpawnAfflictionEvent("GAMEPLAY_SprainPain", "GAMEPLAY_Healed", "ico_injury_pain", InterfaceManager.m_FirstAidBuffColor);
+                PlayerDamageEvent.SpawnAfflictionEvent(UIPatches.GetAfflictionNameBasedOnCause(inst.m_Cause, inst.m_Location), "GAMEPLAY_Healed", UIPatches.GetIconNameBasedOnCause(inst.m_Cause), InterfaceManager.m_FirstAidBuffColor);
                 InterfaceManager.GetPanel<Panel_FirstAid>().UpdateDueToAfflictionHealed();
 
                 ph.UpdatePainEffects();

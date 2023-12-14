@@ -82,7 +82,6 @@ namespace ImprovedAfflictions.Pain
             private static void Postfix(Panel_Crafting __instance, ref int __result)
             {
 
-                PainHelper ph = new PainHelper();
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
                 AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
@@ -109,6 +108,10 @@ namespace ImprovedAfflictions.Pain
             {
 
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+                SprainedAnkle sprains = new SprainedAnkle();
+
+                //if player has sprained ankle, they are limping which means the speed is already being modified enough
+                if (sprains.HasSprainedAnkle()) return;
 
                 AfflictionBodyArea[] feetAndLegs = { AfflictionBodyArea.FootLeft, AfflictionBodyArea.FootRight, AfflictionBodyArea.LegLeft, AfflictionBodyArea.LegRight };
 

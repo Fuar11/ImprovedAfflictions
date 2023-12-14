@@ -18,6 +18,7 @@ using Il2CppSystem.Xml.Schema;
 using ImprovedAfflictions.FoodPoisoning;
 using ImprovedAfflictions.Pain.Component;
 using ImprovedAfflictions.Component;
+using Il2CppSystem.Security;
 
 namespace ImprovedAfflictions
 {
@@ -38,37 +39,48 @@ namespace ImprovedAfflictions
             {
                 if(affType != AfflictionType.SprainPain || (affType == AfflictionType.SprainPain && causeStr.ToLowerInvariant().Contains("broken rib"))) return;
 
-                __instance.m_LabelCause.text = causeStr;
+                __instance.m_LabelCause.text = GetAfflictionCauseNameBasedOnCause(causeStr, location);
                 __instance.m_LabelCause.color = __instance.m_CauseColor;
                 __instance.m_AfflictionType = affType;
                 __instance.m_AfflictionLocation = location;
                 __instance.m_Index = index;
                 Color colorBasedOnAffliction = __instance.GetColorBasedOnAffliction(__instance.m_AfflictionType, isHovering: false);
-                
-                
-                
-                __instance.m_SpriteEffect.spriteName = spriteName;
-                __instance.m_LabelEffect.text = effectName;
+                __instance.m_SpriteEffect.spriteName = GetIconNameBasedOnCause(causeStr);
+                __instance.m_LabelEffect.text = GetAfflictionNameBasedOnCause(causeStr, location);
                 __instance.UpdateFillBar();
                 __instance.m_SpriteEffect.color = colorBasedOnAffliction;
                 __instance.m_LabelEffect.color = colorBasedOnAffliction;
             }
-
-            private void GetTextureBasedOnCause()
-            {
-                //return UISprite here
-            }
-
-            private void GetAfflictionNameBasedOnCause(string cause)
-            {
-
-                if (cause.ToLowerInvariant().Contains("corrosive chemical burns")) return "Chemical Burns";
-                //keep working on this
-
-            }
-
         }
 
+        public static string GetAfflictionCauseNameBasedOnCause(string cause, AfflictionBodyArea location)
+        {
+            if (cause.ToLowerInvariant().Contains("corrosive chemical burns")) return "Corrosive Chemicals";
+            else if (cause.ToLowerInvariant().Contains("concussion")) return "Head Trauma";
+            else return cause;
+        }
+
+        public static string GetIconNameBasedOnCause(string cause)
+        {
+            //could also go with ico_injury_burn1 for this one vvv
+            if (cause.ToLowerInvariant().Contains("corrosive chemical burns")) return "ico_injury_majorBruising";
+            else if (cause.ToLowerInvariant().Contains("concussion")) return "ico_injury_diabetes";
+            else if (cause.ToLowerInvariant().Contains("bite") || cause.ToLowerInvariant().Contains("scratch") || cause.ToLowerInvariant().Contains("claw")) return "ico_injury_laceration";
+            else if (cause.ToLowerInvariant().Contains("fall")) return "ico_CarryRestrictions";
+            else return "ico_injury_pain";
+        }
+        public static string GetAfflictionNameBasedOnCause(string cause, AfflictionBodyArea location)
+        {
+
+            if (cause.ToLowerInvariant().Contains("corrosive")) return "Chemical Burns";
+            else if (cause.ToLowerInvariant().Contains("fall"))
+            {
+                if (location == AfflictionBodyArea.FootRight || location == AfflictionBodyArea.FootLeft) return "Sprained Ankle";
+                else return "Sprained Wrist";
+            }
+            else if (cause.ToLowerInvariant().Contains("head trauma")) return "Concussion";
+            else return cause;
+        }
 
         [HarmonyPatch(typeof(Panel_FirstAid), nameof(Panel_FirstAid.RefreshRightPage))]
 
@@ -136,7 +148,16 @@ namespace ImprovedAfflictions
                     __instance.m_BodyIconList[j].height = __instance.m_BodyIconHeightOriginal;
                 }
                 int num = -1;
-                __instance.m_LabelAfflictionName.text = Affliction.LocalizedNameFromAfflictionType(__instance.m_SelectedAffButton.m_AfflictionType, __instance.m_SelectedAffButton.GetAfflictionIndex());
+
+                if(__instance.m_SelectedAffButton.m_AfflictionType != AfflictionType.SprainPain || (__instance.m_SelectedAffButton.m_AfflictionType == AfflictionType.SprainPain && __instance.m_SelectedAffButton.m_LabelCause.text.ToLowerInvariant().Contains("broken rib")))
+                {
+                    __instance.m_LabelAfflictionName.text = Affliction.LocalizedNameFromAfflictionType(__instance.m_SelectedAffButton.m_AfflictionType, __instance.m_SelectedAffButton.GetAfflictionIndex());
+                }
+                else
+                {
+                    __instance.m_LabelAfflictionName.text = GetAfflictionNameBasedOnCause(__instance.m_SelectedAffButton.m_LabelCause.text, __instance.m_SelectedAffButton.m_AfflictionLocation);
+                }
+
                 if (Affliction.IsRisk(__instance.m_SelectedAffButton.m_AfflictionType))
                 {
                     __instance.m_LabelAfflictionName.color = InterfaceManager.m_FirstAidRiskColor;
@@ -528,7 +549,6 @@ namespace ImprovedAfflictions
                         {
 
                             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
-                            PainAffliction selectedPainInstance = ac.GetPainInstance(selectedAfflictionIndex);
                             SprainPain sprainPainComponent = GameManager.GetSprainPainComponent();
                             PainHelper ph = new PainHelper();
 
@@ -537,7 +557,7 @@ namespace ImprovedAfflictions
                             //if painkillers have been taken, the UI will show that accordingly
 
                             __instance.m_LabelAfflictionDescriptionNoRest.text = "";
-                            __instance.m_LabelAfflictionDescription.text = ph.GetAfflictionDescription(selectedPainInstance.m_Cause);
+                            __instance.m_LabelAfflictionDescription.text = ph.GetAfflictionDescription(__instance.m_SelectedAffButton.m_LabelEffect.text);
                             string[] remedySprites = new string[1] { "GEAR_BottlePainKillers" };
                             bool[] remedyComplete = new bool[1] { HasTakenPainkillers };
                             int[] remedyNumRequired = new int[1] { 2 };
@@ -642,5 +662,9 @@ namespace ImprovedAfflictions
         {
             //to-do
         }
+
+
+       
+
     }
 }

@@ -70,7 +70,6 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
         {
             if (!GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>())
             {
-                MelonLogger.Msg("Adding component to scene: {0}", sceneName);
                 GameObject.Find("SCRIPT_ConditionSystems").AddComponent<AfflictionComponent>();
             }
         }

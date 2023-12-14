@@ -21,6 +21,7 @@ namespace ImprovedAfflictions.Pain.Component
         public List<PainAffliction> m_PainInstances = new List<PainAffliction>();
 
         public float m_PainLevel = 0;
+        public float m_PainStartingLevel = 0;
         public float m_PainkillerLevel = 0;
 
         public bool m_PainEffectsCheck;
@@ -87,6 +88,12 @@ namespace ImprovedAfflictions.Pain.Component
             { 
                 m_PainkillerDecrementStartingAmount = 0;
 
+                if (!m_PainEffectsCheck)
+                {
+                    ph.UpdatePainEffects();
+                    m_PainEffectsCheck = true;
+                }
+
                 //reset back to normal values
                 GameManager.GetCameraStatusEffects().m_HeadacheSinSpeed = 3;
                 GameManager.GetCameraStatusEffects().m_HeadacheVignetteIntensity = 0.3f;
@@ -96,6 +103,7 @@ namespace ImprovedAfflictions.Pain.Component
 
         }
 
+        //DATA
         public void LoadData()
         {
             SaveDataManager sdm = Implementation.sdm;
@@ -107,12 +115,11 @@ namespace ImprovedAfflictions.Pain.Component
 
                 AfflictionComponentSaveDataProxy? sdp = JsonSerializer.Deserialize<AfflictionComponentSaveDataProxy>(data);
 
-            
-
                 if (sdp is not null)
                 {
                     m_PainInstances = sdp.m_PainInstances;
                     m_PainLevel = sdp.m_PainLevel;
+                    m_PainStartingLevel = sdp.m_PainStartingLevel;
                     m_PainkillerLevel = sdp.m_PainkillerLevel;
                     m_HasConcussion = sdp.m_HasConcussion;
                     m_InsomniaDrugLevel = sdp.m_InsomniaDrugLevel;
@@ -128,13 +135,15 @@ namespace ImprovedAfflictions.Pain.Component
 
             SaveDataManager sdm = Implementation.sdm;
 
-            AfflictionComponentSaveDataProxy sdp = new AfflictionComponentSaveDataProxy(m_PainInstances, m_PainLevel, m_PainkillerLevel, m_ConcussionDrugLevel, m_InsomniaDrugLevel, m_PainkillerIncrementAmount, m_PainkillerDecrementStartingAmount, m_HasConcussion);
+            AfflictionComponentSaveDataProxy sdp = new AfflictionComponentSaveDataProxy(m_PainInstances, m_PainLevel, m_PainStartingLevel, m_PainkillerLevel, m_ConcussionDrugLevel, m_InsomniaDrugLevel, m_PainkillerIncrementAmount, m_PainkillerDecrementStartingAmount, m_HasConcussion);
 
             string data = JsonSerializer.Serialize<AfflictionComponentSaveDataProxy>(sdp);
 
             sdm.Save(data, "component");
 
         }
+
+        //PAINKILLERS
         public void IncrementPainkillerLevel(float numMinutesDelta)
         {
 
@@ -151,6 +160,7 @@ namespace ImprovedAfflictions.Pain.Component
 
             m_PainkillerLevel = Mathf.Clamp(m_PainkillerLevel, 0f, 100f);
 
+            if (m_PainkillerLevel == 0) m_PainEffectsCheck = false;
         }
 
         public bool PainkillersInEffect()
@@ -195,6 +205,8 @@ namespace ImprovedAfflictions.Pain.Component
             {
                 m_PainkillerLevel += amount;
                 m_PainkillerLevel = Mathf.Clamp(m_PainkillerLevel, 0f, 100f);
+                m_PainkillerDecrementStartingAmount += m_PainkillerLevel;
+                m_PainEffectsCheck = false;
                 return;
             }
 
@@ -202,6 +214,7 @@ namespace ImprovedAfflictions.Pain.Component
             m_PainkillerDecrementStartingAmount = m_PainkillerIncrementAmount;
         }
 
+        //PAIN
         public void AddPainInstance(string cause, AfflictionBodyArea location, float duration, float painLevel, float pulseFxIntensity, float pulseFxFrequencySeconds)
         {
             PainAffliction newPain = new PainAffliction();
@@ -214,7 +227,21 @@ namespace ImprovedAfflictions.Pain.Component
             newPain.m_PulseFxFrequencySeconds = pulseFxFrequencySeconds;
             newPain.m_PulseFxMaxDuration = duration;
 
+            m_PainStartingLevel += newPain.m_PainLevel;
+
             m_PainInstances.Add(newPain);
+        }
+
+        public void UpdatePainInstance(int index, PainAffliction pi)
+        {
+            m_PainStartingLevel -= m_PainInstances[index].m_PainLevel;
+            m_PainInstances[index] = pi;
+            m_PainStartingLevel += pi.m_PainLevel;
+        }
+        public void CurePainInstance(int index)
+        {
+            m_PainInstances.RemoveAt(index);
+            m_PainStartingLevel = GetTotalPainStartingLevel();
         }
 
         public PainAffliction GetPainInstance(int index)
@@ -231,7 +258,6 @@ namespace ImprovedAfflictions.Pain.Component
         {
             return (m_PainInstances.Count == 0) ? null : m_PainInstances.Find(p => p.m_Location == location && p.m_Cause == cause);
         }
-
 
         public float GetTotalPainLevel()
         {
@@ -260,7 +286,21 @@ namespace ImprovedAfflictions.Pain.Component
             return total;
 
         }
+        public float GetTotalPainStartingLevel()
+        {
+            if (m_PainInstances.Count == 0) return 0;
 
+            float total = 0;
+
+            foreach (var pain in m_PainInstances)
+            {
+                total += pain.m_StartingPainLevel;
+            }
+
+            return total;
+        }
+
+        //OVERDOSE
         public void MaybeDoOverdoseEffects()
         {
 

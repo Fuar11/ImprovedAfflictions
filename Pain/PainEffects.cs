@@ -20,9 +20,6 @@ namespace ImprovedAfflictions.Pain
 
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-            MelonLogger.Msg("Intense pain pulse");
-
-
             GameManager.GetCameraStatusEffects().m_WaterTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_WaterTarget, amount * 1.1f);
             GameManager.GetCameraStatusEffects().m_SprainTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_SprainTarget, amount);
             if(ac.m_PainkillerLevel < 60f) GameManager.GetCameraStatusEffects().m_HeadacheTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_HeadacheTarget, amount);
@@ -32,10 +29,7 @@ namespace ImprovedAfflictions.Pain
 
         public void HeadTraumaPulse(float amount)
         {
-
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
-
-            MelonLogger.Msg("Head trauma pulse");
 
             GameManager.GetCameraStatusEffects().m_WaterTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_WaterTarget, amount * 2f);
             GameManager.GetCameraStatusEffects().m_SprainTarget = Mathf.Max(GameManager.GetCameraStatusEffects().m_SprainTarget, amount);
@@ -64,6 +58,23 @@ namespace ImprovedAfflictions.Pain
             public static void Postfix(ref float amount, CameraEffects __instance)
             {
                 __instance.m_CameraStatusEffects.m_SprainTarget = Mathf.Max(__instance.m_CameraStatusEffects.m_SprainTarget, amount);
+            }
+
+        }
+
+        [HarmonyPatch(typeof(CameraEffects), nameof(CameraEffects.HeadachePulse))]
+
+        public class HeadachePulseExtension
+        {
+
+            public static bool Prefix()
+            {
+                return false;
+            }
+
+            public static void Postfix(ref float amount, CameraEffects __instance)
+            {
+                __instance.m_CameraStatusEffects.m_HeadacheTarget = Mathf.Max(__instance.m_CameraStatusEffects.m_HeadacheTarget, amount);
             }
 
         }

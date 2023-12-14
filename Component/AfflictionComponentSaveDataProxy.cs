@@ -13,6 +13,7 @@ namespace ImprovedAfflictions.Component
     {
         public List<PainAffliction> m_PainInstances { get; set; }
         public float m_PainLevel { get; set; }
+        public float m_PainStartingLevel { get; set; }
         public float m_PainkillerLevel { get; set; }
         public float m_ConcussionDrugLevel { get; set; }
         public float m_InsomniaDrugLevel { get; set; }
@@ -20,10 +21,11 @@ namespace ImprovedAfflictions.Component
         public float m_PainkillerDecrementStartingAmount { get; set; }
         public bool m_HasConcussion { get; set; }
 
-        public AfflictionComponentSaveDataProxy(List<PainAffliction> painInstances, float painLevel, float painkillerLevel, float concussionDrugLevel, float insomniaDrugLevel, float painkillerIncrementAmount, float painkillerDecrementStartingAmount, bool hasConcussion)
+        public AfflictionComponentSaveDataProxy(List<PainAffliction> painInstances, float painLevel, float painStartingLevel, float painkillerLevel, float concussionDrugLevel, float insomniaDrugLevel, float painkillerIncrementAmount, float painkillerDecrementStartingAmount, bool hasConcussion)
         {
             m_PainInstances = painInstances;
             m_PainLevel = painLevel;
+            m_PainStartingLevel = painStartingLevel;
             m_PainkillerLevel = painkillerLevel;
             m_ConcussionDrugLevel = concussionDrugLevel;
             m_InsomniaDrugLevel = insomniaDrugLevel;

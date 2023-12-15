@@ -46,7 +46,7 @@ namespace ImprovedAfflictions.Pain
 
         public void UpdatePainInstance(int index, PainAffliction instanceToUpdate)
         {
-            float newDuration = Random.Range(instanceToUpdate.m_PulseFxMaxDuration, 240f);
+            float newDuration = Random.Range(instanceToUpdate.m_PulseFxMaxDuration, instanceToUpdate.m_MaxDuration);
             SprainPain painManager = GameManager.GetSprainPainComponent();
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
@@ -134,48 +134,125 @@ namespace ImprovedAfflictions.Pain
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
 
-            AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
+            AfflictionBodyArea[] handRight = { AfflictionBodyArea.HandRight };
+            AfflictionBodyArea[] handLeft = { AfflictionBodyArea.HandLeft };
 
-            //just hands
-            float handsPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands);
-            float handsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands, true);
-            float handsPainDifference = (handsPainLevel / handsStartingPainLevel) * 100;
-            
-            AfflictionBodyArea[] rLimbs = { AfflictionBodyArea.ArmRight, AfflictionBodyArea.HandRight };
+            //both hands
+            float handRightPainLevel = ac.GetTotalPainLevelForPainAtLocations(handRight);
+            float handRightStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(handRight, true);
+            float handRightPainDifference = (handRightPainLevel / handRightStartingPainLevel) * 100;
 
-            //right arm and hand
-            float rLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(rLimbs);
-            float rLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(rLimbs, true);
-            float rLimbsPainDifference = (rLimbsPainLevel / rLimbsStartingPainLevel) * 100;
+            float handLeftPainLevel = ac.GetTotalPainLevelForPainAtLocations(handLeft);
+            float handLeftStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(handLeft, true);
+            float handLeftPainDifference = (handLeftPainLevel / handLeftStartingPainLevel) * 100;
 
-            AfflictionBodyArea[] lLimbs = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.HandLeft };
+            AfflictionBodyArea[] armLeft = { AfflictionBodyArea.ArmLeft };
+            AfflictionBodyArea[] armRight = { AfflictionBodyArea.ArmRight };
 
-            //left arm and hand
-            float lLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(lLimbs);
-            float lLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(lLimbs, true);
-            float lLimbsPainDifference = (lLimbsPainLevel / lLimbsStartingPainLevel) * 100;
+            //both arms
+            float armLeftPainLevel = ac.GetTotalPainLevelForPainAtLocations(armLeft);
+            float armLeftStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(armLeft, true);
+            float armLeftPainDifference = (armLeftPainLevel / armLeftStartingPainLevel) * 100;
 
-            AfflictionBodyArea[] arms = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmRight };
+            float armRightPainLevel = ac.GetTotalPainLevelForPainAtLocations(armRight);
+            float armRightStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(armRight, true);
+            float armRightPainDifference = (armRightPainLevel / armRightStartingPainLevel) * 100;
 
-            //just arms
-            float armsPainLevel = ac.GetTotalPainLevelForPainAtLocations(arms);
-            float armsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(arms, true);
-            float armsPainDifference = (armsPainLevel / armsStartingPainLevel) * 100;
+            AfflictionBodyArea[] legLeft = { AfflictionBodyArea.LegLeft};
+            AfflictionBodyArea[] legRight = { AfflictionBodyArea.LegRight };
 
-            AfflictionBodyArea[] legs = { AfflictionBodyArea.LegLeft, AfflictionBodyArea.LegRight };
+            //both legs
+            float legLeftPainLevel = ac.GetTotalPainLevelForPainAtLocations(legLeft);
+            float legLeftStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(legLeft, true);
+            float legLeftPainDifference = (legLeftPainLevel / legLeftStartingPainLevel) * 100;
 
-            //just arms
-            float legsPainLevel = ac.GetTotalPainLevelForPainAtLocations(legs);
-            float legsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(legs, true);
-            float legsPainDifference = (legsPainLevel / legsStartingPainLevel) * 100;
+            float legRightPainLevel = ac.GetTotalPainLevelForPainAtLocations(legRight);
+            float legRightStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(legRight, true);
+            float legRightPainDifference = (legRightPainLevel / legRightStartingPainLevel) * 100;
 
-            
-            if (handsPainDifference > 30 && !ac.PainkillersInEffect(handsPainLevel)) return false;
-            else if (lLimbsPainDifference > 30 && !ac.PainkillersInEffect(lLimbsPainLevel)) return false;
-            else if (rLimbsPainDifference > 30 && !ac.PainkillersInEffect(rLimbsPainLevel)) return false;
-            else if (armsPainDifference > 30 && !ac.PainkillersInEffect(armsPainLevel)) return false;
+            AfflictionBodyArea[] footLeft = { AfflictionBodyArea.FootLeft };
+            AfflictionBodyArea[] footRight = { AfflictionBodyArea.FootRight };
 
-            if (legsPainDifference > 30 && !ac.PainkillersInEffect(legsPainLevel)) return false;
+            // Both feet
+            float footLeftPainLevel = ac.GetTotalPainLevelForPainAtLocations(footLeft);
+            float footLeftStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(footLeft, true);
+            float footLeftPainDifference = (footLeftPainLevel / footLeftStartingPainLevel) * 100;
+
+            float footRightPainLevel = ac.GetTotalPainLevelForPainAtLocations(footRight);
+            float footRightStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(footRight, true);
+            float footRightPainDifference = (footRightPainLevel / footRightStartingPainLevel) * 100;
+
+            if ((handLeftPainDifference > 30 && handRightPainDifference > 30) && (!ac.PainkillersInEffect(handRightPainLevel) && !ac.PainkillersInEffect(handLeftPainLevel))) return false;
+            else if (armLeftPainDifference > 30 && handLeftPainDifference > 30 && (!ac.PainkillersInEffect(armLeftPainLevel) && !ac.PainkillersInEffect(handLeftPainLevel))) return false;
+            else if (armRightPainDifference > 30 && handRightPainDifference > 30 && (!ac.PainkillersInEffect(armRightPainLevel) && !ac.PainkillersInEffect(handRightPainLevel))) return false;
+            else if (armLeftPainDifference > 30 && armRightPainDifference > 30 && !ac.PainkillersInEffect(armRightPainLevel) && !ac.PainkillersInEffect(armLeftPainLevel)) return false;
+
+            if ((footLeftPainDifference > 30 && footRightPainDifference > 30) && !ac.PainkillersInEffect(legRightPainLevel) && !ac.PainkillersInEffect(legLeftPainLevel)) return false;
+            else if (legLeftPainDifference > 30 && footLeftPainDifference > 30 && !ac.PainkillersInEffect(legLeftPainLevel) && !ac.PainkillersInEffect(footLeftPainLevel)) return false;
+            else if (legRightPainDifference > 30 && footRightPainDifference > 30 && !ac.PainkillersInEffect(legRightPainLevel) && !ac.PainkillersInEffect(footRightPainLevel)) return false;
+            else if (legLeftPainDifference > 30 && legRightPainDifference > 30 && !ac.PainkillersInEffect(legRightPainLevel) && !ac.PainkillersInEffect(legLeftPainLevel)) return false;
+
+            return true;
+        }
+
+        public static bool CanCarryTravois()
+        {
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+            AfflictionBodyArea[] armLeft = { AfflictionBodyArea.ArmLeft };
+            AfflictionBodyArea[] armRight = { AfflictionBodyArea.ArmRight };
+            AfflictionBodyArea[] chest = { AfflictionBodyArea.Chest };
+
+            float armLeftPainLevel = ac.GetTotalPainLevelForPainAtLocations(armLeft);
+            float armLeftStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(armLeft, true);
+            float armLeftPainDifference = (armLeftPainLevel / armLeftStartingPainLevel) * 100;
+
+            float armRightPainLevel = ac.GetTotalPainLevelForPainAtLocations(armRight);
+            float armRightStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(armRight, true);
+            float armRightPainDifference = (armRightPainLevel / armRightStartingPainLevel) * 100;
+
+            float chestPainLevel = ac.GetTotalPainLevelForPainAtLocations(chest);
+            float chestStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(chest, true);
+            float chestPainDifference = (chestPainLevel / chestStartingPainLevel) * 100;
+
+            if (armRightPainDifference > 30 && armLeftPainDifference > 30 || chestPainDifference > 30)
+            {
+                return false;
+            }
+            else return true;
+        }
+
+        public static bool CanClimbRocks()
+        {
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+            AfflictionBodyArea[] handRight = { AfflictionBodyArea.HandRight };
+            AfflictionBodyArea[] handLeft = { AfflictionBodyArea.HandLeft };
+
+            //both hands
+            float handRightPainLevel = ac.GetTotalPainLevelForPainAtLocations(handRight);
+            float handRightStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(handRight, true);
+            float handRightPainDifference = (handRightPainLevel / handRightStartingPainLevel) * 100;
+
+            float handLeftPainLevel = ac.GetTotalPainLevelForPainAtLocations(handLeft);
+            float handLeftStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(handLeft, true);
+            float handLeftPainDifference = (handLeftPainLevel / handLeftStartingPainLevel) * 100;
+
+            AfflictionBodyArea[] armLeft = { AfflictionBodyArea.ArmLeft };
+            AfflictionBodyArea[] armRight = { AfflictionBodyArea.ArmRight };
+
+            //both arms
+            float armLeftPainLevel = ac.GetTotalPainLevelForPainAtLocations(armLeft);
+            float armLeftStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(armLeft, true);
+            float armLeftPainDifference = (armLeftPainLevel / armLeftStartingPainLevel) * 100;
+
+            float armRightPainLevel = ac.GetTotalPainLevelForPainAtLocations(armRight);
+            float armRightStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(armRight, true);
+            float armRightPainDifference = (armRightPainLevel / armRightStartingPainLevel) * 100;
+
+            if ((handLeftPainDifference > 30 && handRightPainDifference > 30) && (!ac.PainkillersInEffect(handRightPainLevel) && !ac.PainkillersInEffect(handLeftPainLevel))) return false;
+            else if (armLeftPainDifference > 30 && handLeftPainDifference > 30 && (!ac.PainkillersInEffect(armLeftPainLevel) && !ac.PainkillersInEffect(handLeftPainLevel))) return false;
+            else if (armRightPainDifference > 30 && handRightPainDifference > 30 && (!ac.PainkillersInEffect(armRightPainLevel) && !ac.PainkillersInEffect(handRightPainLevel))) return false;
+            else if ((armLeftPainDifference > 30 && armRightPainDifference > 30) && !ac.PainkillersInEffect(armRightPainLevel) && !ac.PainkillersInEffect(armLeftPainLevel)) return false;
 
             return true;
         }

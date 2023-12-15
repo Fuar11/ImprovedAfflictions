@@ -124,14 +124,17 @@ namespace ImprovedAfflictions.Pain
                 }
 
                 float painLevel = 0;
+                float maxDuration = 0;
 
                 if (cause.ToLowerInvariant() == "console" || cause.ToLowerInvariant().Contains("bite")) //animal bites
                 {
                     painLevel = 15f;
+                    maxDuration = 96f;
 
                     if (location == AfflictionBodyArea.Head)
                     {
                         __instance.m_AfflictionDurationHours = Random.Range(96f, 124f);
+                        maxDuration = 124f;
                         __instance.m_PulseFxIntensity = 1.1f;
                         __instance.m_PulseFxFrequencySeconds = 8f;
                         painLevel = 21f;
@@ -151,7 +154,6 @@ namespace ImprovedAfflictions.Pain
                     }
                     else if (location == AfflictionBodyArea.HandRight || location == AfflictionBodyArea.HandLeft)
                     {
-
                         AfflictionBodyArea locationToCheck = location == AfflictionBodyArea.HandRight ? AfflictionBodyArea.ArmRight : AfflictionBodyArea.ArmLeft;
                         if (ac.GetPainInstanceAtLocationWithCause(locationToCheck, cause) != null) painLevel -= 5;
 
@@ -192,6 +194,7 @@ namespace ImprovedAfflictions.Pain
                     else
                     {
                         __instance.m_AfflictionDurationHours = Random.Range(48f, 72f);
+                        maxDuration = 72f;
                         __instance.m_PulseFxIntensity = 0.5f;
                         __instance.m_PulseFxFrequencySeconds = 18f;
                         painLevel = 5f;
@@ -200,6 +203,7 @@ namespace ImprovedAfflictions.Pain
                 else if (cause.ToLowerInvariant().Contains("fall")) //sprains
                 {
                     __instance.m_AfflictionDurationHours = Random.Range(96f, 124f);
+                    maxDuration = 124f;
                     __instance.m_PulseFxIntensity = 0.65f;
                     __instance.m_PulseFxFrequencySeconds = 15f;
                     painLevel = 10f;
@@ -207,6 +211,7 @@ namespace ImprovedAfflictions.Pain
                 else if (cause.ToLowerInvariant() == "concussion") //head trauma or concussion
                 {
                     __instance.m_AfflictionDurationHours = Random.Range(96f, 240f);
+                    maxDuration = 240f;
                     __instance.m_PulseFxIntensity = 2f;
                     __instance.m_PulseFxFrequencySeconds = 6f;
                     painLevel = 40f;
@@ -221,14 +226,22 @@ namespace ImprovedAfflictions.Pain
                 else if (cause.ToLowerInvariant() == "corrosive chemical burns") //chemical burns
                 {
                     painLevel = 25f;
-                    if (location == AfflictionBodyArea.FootLeft || location == AfflictionBodyArea.FootRight) __instance.m_AfflictionDurationHours = Random.Range(96f, 240f);
-                    else __instance.m_AfflictionDurationHours = Random.Range(72f, 120f);
+                    if (location == AfflictionBodyArea.FootLeft || location == AfflictionBodyArea.FootRight)
+                    {
+                        __instance.m_AfflictionDurationHours = Random.Range(96f, 240f);
+                        maxDuration = 240f;
+                    }
+                    else
+                    {
+                        __instance.m_AfflictionDurationHours = Random.Range(72f, 120f);
+                        maxDuration = 120f;
+                    }
 
                     __instance.m_PulseFxIntensity = 0.9f;
                     __instance.m_PulseFxFrequencySeconds = 10f;
                 }
 
-                ac.AddPainInstance(cause, location, __instance.m_AfflictionDurationHours, painLevel, __instance.m_PulseFxIntensity, __instance.m_PulseFxFrequencySeconds);
+                ac.AddPainInstance(cause, location, __instance.m_AfflictionDurationHours, maxDuration, painLevel , __instance.m_PulseFxIntensity, __instance.m_PulseFxFrequencySeconds);
 
                 //update pain effects when new pain is afflicted
                 ph.UpdatePainEffects();
@@ -241,29 +254,31 @@ namespace ImprovedAfflictions.Pain
 
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.TakePainKillers))]
 
-        public class PainKillerModifier
+        public class PainKillerStopFromCuring
         {
             public static bool Prefix()
             {
                 return false;
             }
-            public static void Postfix(SprainPain __instance, ref int index)
-            {
-
-                /**
-                if (__instance.GetRemainingHours(index) <= 12f) //if there's 12 hours or less left on the pain area, painkiller will instantly relieve it
-                {
-                    var value = __instance.m_ActiveInstances[index];
-                    float num = (value.m_EndTime - hoursPlayedNotPaused) * (100f - __instance.m_TreatmentPercent) * 0.01f;
-                    value.m_EndTime = hoursPlayedNotPaused + num;
-                    __instance.m_ActiveInstances[index] = value;
-                    return;
-                } **/
-
-               AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
-               ac.AdministerPainkillers(ac.m_PainkillerStandardAmount);
-            }
         }
+
+        [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.TreatAffliction))]
+
+        public class PainkillerModifier
+        {
+
+            public static void Prefix(ref FirstAidItem firstAidItem)
+            {
+                MelonLogger.Msg("Taking painkillers");
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                float amount = firstAidItem.m_GearItem.m_CurrentHP < 45 ? ac.m_PainkillerStandardAmount * ((firstAidItem.m_GearItem.m_CurrentHP + 20) / 100) : ac.m_PainkillerStandardAmount;
+
+                ac.AdministerPainkillers(amount);
+            }
+
+        }
+
 
         [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.TreatAfflictionWithFirstAid))]
 

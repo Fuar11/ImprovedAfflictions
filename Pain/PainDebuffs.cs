@@ -12,6 +12,8 @@ using UnityEngine;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using MelonLoader;
 using ImprovedAfflictions.Pain.Component;
+using Il2CppTLD.BigCarry;
+using Il2CppTLD.Interactions;
 
 namespace ImprovedAfflictions.Pain
 {
@@ -28,7 +30,6 @@ namespace ImprovedAfflictions.Pain
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
                 AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
-                AfflictionBodyArea[] arms = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmLeft };
                 AfflictionBodyArea[] upperLimbs = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight, AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmLeft };
 
                 //just hands
@@ -314,11 +315,95 @@ namespace ImprovedAfflictions.Pain
             }
         }
 
+        [HarmonyPatch(typeof(SimpleInteraction), nameof(SimpleInteraction.PerformInteraction))]
+
+        public class RockClimbRestriction
+        {
+
+            public static bool Prefix(SimpleInteraction __instance)
+            {
+                if(__instance.gameObject.name == "INTERACT_CLIMB_ENABLED" || __instance.gameObject.name == "INTERACT_CLIMBDOWN_ENABLED")
+                {
+                    if (!PainHelper.CanClimbRocks())
+                    {
+                        GameAudioManager.PlayGUIError();
+                        HUDMessage.AddMessage("Can't climb while injured.");
+                        return false;
+                    }
+                    else return true;
+                }
+                else return true;
+            }
+
+        }
+
+        /**
+
+        [HarmonyPatch(typeof(TravoisBigCarryItem), nameof(TravoisBigCarryItem.OnPrepareForCarry))]
+        public class TravoisCarryRestriction
+        {
+            public static bool Prefix()
+            {
+
+                MelonLogger.Msg("Travois carry");
+
+                bool flag = PainHelper.CanCarryTravois();
+
+                if (!flag)
+                {
+                    GameAudioManager.PlayGUIError();
+                    HUDMessage.AddMessage("Can't carry travois when injured.");
+                    GameManager.GetPlayerManagerComponent().gameObject.GetComponent<BigCarrySystem>().MaybeDropImmediate();
+                    return false;
+                }
+                else return true;
+                
+
+            }
+
+        }
+
+        [HarmonyPatch(typeof(BigCarrySystem), nameof(BigCarrySystem.PrepareCarry))]
+
+        public class testingc
+        {
+
+            public static void Prefix()
+            {
+                MelonLogger.Msg("Prepare carry");
+            }
+
+        }
+
+        [HarmonyPatch(typeof(BigCarrySystem), nameof(BigCarrySystem.BeginCarry))]
+
+        public class testingb
+        {
+
+            public static void Prefix()
+            {
+                MelonLogger.Msg("Begin carry");
+            }
+
+        }
+
+        [HarmonyPatch(typeof(BigCarrySystem), nameof(BigCarrySystem.SetupCarry))]
+
+        public class testing
+        {
+
+            public static void Prefix()
+            {
+                MelonLogger.Msg("Setup carry");
+            }
+
+        } **/
+
         //painkiller debuffs
 
-        
-       
-        
+
+
+
 
     }
 }

@@ -171,6 +171,8 @@ namespace ImprovedAfflictions.Pain.Component
         public bool PainkillersInEffect(float num, bool forIndex = false)
         {
 
+            if (num == 0) return false;
+
             //if forIndex is true then the value passed is being used as index and not value to check for. 
             if (forIndex)
             {
@@ -210,17 +212,19 @@ namespace ImprovedAfflictions.Pain.Component
                 return;
             }
 
-            m_PainkillerIncrementAmount += m_PainkillerIncrementAmount != 0 ? amount : m_PainkillerLevel + m_PainkillerStandardAmount;
+            m_PainkillerIncrementAmount += m_PainkillerIncrementAmount != 0 ? amount : m_PainkillerLevel + amount;
             m_PainkillerDecrementStartingAmount = m_PainkillerIncrementAmount;
         }
 
         //PAIN
-        public void AddPainInstance(string cause, AfflictionBodyArea location, float duration, float painLevel, float pulseFxIntensity, float pulseFxFrequencySeconds)
+        public void AddPainInstance(string cause, AfflictionBodyArea location, float duration, float maxDuration, float painLevel, float pulseFxIntensity, float pulseFxFrequencySeconds)
         {
+
             PainAffliction newPain = new PainAffliction();
             newPain.m_Cause = cause;
             newPain.m_Location = location;
             newPain.m_EndTime = GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime) + duration;
+            newPain.m_MaxDuration = maxDuration;
             newPain.m_PainLevel = painLevel;
             newPain.m_StartingPainLevel = painLevel;
             newPain.m_PulseFxIntensity = pulseFxIntensity;

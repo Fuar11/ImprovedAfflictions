@@ -27,7 +27,7 @@ namespace ImprovedAfflictions
 
         [HarmonyPatch(typeof(AfflictionButton), nameof(AfflictionButton.SetCauseAndEffect))]
 
-        public class FirstAidUIUpdate
+        public class AfflictionListUIUpdate
         {
 
             public static bool Prefix(ref string causeStr, ref AfflictionType affType, ref AfflictionBodyArea location, ref int index, ref string effectName, ref string spriteName)
@@ -59,7 +59,6 @@ namespace ImprovedAfflictions
             else if (cause.ToLowerInvariant().Contains("concussion")) return "Head Trauma";
             else return cause;
         }
-
         public static string GetIconNameBasedOnCause(string cause)
         {
             //could also go with ico_injury_burn1 for this one vvv
@@ -86,7 +85,6 @@ namespace ImprovedAfflictions
 
         public class FirstAidInstanceUIUpdate
         {
-
             public static bool Prefix(Panel_FirstAid __instance)
             {
 
@@ -663,8 +661,40 @@ namespace ImprovedAfflictions
             //to-do
         }
 
+        [HarmonyPatch(typeof(Panel_Affliction), "UpdateSelectedAffliction", new Type[] { typeof(Affliction) })]
 
-       
+        public class FirstAidPanelTextUpdate
+        {
+
+            public static void Postfix(Affliction affliction, Panel_Affliction __instance)
+            {
+
+                if (affliction.m_AfflictionType != AfflictionType.SprainPain || (affliction.m_AfflictionType == AfflictionType.SprainPain && affliction.m_Cause.ToLowerInvariant().Contains("broken rib"))) return;
+
+                __instance.m_Label.text = GetAfflictionNameBasedOnCause(affliction.m_Cause, affliction.m_Location);
+                __instance.m_LabelCause.text = GetAfflictionCauseNameBasedOnCause(affliction.m_Cause, affliction.m_Location);
+                __instance.m_LabelLocation.text = LocalizedNameFromAfflictionLocation(affliction.m_Location);
+                if (__instance.m_AfflictionButtonColorReferences)
+                {
+                    Color colorBasedOnAffliction = __instance.m_AfflictionButtonColorReferences.GetColorBasedOnAffliction(affliction.m_AfflictionType, isHovering: true);
+                    __instance.m_LabelCause.color = colorBasedOnAffliction;
+                    __instance.m_LabelLocation.color = colorBasedOnAffliction;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(AfflictionCoverflow), nameof(AfflictionCoverflow.SetAffliction))]
+
+        public class FirstAidPanelSpritesUpdate
+        {
+
+            public static void Postfix(ref Affliction affliction, AfflictionCoverflow __instance)
+            {
+                __instance.m_SpriteEffect.spriteName = affliction.m_AfflictionType == AfflictionType.SprainPain && !affliction.m_Cause.ToLowerInvariant().Contains("broken rib") ? GetIconNameBasedOnCause(affliction.m_Cause) : Affliction.SpriteNameFromAfflictionType(affliction.m_AfflictionType);
+            }
+
+
+        }
 
     }
 }

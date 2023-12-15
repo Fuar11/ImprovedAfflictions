@@ -20,6 +20,7 @@ namespace ImprovedAfflictions.Component
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public AfflictionBodyArea m_Location { get; set; }
         public float m_EndTime { get; set; }
+        public float m_MaxDuration { get; set; }
         public float m_PainLevel { get; set; }
         public float m_StartingPainLevel { get; set; }
         public float m_PulseFxIntensity { get; set; }

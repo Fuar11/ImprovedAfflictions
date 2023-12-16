@@ -19,6 +19,7 @@ using ImprovedAfflictions.FoodPoisoning;
 using ImprovedAfflictions.Pain.Component;
 using ImprovedAfflictions.Component;
 using Il2CppSystem.Security;
+using Unity.VisualScripting;
 
 namespace ImprovedAfflictions
 {
@@ -695,6 +696,111 @@ namespace ImprovedAfflictions
 
 
         }
+
+        [HarmonyPatch(typeof(Panel_FirstAid), nameof(Panel_FirstAid.Initialize))]
+
+        public class AddBloodDrugLevelLabel : MonoBehaviour
+        {
+
+            public static void Postfix(Panel_FirstAid __instance)
+            {
+                //make calories section smaller
+                GameObject statusBars = __instance.gameObject.transform.GetChild(2).gameObject;
+                GameObject caloriesSection = statusBars.transform.GetChild(12).gameObject;
+                GameObject caloriesBg = caloriesSection.transform.GetChild(3).gameObject;
+
+                Vector3 scale = caloriesBg.transform.localScale;
+                scale.x -= 0.2f;
+                caloriesBg.transform.localScale = scale;
+
+                GameObject bloodDrugLevelSection = Instantiate(caloriesSection, caloriesSection.transform.parent);
+                bloodDrugLevelSection.name = "Blood Drug Level";
+                
+                /**UISprite pillIcon = bloodDrugLevelSection.transform.GetChild(0).GetComponent<UISprite>();
+                pillIcon.mSpriteName = "ico_units_pill";
+                pillIcon.gameObject.active = true; **/
+
+                Vector3 pos = caloriesSection.transform.position;
+                pos.x -= 0.33f;
+                bloodDrugLevelSection.transform.position = pos;
+
+                /**
+                GameObject conditionBarSection = __instance.gameObject.transform.GetChild(3).gameObject;
+                GameObject conditionBarSpawner = conditionBarSection.transform.GetChild(1).gameObject;
+
+                GenericStatusBarSpawner gsbs = conditionBarSpawner.AddComponent<GenericStatusBarSpawner>();
+                gsbs.m_EmptySpriteName = "ico_units_pill";
+                gsbs.m_MainSpriteName = "ico_units_pill";
+                gsbs.m_StatusBarType = StatusBar.StatusBarType.Condition;
+                gsbs.m_Prefab = conditionBarSpawner.transform.GetChild(0).gameObject;
+
+                gsbs.enabled = true;
+                gsbs.Awake(); **/
+            }
+
+        }
+
+        [HarmonyPatch(typeof(Panel_FirstAid), nameof(Panel_FirstAid.RefreshStatusLabels))]
+
+        public class UpdateBloodDrugLevelOnUI
+        {
+
+            public static void Postfix(Panel_FirstAid __instance)
+            {
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+                GameObject statusBars = __instance.gameObject.transform.GetChild(2).gameObject;
+                GameObject bloodDrugLevel = statusBars.transform.GetChild(13).gameObject;
+
+
+                if (bloodDrugLevel)
+                {
+                    bloodDrugLevel.transform.GetChild(1).GetComponent<UILabel>().text = "BLOOD DRUG LEVEL";
+                    bloodDrugLevel.transform.GetChild(2).GetComponent<UILabel>().text = ac.GetPainkillerLevelPercent();
+                }
+            }
+
+        }
+
+
+        /**
+        [HarmonyPatch(typeof(GenericStatusBarSpawner), nameof(GenericStatusBarSpawner.AssignValuesToSpawnedObject))]
+
+        public class BloodDrugLevelBarMove
+        {
+
+            public static void Postfix(GenericStatusBarSpawner __instance)
+            {
+
+                if(__instance.m_EmptySpriteName == "ico_units_pill")
+                {
+                    Vector3 position = __instance.m_SpawnedObject.transform.position;
+                    position.y -= 0.10f;
+                    __instance.m_SpawnedObject.transform.position = position;
+                }
+
+            }
+
+        }
+
+        [HarmonyPatch(typeof(StatusBar), nameof(StatusBar.GetFillValuesCondition))]
+
+        public class OverrideConditionFillValue
+        {
+
+            public static void Postfix(ref float __result, StatusBar __instance)
+            {
+
+                MelonLogger.Msg("Hellooooooooo?");
+
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                if (__instance.m_SpriteWhenEmpty.mSpriteName == "ico_units_pill")
+                {
+                    __result = ac.m_PainkillerLevel;
+                }
+            }
+
+        } **/
 
     }
 }

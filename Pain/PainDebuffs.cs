@@ -130,6 +130,13 @@ namespace ImprovedAfflictions.Pain
                         __result /= multi1;
                     }
                 }
+                else
+                {
+                    if (ac.IsHighOnPainkillers())
+                    {
+                        __result /= ac.IsOverdosing() ? 0.8f : 0.9f; 
+                    }
+                }
             }
         }
 
@@ -399,11 +406,87 @@ namespace ImprovedAfflictions.Pain
 
         } **/
 
+
+        //reading
+
+        [HarmonyPatch(typeof(Panel_Inventory_Examine), nameof(Panel_Inventory_Examine.MaybeAbortReadingWithHUDMessage))]
+
+        public class ReadingChanges
+        {
+
+            // true result means abort reading. False means you're allowed to read
+            static bool Prefix(ref bool __result)
+            {
+                __result = ShouldPreventReading();
+                return false; // Don't execute original method afterwards
+            }
+
+            private static bool ShouldPreventReading()
+            {
+
+                PainHelper ph = new PainHelper();
+
+                if (GameManager.GetWeatherComponent().IsTooDarkForAction(ActionsToBlock.Reading))
+                {
+                    HUDMessage.AddMessage(Localization.Get("GAMEPLAY_TooDarkToRead"), false);
+                    return true;
+                }
+                if (GameManager.GetFatigueComponent().IsExhausted())
+                {
+                    HUDMessage.AddMessage(Localization.Get("GAMEPLAY_TooTiredToRead"), false);
+                    return true;
+                }
+                if (GameManager.GetFreezingComponent().IsFreezing())
+                {
+                    HUDMessage.AddMessage(Localization.Get("GAMEPLAY_TooColdToRead"), false);
+                    return true;
+                }
+                if (GameManager.GetHungerComponent().IsStarving())
+                {
+                    HUDMessage.AddMessage(Localization.Get("GAMEPLAY_TooHungryToRead"), false);
+                    return true;
+                }
+                if (GameManager.GetThirstComponent().IsDehydrated())
+                {
+                    HUDMessage.AddMessage(Localization.Get("GAMEPLAY_TooThirstyToRead"), false);
+                    return true;
+                }
+                if (GameManager.GetConditionComponent().GetNormalizedCondition() < 0.1f)
+                {
+                    HUDMessage.AddMessage(Localization.Get("GAMEPLAY_TooWoundedToRead"), false);
+                    return true;
+                }
+                if (GameManager.GetConditionComponent().HasNonRiskAffliction())
+                {
+                    if(ph.HasConcussionInEffect())
+                    {
+                        HUDMessage.AddMessage("Can't focus on reading with a concussion", false);
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
+            }
+
+        }
+
         //painkiller debuffs
+        [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.PlayerCanSprint))]
 
+        public class OverdoseSprintRestriction
+        {
 
+            public static void Postfix(ref bool __result)
+            {
 
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
+                if (ac.IsOverdosing() && !GameManager.GetEmergencyStimComponent().GetEmergencyStimActive())
+                {
+                    __result = false;
+                }
+            }
 
+        }
     }
 }

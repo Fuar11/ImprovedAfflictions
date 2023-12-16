@@ -63,7 +63,7 @@ namespace ImprovedAfflictions.Pain
                     if (__instance.m_SecondsSinceLastPulseFx > __instance.m_PulseFxFrequencySeconds)
                     {
 
-                        if (ph.HasConcussion())
+                        if (ph.GetConcussion() is not null)
                         {
                             effects.HeadTraumaPulse(__instance.m_PulseFxIntensity);
                         }
@@ -102,10 +102,13 @@ namespace ImprovedAfflictions.Pain
 
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.ApplyAffliction))]
 
-        public class PainModifier
+        public class PainOverride
         {
-            public static bool Prefix(ref AfflictionBodyArea location, ref string cause, SprainPain __instance)
+            public static bool Prefix(ref AfflictionBodyArea location, ref string cause, ref AfflictionOptions opts, SprainPain __instance)
             {
+
+                opts = AfflictionOptions.None;
+
                 PainHelper ph = new PainHelper();
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
                 int index = 0;
@@ -243,14 +246,17 @@ namespace ImprovedAfflictions.Pain
 
                 ac.AddPainInstance(cause, location, __instance.m_AfflictionDurationHours, maxDuration, painLevel , __instance.m_PulseFxIntensity, __instance.m_PulseFxFrequencySeconds);
 
+                if(cause.ToLowerInvariant() != "fall" || cause.ToLowerInvariant() != "broken rib" || cause.ToLowerInvariant() != "console")
+                {
+                    PlayerDamageEvent.SpawnDamageEvent(UIPatches.GetAfflictionNameBasedOnCause(cause, location), "GAMEPLAY_Affliction", UIPatches.GetIconNameBasedOnCause(cause), InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
+                }
+
                 //update pain effects when new pain is afflicted
                 ph.UpdatePainEffects();
                 return true;
             }
 
         }
-
-
 
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.TakePainKillers))]
 
@@ -262,36 +268,20 @@ namespace ImprovedAfflictions.Pain
             }
         }
 
-        [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.TreatAffliction))]
+     
+        [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.TreatAfflictionWithFirstAid))]
 
         public class PainkillerModifier
         {
-
-            public static void Prefix(ref FirstAidItem firstAidItem)
-            {
-                MelonLogger.Msg("Taking painkillers");
-                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
-
-                float amount = firstAidItem.m_GearItem.m_CurrentHP < 45 ? ac.m_PainkillerStandardAmount * ((firstAidItem.m_GearItem.m_CurrentHP + 20) / 100) : ac.m_PainkillerStandardAmount;
-
-                ac.AdministerPainkillers(amount);
-            }
-
-        }
-
-
-        [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.TreatAfflictionWithFirstAid))]
-
-        public class PainkillerModifier2
-        {
-
             public static void Postfix(PlayerManager __instance)
             {
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-                if (__instance.m_FirstAidItemUsed.name.ToLowerInvariant().Contains("painkiller") && __instance.m_AfflictionSelected == Affliction.InvalidAffliction)
+                if (__instance.m_FirstAidItemUsed.name.ToLowerInvariant().Contains("painkiller"))
                 {
-                    ac.AdministerPainkillers(ac.m_PainkillerStandardAmount);
+                    float amount = __instance.m_FirstAidItemUsed.m_GearItem.m_CurrentHP < 45 ? ac.m_PainkillerStandardAmount * ((__instance.m_FirstAidItemUsed.m_GearItem.m_CurrentHP + 20) / 100) : ac.m_PainkillerStandardAmount;
+
+                    ac.AdministerPainkillers(amount);
                 }
 
             }
@@ -309,10 +299,8 @@ namespace ImprovedAfflictions.Pain
             }
         }
 
-
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.CureAffliction))]
-
-        public class RemovePainData
+        public class RemovePainAffliction
         {
             public static bool Prefix()
             {
@@ -328,7 +316,9 @@ namespace ImprovedAfflictions.Pain
                 ac.CurePainInstance(index);
 
                 __instance.m_ActiveInstances.Remove(inst);
+ 
                 PlayerDamageEvent.SpawnAfflictionEvent(UIPatches.GetAfflictionNameBasedOnCause(inst.m_Cause, inst.m_Location), "GAMEPLAY_Healed", UIPatches.GetIconNameBasedOnCause(inst.m_Cause), InterfaceManager.m_FirstAidBuffColor);
+               
                 InterfaceManager.GetPanel<Panel_FirstAid>().UpdateDueToAfflictionHealed();
 
                 ph.UpdatePainEffects();
@@ -512,7 +502,7 @@ namespace ImprovedAfflictions.Pain
                         if (__instance.m_FallFromRope)
                         {
                             //maybe add concussion to player when falling from rope
-                            ph.MaybeConcuss();
+                            ph.MaybeConcuss(90f);
 
                             if (__instance.MaybeSprainAnkle())
                             {
@@ -568,7 +558,7 @@ namespace ImprovedAfflictions.Pain
             public static void Postfix()
             {
                 PainHelper ph = new PainHelper();
-                ph.MaybeConcuss();
+                ph.MaybeConcuss(80f);
             }
         }
 
@@ -578,7 +568,7 @@ namespace ImprovedAfflictions.Pain
             public static void Postfix()
             {
                 PainHelper ph = new PainHelper();
-                ph.MaybeConcuss();
+                ph.MaybeConcuss(60f);
             }
 
         }

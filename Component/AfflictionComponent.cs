@@ -50,6 +50,8 @@ namespace ImprovedAfflictions.Pain.Component
         public void Update()
         {
 
+            if (GameManager.m_IsPaused || GameManager.s_IsGameplaySuspended) return;
+
             float tODMinutes = GameManager.GetTimeOfDayComponent().GetTODMinutes(Time.deltaTime);
             float tODHours = GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
             PainHelper ph = new PainHelper();
@@ -186,7 +188,6 @@ namespace ImprovedAfflictions.Pain.Component
         {
             return m_PainkillerLevel > 0;
         }
-
         public bool IsHighOnPainkillers()
         {
             return m_PainkillerLevel > 60f;
@@ -200,19 +201,34 @@ namespace ImprovedAfflictions.Pain.Component
             return m_PainkillerLevel;
         }
 
+        public string GetPainkillerLevelPercent()
+        {
+            string result = Mathf.Clamp(Mathf.FloorToInt(m_PainkillerLevel), 0, 100).ToString();
+           
+            return result + "%";
+        }
+
         public void AdministerPainkillers(float amount, bool instant = false)
         {
-
             if (instant)
             {
                 m_PainkillerLevel += amount;
                 m_PainkillerLevel = Mathf.Clamp(m_PainkillerLevel, 0f, 100f);
+
+                if(m_PainkillerIncrementAmount != 0)
+                {
+                    m_PainkillerIncrementAmount += m_PainkillerLevel;
+                    m_PainkillerIncrementAmount = Mathf.Clamp(m_PainkillerIncrementAmount, 0f, 100f);
+                }
+
                 m_PainkillerDecrementStartingAmount += m_PainkillerLevel;
+                m_PainkillerDecrementStartingAmount = Mathf.Clamp(m_PainkillerDecrementStartingAmount, 0f, 100f);
                 m_PainEffectsCheck = false;
                 return;
             }
 
             m_PainkillerIncrementAmount += m_PainkillerIncrementAmount != 0 ? amount : m_PainkillerLevel + amount;
+            m_PainkillerIncrementAmount = Mathf.Clamp(m_PainkillerIncrementAmount, 0f, 100f);
             m_PainkillerDecrementStartingAmount = m_PainkillerIncrementAmount;
         }
 
@@ -313,23 +329,59 @@ namespace ImprovedAfflictions.Pain.Component
             if (IsHighOnPainkillers())
             {
 
-                AddOverdoseFatigueDebuff();
+                ApplyPainkillerDamage();
 
                 if(m_SecondsSinceLastODFx > m_ODPulseFxFrequencySeconds)
                 {
                     effects.OverdoseVignette(m_ODPulseFxIntensity);
                     m_SecondsSinceLastODFx = 0;
                 }
+
+                Condition cond = GameManager.GetConditionComponent();
+
+                if (IsOverdosing())
+                {
+                    float intensityFactor = 9f;
+
+                    if (m_PainkillerLevel > 95f) intensityFactor = 8f;
+
+                    float blurFrac = 1f - Mathf.Clamp01((intensityFactor - 0) / (cond.m_HPToStartBlur - cond.m_HPForMaxBlur));
+                    Vector3 velocity = GameManager.GetVpFPSPlayer().Controller.Velocity;
+                    float speedFrac = 1f - Mathf.Clamp01(velocity.magnitude / cond.m_MaxVelocityForSpeedFracCalc);
+
+                    cond.ApplyLowHealthStagger(blurFrac, speedFrac);
+
+                }
+                else
+                {
+
+                    if(GameManager.GetVpFPSCamera().m_BasePitch != 0f &&
+                    GameManager.GetVpFPSCamera().m_BaseRoll != 0f)
+                    {
+                        cond.ResetLowHealthPitchAndRoll();
+                    }
+                }
+
             }
 
         }
 
-        public void AddOverdoseFatigueDebuff()
+        public void ApplyPainkillerDamage()
         {
-            int decreaseMultiplier = IsOverdosing() ? 45 : 30;
-            float fatigueValue = decreaseMultiplier * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
 
-            GameManager.GetFatigueComponent().AddFatigue(fatigueValue);
+            float fatigueIncreasePerHour = IsOverdosing() ? 45 : 30;
+            float conditionDrainPerHour = IsOverdosing() ? 5f : 1f;
+
+            float val = conditionDrainPerHour * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
+            GameManager.GetConditionComponent().AddHealth(0f - val, DamageSource.Player);
+
+            if (!GameManager.GetPlayerManagerComponent().PlayerIsSleeping())
+            {
+                float fatigueValue = fatigueIncreasePerHour * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
+                GameManager.GetFatigueComponent().AddFatigue(fatigueValue);
+            }
+
+
 
         }
 

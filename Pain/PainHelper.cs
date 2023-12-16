@@ -6,6 +6,7 @@ using ImprovedAfflictions.Component;
 using ImprovedAfflictions.Pain.Component;
 using UnityEngine;
 using MelonLoader;
+using NetTopologySuite.Geometries;
 
 namespace ImprovedAfflictions.Pain
 {
@@ -59,9 +60,16 @@ namespace ImprovedAfflictions.Pain
 
             instanceToUpdate.m_PulseFxMaxDuration = newDuration;
 
+            string cause = instanceToUpdate.m_Cause;
+            AfflictionBodyArea location = instanceToUpdate.m_Location;
+
+            if (cause.ToLowerInvariant() != "fall" && cause.ToLowerInvariant() != "broken rib" && cause.ToLowerInvariant() != "console" && !cause.ToLowerInvariant().Contains("chemical"))
+            {
+                PlayerDamageEvent.SpawnDamageEvent(UIPatches.GetAfflictionNameBasedOnCause(cause, location), "GAMEPLAY_Affliction", UIPatches.GetIconNameBasedOnCause(cause), InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
+            }
+
             ac.UpdatePainInstance(index, instanceToUpdate);
         }
-
         public PainAffliction GetPainInstance(AfflictionBodyArea location, string cause, ref int index)
         {
             SprainPain painManager = GameManager.GetSprainPainComponent();
@@ -87,7 +95,6 @@ namespace ImprovedAfflictions.Pain
             }
             return null;
         }
-
         public bool IsOnPainkillers()
         {
 
@@ -100,7 +107,6 @@ namespace ImprovedAfflictions.Pain
 
             return false;
         }
-
         public bool HasPainAtLocation(AfflictionBodyArea location, string cause)
         {
             foreach (SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
@@ -112,7 +118,6 @@ namespace ImprovedAfflictions.Pain
             }
             return false;
         }
-
         public void UpdatePainAtLocation(AfflictionBodyArea location, string cause)
         {
 
@@ -127,7 +132,6 @@ namespace ImprovedAfflictions.Pain
             }
 
         }
-
         public bool CanClimbRope()
         {
 
@@ -194,7 +198,6 @@ namespace ImprovedAfflictions.Pain
 
             return true;
         }
-
         public static bool CanCarryTravois()
         {
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
@@ -220,7 +223,6 @@ namespace ImprovedAfflictions.Pain
             }
             else return true;
         }
-
         public static bool CanClimbRocks()
         {
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
@@ -256,51 +258,51 @@ namespace ImprovedAfflictions.Pain
 
             return true;
         }
-
-        public bool HasConcussion()
+        
+        public bool HasConcussionInEffect()
         {
-            SprainPain painManager = GameManager.GetSprainPainComponent();
-            foreach (SprainPain.Instance inst in painManager.m_ActiveInstances)
-            {
-                if (inst.m_Cause.ToLowerInvariant() == "concussion")
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public PainAffliction GetConcussion()
-        {
-            SprainPain painManager = GameManager.GetSprainPainComponent();
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-            for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
+            PainAffliction concussion = GetConcussion();
+
+            if ((concussion.m_PainLevel / concussion.m_StartingPainLevel) * 100 < 30) return false;
+
+            if (ac.PainkillersInEffect(concussion.m_PainLevel)) return false;
+            else return true;
+
+        }
+        public PainAffliction GetConcussion()
+        {
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+            foreach(var p in ac.m_PainInstances)
             {
-                SprainPain.Instance inst = painManager.m_ActiveInstances[i];
-
-                if (inst.m_Cause == "concussion")
-                {
-
-                    PainAffliction pain = ac.GetPainInstance(i);
-
-                    return pain;
-                }
+                if (p.m_Cause.ToLowerInvariant().Contains("concussion") || p.m_Cause.ToLowerInvariant().Contains("trauma")) return p;
             }
+
             return null;
 
         }
-
-        public void MaybeConcuss()
+        public void MaybeConcuss(float chance)
         {
-            if (Il2Cpp.Utils.RollChance(60f))
+            GearItem hardHat = GameManager.GetInventoryComponent().GearInInventory("GEAR_MinersHelmet", 1);
+
+            if (hardHat != null)
             {
+                if (hardHat.m_ClothingItem.IsWearing())
+                {
+                    chance /= 2;
+                }
+            }
+
+            if (Il2Cpp.Utils.RollChance(chance))
+            {
+
                 GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.Head, "concussion", AfflictionOptions.PlayFX | AfflictionOptions.DoAutoSave | AfflictionOptions.DisplayIcon);
                 GameManager.GetCameraEffects().PainPulse(1f);
             }
 
         }
-
         public PainAffliction GetBrokenRibPain(ref int index)
         {
 
@@ -324,7 +326,6 @@ namespace ImprovedAfflictions.Pain
             return null;
 
         }
-
         public void EndBrokenRibPain()
         {
 
@@ -342,7 +343,6 @@ namespace ImprovedAfflictions.Pain
             }
 
         }
-
         public string GetAfflictionDescription(string name)
         {
             switch (name.ToLowerInvariant())

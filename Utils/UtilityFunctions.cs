@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Il2Cpp;
+using Il2CppTLD.Gameplay;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +22,12 @@ namespace ImprovedAfflictions.Utils
             variable = Math.Max(minVariableValue, Math.Min(maxVariableValue, variable));
 
             return variable;
+        }
+
+        public static bool IsInterloperOrFastDecayRate()
+        {
+            if (ExperienceModeManager.GetCurrentExperienceModeType() == ExperienceModeType.Interloper || GameManager.InCustomMode() && GameManager.GetCustomMode().m_ItemDecayRate == Il2CppTLD.Gameplay.Tunable.CustomTunableLMHV.VeryHigh) return true;
+            else return false;
         }
 
     }

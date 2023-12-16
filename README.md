@@ -60,11 +60,11 @@ Painkillers are not without their downsides. Taking too much can result in an ov
 
 Overdose will be fleshed out as feedback comes in.
 
-### Food Poisoning, Dysentery, Hypothermia and Scurvy
+## Food Poisoning, Dysentery, Hypothermia and Scurvy
 
 These afflictions are not new but have had some tweaks and changes done to make them more of a challenge and a threat.
 
-## Food Poisoning & Dysentery
+### Food Poisoning & Dysentery
 
 Food poisoning & dysentery are now more common, more deadly and take longer to recover from. 
 
@@ -78,18 +78,15 @@ Food poisoning contraction chance is based on the condition of the food. If a fo
 
 The amount of condition you lose while sick from food poisoning will depends on your other stats, including number of injuries.
 
-## Hypothermia
+### Hypothermia
 
 While under the cold grip of hypothermia, you will feel colder all around and warming up will take slightly more time.
 
-## Scurvy
+### Scurvy
 
 Scurvy is now more deadly. A low vitamin c diet has resulted in any vitamin c devoid foods being far less nutritious. Foods without vitamin c or low vitamin c will give 50% less calories. In addition,
 you will get tired and colder much quicker. Along with a slight increase the carry capacity penalty. 
 
-
-
-Note: Chemical burns are in the form of Pain.
 
 ## Installation
 

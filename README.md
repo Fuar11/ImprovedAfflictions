@@ -10,7 +10,7 @@ Among many tweaked and changes afflictions, IA adds a collection of new and impr
 
 ### Animal Bites
 
-A bite from a wolf or bear during an attack can cause blood loss or a sprain. Upon receiving either of those afflictions, the wolf bite or wolf bear affliction will be contracted alongside. These bites can last upwards of 5 days.
+A bite from a wolf or bear during an attack can cause blood loss or a sprain. Upon receiving either of those afflictions, the wolf bite or bear bite affliction will be contracted alongside. These bites can last upwards of 5 days.
 
 ### Falls
 

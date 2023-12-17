@@ -6,7 +6,6 @@ using ImprovedAfflictions.Component;
 using ImprovedAfflictions.Pain.Component;
 using UnityEngine;
 using MelonLoader;
-using NetTopologySuite.Geometries;
 
 namespace ImprovedAfflictions.Pain
 {

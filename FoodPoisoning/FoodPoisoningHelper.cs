@@ -54,7 +54,11 @@ namespace ImprovedAfflictions.FoodPoisoning
             {
                 return false;
             }
-            if (!gi.m_FoodItem.m_IsRawMeat && gi.GetNormalizedCondition() > 0.45f)
+
+            float threshold = 0.45f;
+            if (UtilityFunctions.IsInterloperOrFastDecayRate() && Settings.settings.fpThreshold == Active.Enabled) threshold = 0.25f;
+
+            if (!gi.m_FoodItem.m_IsRawMeat && gi.GetNormalizedCondition() > threshold)
             {
                 return false;
             }
@@ -69,11 +73,11 @@ namespace ImprovedAfflictions.FoodPoisoning
             //if player has scurvy, they have a much higher chance of getting food poisoning, regardless of food type
             if (GameManager.GetScurvyComponent().HasAffliction()) percent += 25;
 
-                //20% offset for interloper or difficulties with a fast decay rate
-                if (UtilityFunctions.IsInterloperOrFastDecayRate()) 
-                {
-                    percent -= 20;
-                }
+            //20% offset for interloper or difficulties with a fast decay rate
+            if (UtilityFunctions.IsInterloperOrFastDecayRate() && Settings.settings.fpOffset == Active.Enabled)
+            {
+                percent -= 20;
+            }
 
             return Il2Cpp.Utils.RollChance(percent);
         }

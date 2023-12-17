@@ -21,8 +21,6 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
     public void Execute(TLDDateTime time, string eventType, string? eventId, string? eventData)
     {
         
-        PainHelper ph = new PainHelper();
-
         switch (eventType)
         {
             case "takeEffectFoodPoisoning":
@@ -48,11 +46,6 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
                     GameManager.GetFoodPoisoningComponent().FoodPoisoningStart(eventId, displayIcon: true);
                 }
                 break;
-
-            /** got inlined
-            case "takeEffectAntibiotics":
-                GameManager.GetFoodPoisoningComponent().m_AntibioticsTaken = true;
-                break; **/
         }
     }
 
@@ -60,7 +53,8 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
 	{
         Instance = this;
 		MelonLogger.Msg("Improved Afflictions is online.");
-	}
+        Settings.OnLoad();
+    }
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {

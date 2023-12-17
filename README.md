@@ -74,7 +74,7 @@ If the food makes you sick, it will take some time for the effects of the diseas
 Both illnesses will drain you, weakaning you until you die. Resting is still the best way to recover but both diseases will heal over time on their own. However taking antibiotics will reduce their
 impact on your health. Condition loss isn't stunted when sleeping, although it is dimished, especially while on antibiotics. 
 
-Food poisoning contraction chance is based on the condition of the food. If a food item is below 45% you have a chance of getting food poisoning. Any higher and you are safe. The chance is directly proportional to the condition, so 25% condition food will give a 75% chance of getting food poisoning. On difficulties such as interloper, or custom where the decay rate is very high, this is offset by 20%. So 25% will actually be 55%. This is to ensure players can still consume man-made food early on.
+Food poisoning contraction chance is based on the condition of the food. If a food item is below 45% you have a chance of getting food poisoning. Any higher and you are safe. The chance is directly proportional to the condition, so 25% condition food will give a 75% chance of getting food poisoning. On difficulties such as interloper, or custom where the decay rate is very high, there are optional settings to reduce the chance, offset by 20%. So 25% condition will actually be 55% instead of 75%. This is to ensure players can still consume man-made food early on. There is also a setting to reduce the condition treshold from 45% to 25%. 
 
 The amount of condition you lose while sick from food poisoning will depends on your other stats, including number of injuries.
 
@@ -95,5 +95,6 @@ you will get tired and colder much quicker. Along with a slight increase the car
 
 - [ModData](https://github.com/dommrogers/ModData/releases/latest)
 - [Moment](https://github.com/No3371/TLD-Moment/releases/latest)
+- [ModSettings](https://github.com/DigitalzombieTLD/ModSettings/releases/latest)
 
 * Install the latest release and drop it in your mods folder

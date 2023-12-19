@@ -165,7 +165,7 @@ namespace ImprovedAfflictions.FoodPoisoning
 
                 if (fph.RollFoodPoisoningChance(__instance.m_FoodItemEaten, __instance.m_FoodItemEatenStartingCalories) && sdm.LoadData("scheduledFoodPoisoning") != "true" && !GameManager.GetFoodPoisoningComponent().HasTakenAntibiotics())
                 {
-                    int val = Random.Range(1, 2);
+                    int val = Random.Range(Settings.settings.fpMinTime, Settings.settings.fpMaxTime);
                     sdm.Save("true", "scheduledFoodPoisoning");
                     Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, val, 0), "takeEffectFoodPoisoning", __instance.m_FoodItemEaten.DisplayName));
                 }

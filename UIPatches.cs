@@ -35,10 +35,10 @@ namespace ImprovedAfflictions
             {
                 return (affType != AfflictionType.SprainPain || (affType == AfflictionType.SprainPain && causeStr.ToLowerInvariant().Contains("broken rib"))) ? true : false;
             }
-
+            
             public static void Postfix(ref string causeStr, ref AfflictionType affType, ref AfflictionBodyArea location, ref int index, ref string effectName, ref string spriteName, AfflictionButton __instance)
             {
-                if(affType != AfflictionType.SprainPain || (affType == AfflictionType.SprainPain && causeStr.ToLowerInvariant().Contains("broken rib"))) return;
+                if (affType != AfflictionType.SprainPain || (affType == AfflictionType.SprainPain && causeStr.ToLowerInvariant().Contains("broken rib"))) return;
 
                 __instance.m_LabelCause.text = GetAfflictionCauseNameBasedOnCause(causeStr, location);
                 __instance.m_LabelCause.color = __instance.m_CauseColor;
@@ -548,10 +548,10 @@ namespace ImprovedAfflictions
                         {
 
                             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
-                            SprainPain sprainPainComponent = GameManager.GetSprainPainComponent();
                             PainHelper ph = new PainHelper();
 
                             bool HasTakenPainkillers = ac.PainkillersInEffect(selectedAfflictionIndex, true);
+                            float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
 
                             //if painkillers have been taken, the UI will show that accordingly
 
@@ -564,8 +564,8 @@ namespace ImprovedAfflictions
                             bool[] altRemedyComplete = new bool[1] { HasTakenPainkillers };
                             int[] altRemedyNumRequired = new int[1] { 1 };
                             __instance.SetItemsNeeded(remedySprites, remedyComplete, remedyNumRequired, altRemedySprites, altRemedyComplete, altRemedyNumRequired, 0f, 0f, 0f);
-                            num = (int)sprainPainComponent.GetLocation(selectedAfflictionIndex);
-                            num4 = Mathf.CeilToInt(GameManager.GetSprainPainComponent().GetRemainingHours(selectedAfflictionIndex) * 60f);
+                            num = (int)ac.m_PainInstances[selectedAfflictionIndex].m_Location;
+                            num4 = Mathf.CeilToInt((ac.m_PainInstances[selectedAfflictionIndex].m_EndTime - hoursPlayedNotPaused) * 60f);
 
                             if(num4 >= 9999999)
                             {
@@ -761,6 +761,17 @@ namespace ImprovedAfflictions
 
         }
 
+        [HarmonyPatch(typeof(Panel_Affliction), nameof(Panel_Affliction.RequiresPainKiller))]
+
+        public class RequiresPainkillerOverride
+        {
+            public static void Postfix(ref bool __result)
+            {
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                if (ac.m_PainInstances.Count > 0) __result = true;
+            }
+        }
 
         /**
         [HarmonyPatch(typeof(GenericStatusBarSpawner), nameof(GenericStatusBarSpawner.AssignValuesToSpawnedObject))]

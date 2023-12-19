@@ -44,46 +44,18 @@ namespace ImprovedAfflictions.Pain
             
         }
 
-        public void UpdatePainInstance(int index, PainAffliction instanceToUpdate)
-        {
-            float newDuration = Random.Range(instanceToUpdate.m_PulseFxMaxDuration, instanceToUpdate.m_MaxDuration);
-            SprainPain painManager = GameManager.GetSprainPainComponent();
-            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
-
-            SprainPain.Instance newInstance = new SprainPain.Instance();
-            newInstance.m_Location = painManager.m_ActiveInstances[index].m_Location;
-            newInstance.m_Cause = painManager.m_ActiveInstances[index].m_Cause;
-            newInstance.m_EndTime = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused() + newDuration;
-
-            painManager.m_ActiveInstances[index] = newInstance;
-
-            instanceToUpdate.m_PulseFxMaxDuration = newDuration;
-
-            string cause = instanceToUpdate.m_Cause;
-            AfflictionBodyArea location = instanceToUpdate.m_Location;
-
-            if (cause.ToLowerInvariant() != "fall" && cause.ToLowerInvariant() != "broken rib" && cause.ToLowerInvariant() != "console" && !cause.ToLowerInvariant().Contains("chemical"))
-            {
-                PlayerDamageEvent.SpawnDamageEvent(UIPatches.GetAfflictionNameBasedOnCause(cause, location), "GAMEPLAY_Affliction", UIPatches.GetIconNameBasedOnCause(cause), InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
-            }
-
-            ac.UpdatePainInstance(index, instanceToUpdate);
-        }
         public PainAffliction GetPainInstance(AfflictionBodyArea location, string cause, ref int index)
         {
-            SprainPain painManager = GameManager.GetSprainPainComponent();
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-            for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
+            for (int i = 0; i < ac.m_PainInstances.Count; i++)
             {
-                SprainPain.Instance inst = painManager.m_ActiveInstances[i];
+                PainAffliction pain = ac.m_PainInstances[i];
 
-                if (inst.m_Location == location && inst.m_Cause == cause)
+                if (pain.m_Location == location && pain.m_Cause == cause)
                 {
 
-                    if (inst.m_Cause == "concussion") continue;
-
-                    PainAffliction pain = ac.GetPainInstance(i);
+                    if (pain.m_Cause == "concussion") continue;
 
                     index = i;
 
@@ -105,31 +77,6 @@ namespace ImprovedAfflictions.Pain
             }
 
             return false;
-        }
-        public bool HasPainAtLocation(AfflictionBodyArea location, string cause)
-        {
-            foreach (SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
-            {
-                if (pain.m_Location == location && pain.m_Cause == cause)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        public void UpdatePainAtLocation(AfflictionBodyArea location, string cause)
-        {
-
-            float newDuration = Random.Range(96f, 240f);
-
-            foreach (SprainPain.Instance pain in GameManager.GetSprainPainComponent().m_ActiveInstances)
-            {
-                if (pain.m_Location == location && pain.m_Cause == cause)
-                {
-                    pain.m_EndTime = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused() + newDuration;
-                }
-            }
-
         }
         public bool CanClimbRope()
         {
@@ -305,18 +252,14 @@ namespace ImprovedAfflictions.Pain
         public PainAffliction GetBrokenRibPain(ref int index)
         {
 
-            SprainPain painManager = GameManager.GetSprainPainComponent();
             AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
-            for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
+            for (int i = 0; i < ac.m_PainInstances.Count; i++)
             {
-                SprainPain.Instance inst = painManager.m_ActiveInstances[i];
+                PainAffliction pain = ac.m_PainInstances[i];
 
-                if (inst.m_Cause == "broken rib")
+                if (pain.m_Cause == "broken rib")
                 {
-
-                    PainAffliction pain = ac.GetPainInstance(i);
-
                     index = i;
 
                     return pain;
@@ -328,16 +271,16 @@ namespace ImprovedAfflictions.Pain
         public void EndBrokenRibPain()
         {
 
-            SprainPain painManager = GameManager.GetSprainPainComponent();
+            AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
 
-            for (int i = 0; i < painManager.m_ActiveInstances.Count; i++)
+            for (int i = 0; i < ac.m_PainInstances.Count; i++)
             {
-                SprainPain.Instance inst = painManager.m_ActiveInstances[i];
+                PainAffliction pain = ac.m_PainInstances[i];
 
-                if (inst.m_Cause == "broken rib")
+                if (pain.m_Cause == "broken rib")
                 {
-                    painManager.CureAffliction(inst);
+                    ac.CurePainInstance(i);
                 }
             }
 

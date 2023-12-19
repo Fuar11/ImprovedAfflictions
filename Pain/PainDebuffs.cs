@@ -109,6 +109,9 @@ namespace ImprovedAfflictions.Pain
             {
 
                 AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                if (ac.m_PainInstances.Count == 0) return;
+                
                 SprainedAnkle sprains = new SprainedAnkle();
 
                 //if player has sprained ankle, they are limping which means the speed is already being modified enough

@@ -11,6 +11,7 @@ using ImprovedAfflictions.Utils;
 using ImprovedAfflictions.Component;
 using System.Text.Json;
 using MelonLoader;
+using Random = UnityEngine.Random;
 
 namespace ImprovedAfflictions.Pain.Component
 {
@@ -19,6 +20,10 @@ namespace ImprovedAfflictions.Pain.Component
     {
 
         public List<PainAffliction> m_PainInstances = new List<PainAffliction>();
+
+        public SprainPain m_PainManager = GameManager.GetSprainPainComponent();
+        private PainEffects m_PainEffects = new PainEffects();
+        private PainHelper m_PainHelper = new PainHelper();
 
         public float m_PainLevel = 0;
         public float m_PainStartingLevel = 0;
@@ -54,7 +59,6 @@ namespace ImprovedAfflictions.Pain.Component
 
             float tODMinutes = GameManager.GetTimeOfDayComponent().GetTODMinutes(Time.deltaTime);
             float tODHours = GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
-            PainHelper ph = new PainHelper();
 
             foreach(var pain in m_PainInstances)
             {
@@ -77,7 +81,7 @@ namespace ImprovedAfflictions.Pain.Component
 
                 if (!m_PainEffectsCheck)
                 {
-                    ph.UpdatePainEffects();
+                    m_PainHelper.UpdatePainEffects();
                     m_PainEffectsCheck = true;
                 }
 
@@ -92,7 +96,7 @@ namespace ImprovedAfflictions.Pain.Component
 
                 if (!m_PainEffectsCheck)
                 {
-                    ph.UpdatePainEffects();
+                    m_PainHelper.UpdatePainEffects();
                     m_PainEffectsCheck = true;
                 }
 
@@ -101,7 +105,7 @@ namespace ImprovedAfflictions.Pain.Component
                 GameManager.GetCameraStatusEffects().m_HeadacheVignetteIntensity = 0.3f;
             }
 
-
+            MaybeDoPainEffects();
 
         }
 
@@ -173,7 +177,7 @@ namespace ImprovedAfflictions.Pain.Component
         public bool PainkillersInEffect(float num, bool forIndex = false)
         {
 
-            if (num == 0) return false;
+            if (num == 0 && !forIndex) return false;
 
             //if forIndex is true then the value passed is being used as index and not value to check for. 
             if (forIndex)
@@ -254,16 +258,45 @@ namespace ImprovedAfflictions.Pain.Component
 
         public void UpdatePainInstance(int index, PainAffliction pi)
         {
+
+            float newDuration = Random.Range(pi.m_PulseFxMaxDuration, pi.m_MaxDuration);
+            pi.m_PulseFxMaxDuration = newDuration;
+
+            string cause = pi.m_Cause;
+            AfflictionBodyArea location = pi.m_Location;
+
+            if (cause.ToLowerInvariant() != "fall" && cause.ToLowerInvariant() != "broken rib" && cause.ToLowerInvariant() != "console" && !cause.ToLowerInvariant().Contains("chemical"))
+            {
+                PlayerDamageEvent.SpawnDamageEvent(UIPatches.GetAfflictionNameBasedOnCause(cause, location), "GAMEPLAY_Affliction", UIPatches.GetIconNameBasedOnCause(cause), InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
+            }
+
             m_PainStartingLevel -= m_PainInstances[index].m_PainLevel;
             m_PainInstances[index] = pi;
             m_PainStartingLevel += pi.m_PainLevel;
         }
         public void CurePainInstance(int index)
         {
+
+            PlayerDamageEvent.SpawnAfflictionEvent(UIPatches.GetAfflictionNameBasedOnCause(m_PainInstances[index].m_Cause, m_PainInstances[index].m_Location), "GAMEPLAY_Healed", UIPatches.GetIconNameBasedOnCause(m_PainInstances[index].m_Cause), InterfaceManager.m_FirstAidBuffColor);
+
             m_PainInstances.RemoveAt(index);
             m_PainStartingLevel = GetTotalPainStartingLevel();
+            m_PainHelper.UpdatePainEffects();
         }
 
+        public void MaybeCurePainInstance()
+        {
+            float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
+            for (int num = m_PainInstances.Count - 1; num >= 0; num--)
+            {
+                PainAffliction inst = m_PainInstances[num];
+                if (hoursPlayedNotPaused > inst.m_EndTime)
+                {
+                    CurePainInstance(num);
+                    InterfaceManager.GetPanel<Panel_FirstAid>().UpdateDueToAfflictionHealed();
+                }
+            }
+        }
         public PainAffliction GetPainInstance(int index)
         {
             return m_PainInstances[index];
@@ -364,6 +397,50 @@ namespace ImprovedAfflictions.Pain.Component
 
             }
 
+        }
+
+        public void MaybeDoPainEffects()
+        {
+            //overall pain level is not less than 20 percent of the most recent highest pain level
+            if ((m_PainLevel / m_PainStartingLevel) * 100 > 20)
+            {
+                m_PainManager.m_SecondsSinceLastPulseFx += Time.deltaTime;
+                if (m_PainManager.m_SecondsSinceLastPulseFx > m_PainManager.m_PulseFxFrequencySeconds)
+                {
+
+                    if (m_PainHelper.GetConcussion() is not null)
+                    {
+                        m_PainEffects.HeadTraumaPulse(m_PainManager.m_PulseFxIntensity);
+                    }
+                    else if (m_PainManager.m_PulseFxIntensity > 1f)
+                    {
+                        m_PainEffects.IntensePainPulse(m_PainManager.m_PulseFxIntensity);
+                    }
+                    else
+                    {
+                        GameManager.GetCameraEffects().SprainPulse(m_PainManager.m_PulseFxIntensity);
+                    }
+
+
+                    //random variation between pain pulses
+                    //__instance.m_PulseFxFrequencySeconds = Random.Range(3f, __instance.m_PulseFxFrequencySeconds + 5f);
+                    m_PainManager.m_SecondsSinceLastPulseFx = 0f;
+                }
+            }
+            else
+            {
+                GameManager.GetCameraEffects().SprainPulse(0f);
+                m_PainManager.m_SecondsSinceLastPulseFx = 0f;
+            }
+            if (!string.IsNullOrEmpty(m_PainManager.m_PulseFxWwiseRtpcName))
+            {
+
+                float val = m_PainHelper.IsOnPainkillers() ? 100f : 50f;
+
+                float in_value = GameManager.GetCameraStatusEffects().m_SprainAmountSin * val;
+                GameObject soundEmitterFromGameObject = GameAudioManager.GetSoundEmitterFromGameObject(GameManager.GetPlayerObject());
+                AkSoundEngine.SetRTPCValue(m_PainManager.m_PulseFxWwiseRtpcName, in_value, soundEmitterFromGameObject);
+            }
         }
 
         public void ApplyPainkillerDamage()

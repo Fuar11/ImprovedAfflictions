@@ -10,11 +10,14 @@ using UnityEngine;
 using MelonLoader;
 using Il2Cpp;
 using ImprovedAfflictions.Pain;
+using ImprovedAfflictions.Pain.Component;
 
 namespace ImprovedAfflictions.FoodPoisoning
 {
     internal class FoodPoisoningHelper
     {
+
+        AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
 
         public float GetRemainingHours()
         {
@@ -24,6 +27,8 @@ namespace ImprovedAfflictions.FoodPoisoning
 
         public float CalculateConditionToDrain()
         {
+
+
 
             float conditionPerHour = GameManager.GetPlayerManagerComponent().PlayerIsSleeping() ? 7f : 10f;
 
@@ -35,7 +40,7 @@ namespace ImprovedAfflictions.FoodPoisoning
             if (hungerAmt < 35f) conditionPerHour += 1f;
             if (thirstAmt < 25f) conditionPerHour += 1f;
 
-            if (GameManager.GetSprainPainComponent().GetAfflictionsCount() > 3) conditionPerHour += 0.5f;
+            if (ac.GetTotalPainLevel() >= 35f && !ac.PainkillersInEffect()) conditionPerHour += 0.5f;
 
             if (GameManager.GetFoodPoisoningComponent().HasTakenAntibiotics()) conditionPerHour -= 2f;
 

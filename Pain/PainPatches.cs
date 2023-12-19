@@ -22,82 +22,17 @@ namespace ImprovedAfflictions.Pain
     internal class PainPatches
     {
 
+        
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.Update))]
 
         public class UpdateOverride
         {
 
-            public static bool Prefix(SprainPain __instance)
+            public static bool Prefix()
             {
                 return false;
             }
-
-            public static void Postfix(SprainPain __instance)
-            {
-
-                if (GameManager.m_IsPaused || GameManager.s_IsGameplaySuspended || GameManager.m_ActiveScene.ToLowerInvariant().Contains("menu") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("boot") || GameManager.m_ActiveScene.ToLowerInvariant().Contains("empty"))
-                {
-                    return;
-                }
-
-                PainHelper ph = new PainHelper();
-                PainEffects effects = new PainEffects();
-                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
-
-
-                float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
-                for (int num = __instance.m_ActiveInstances.Count - 1; num >= 0; num--)
-                {
-                    SprainPain.Instance inst = __instance.m_ActiveInstances[num];
-                    if (hoursPlayedNotPaused > inst.m_EndTime)
-                    {
-                        ac.CurePainInstance(num);
-                        __instance.CureAffliction(inst);
-                    }
-                }
-
-                //overall pain level is not less than 20 percent of the most recent highest pain level
-                if ((ac.m_PainLevel / ac.m_PainStartingLevel) * 100 > 20)
-                {
-                    __instance.m_SecondsSinceLastPulseFx += Time.deltaTime;
-                    if (__instance.m_SecondsSinceLastPulseFx > __instance.m_PulseFxFrequencySeconds)
-                    {
-
-                        if (ph.GetConcussion() is not null)
-                        {
-                            effects.HeadTraumaPulse(__instance.m_PulseFxIntensity);
-                        }
-                        else if (__instance.m_PulseFxIntensity > 1f)
-                        {
-                            effects.IntensePainPulse(__instance.m_PulseFxIntensity);
-                        }
-                        else
-                        {
-                            GameManager.GetCameraEffects().SprainPulse(__instance.m_PulseFxIntensity);
-                        }
-
-
-                        //random variation between pain pulses
-                        //__instance.m_PulseFxFrequencySeconds = Random.Range(3f, __instance.m_PulseFxFrequencySeconds + 5f);
-                        __instance.m_SecondsSinceLastPulseFx = 0f;
-                    }
-                }
-                else
-                {
-                    GameManager.GetCameraEffects().SprainPulse(0f);
-                    __instance.m_SecondsSinceLastPulseFx = 0f;
-                }
-                if (!string.IsNullOrEmpty(__instance.m_PulseFxWwiseRtpcName))
-                {
-
-                    float val = ph.IsOnPainkillers() ? 100f : 50f;
-
-                    float in_value = GameManager.GetCameraStatusEffects().m_SprainAmountSin * val;
-                    GameObject soundEmitterFromGameObject = GameAudioManager.GetSoundEmitterFromGameObject(GameManager.GetPlayerObject());
-                    AkSoundEngine.SetRTPCValue(__instance.m_PulseFxWwiseRtpcName, in_value, soundEmitterFromGameObject);
-                }
-            }
-        }
+        } 
 
 
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.ApplyAffliction))]
@@ -121,7 +56,7 @@ namespace ImprovedAfflictions.Pain
 
                 if (existingInstance != null)
                 {
-                    ph.UpdatePainInstance(index, existingInstance);
+                    ac.UpdatePainInstance(index, existingInstance);
                     ph.UpdatePainEffects();
                     return false;
                 }
@@ -246,16 +181,80 @@ namespace ImprovedAfflictions.Pain
 
                 ac.AddPainInstance(cause, location, __instance.m_AfflictionDurationHours, maxDuration, painLevel , __instance.m_PulseFxIntensity, __instance.m_PulseFxFrequencySeconds);
 
-                if(cause.ToLowerInvariant() != "fall" || cause.ToLowerInvariant() != "broken rib" || cause.ToLowerInvariant() != "console")
+
+
+                if (ac.m_PainInstances.Count == 1)
+                {
+                    ac.m_PainManager.m_SecondsSinceLastPulseFx = ac.m_PainManager.m_PulseFxFrequencySeconds - ac.m_PainManager.m_PulseFxStartDelaySeconds;
+                    MelonLogger.Msg("Seconds since last pulse fx on add for the first time: {0}", ac.m_PainManager.m_SecondsSinceLastPulseFx);
+                }
+
+                if (cause.ToLowerInvariant() != "fall" || cause.ToLowerInvariant() != "broken rib" || cause.ToLowerInvariant() != "console")
                 {
                     PlayerDamageEvent.SpawnDamageEvent(UIPatches.GetAfflictionNameBasedOnCause(cause, location), "GAMEPLAY_Affliction", UIPatches.GetIconNameBasedOnCause(cause), InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
                 }
 
                 //update pain effects when new pain is afflicted
                 ph.UpdatePainEffects();
-                return true;
+                return false;
             }
 
+        }
+
+        [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.GetAfflictionsCount))]
+
+        public class GetAfflictionsCountOverride
+        {
+
+            public static bool Prefix() { return false; }
+            public static void Postfix(ref int __result)
+            {
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                __result = ac.m_PainInstances.Count;
+            }
+
+        }
+
+        [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.GetLocation))]
+
+        public class GetPainLocationOverride
+        {
+
+            public static bool Prefix() { return false; }
+            public static void Postfix(ref int index, ref AfflictionBodyArea __result)
+            {
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                __result = ac.m_PainInstances[index].m_Location;
+            }
+
+        }
+
+        [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.GetCauseLocId))]
+
+        public class GetCauseOverride
+        {
+
+            public static bool Prefix() { return false; }
+            public static void Postfix(ref int index, ref string __result)
+            {
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                __result = ac.m_PainInstances[index].m_Cause;
+            }
+        }
+
+        [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.HasSprainPain))]
+
+        public class HasPainOverride
+        {
+            public static void Postfix(ref bool __result)
+            {
+                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+
+                if (ac.GetTotalPainLevel() > 0) __result = true;
+            }
         }
 
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.TakePainKillers))]
@@ -299,6 +298,7 @@ namespace ImprovedAfflictions.Pain
             }
         }
 
+        /**
         [HarmonyPatch(typeof(SprainPain), nameof(SprainPain.CureAffliction))]
         public class RemovePainAffliction
         {
@@ -324,7 +324,7 @@ namespace ImprovedAfflictions.Pain
                 ph.UpdatePainEffects();
             }
 
-        }
+        } **/
 
         //adds pain whenever blood loss is contracted
         [HarmonyPatch(typeof(BloodLoss), nameof(BloodLoss.BloodLossStart))]

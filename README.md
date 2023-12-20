@@ -69,7 +69,7 @@ These afflictions are not new but have had some tweaks and changes done to make 
 Food poisoning & dysentery are now more common, more deadly and take longer to recover from. 
 
 Low quality food has a much higher chance of making you ill, the type of food will dictate what disease you contract. Generally, wet foods will contain dysentery causing bacteria. Including sodas.
-If the food makes you sick, it will take some time for the effects of the disease to kick in so you won't notice until much later. 
+If the food makes you sick, it will take some time for the effects of the disease to kick in so you won't notice until much later. These values can be adjusted in the Mod Settings menu and can be set to 0 to turn it off for instant food poisoning.
 
 Both illnesses will drain you, weakaning you until you die. Resting is still the best way to recover but both diseases will heal over time on their own. However taking antibiotics will reduce their
 impact on your health. Condition loss isn't stunted when sleeping, although it is dimished, especially while on antibiotics. 

@@ -58,7 +58,7 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
-        if (sceneName.ToLowerInvariant().Contains("menu") || sceneName.ToLowerInvariant().Contains("dlc") || sceneName.ToLowerInvariant().Contains("boot")) return;
+        if (sceneName.ToLowerInvariant().Contains("menu") || sceneName.ToLowerInvariant().Contains("dlc") || sceneName.ToLowerInvariant().Contains("boot") || sceneName.ToLowerInvariant() == "empty") return;
 
         if (!sceneName.Contains("_SANDBOX") && !sceneName.Contains("_DLC") && !sceneName.Contains("_WILDLIFE"))
         {

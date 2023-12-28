@@ -243,7 +243,7 @@ namespace ImprovedAfflictions.Pain.Component
             PainAffliction newPain = new PainAffliction();
             newPain.m_Cause = cause;
             newPain.m_Location = location;
-            newPain.m_EndTime = GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime) + duration;
+            newPain.m_EndTime = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused() + duration;
             newPain.m_MaxDuration = maxDuration;
             newPain.m_PainLevel = painLevel;
             newPain.m_StartingPainLevel = painLevel;

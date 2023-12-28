@@ -60,8 +60,8 @@ namespace ImprovedAfflictions.FoodPoisoning
                 return false;
             }
 
-            float threshold = 0.45f;
-            if (UtilityFunctions.IsInterloperOrFastDecayRate() && Settings.settings.fpThreshold == Active.Enabled) threshold = 0.25f;
+            float threshold = GetFoodPoisoningThresholdByFoodType(gi);
+            if (UtilityFunctions.IsInterloperOrFastDecayRate() && Settings.settings.fpThreshold == Active.Enabled && threshold < 0.25f) threshold = 0.25f;
 
             if (!gi.m_FoodItem.m_IsRawMeat && gi.GetNormalizedCondition() > threshold)
             {
@@ -86,5 +86,29 @@ namespace ImprovedAfflictions.FoodPoisoning
 
             return Il2Cpp.Utils.RollChance(percent);
         }
+
+        public float GetFoodPoisoningThresholdByFoodType(GearItem gi)
+        {
+
+            switch (gi.name)
+            {
+                case "GEAR_GranolaBar": return 0.31f;
+                case "GEAR_EnergyBar": return 0.3f;
+                case "GEAR_KetchupChips": return 0.25f;
+                case "GEAR_PeanutButter": return 0.3f;
+                case "GEAR_Crackers": return 0.3f;
+                case "GEAR_CandyBar": return 0.3f;
+                case "GEAR_Sardines": return 0.35f;
+                case "GEAR_SodaEnergy": return 0.1f;
+                case "GEAR_SodaGrape": return 0.2f;
+                case "GEAR_SodaOrange": return 0.2f;
+                case "GEAR_Soda": return 0.2f;
+                case "GEAR_BeefJerky": return 0.3f;
+                default: return 0.45f;
+            }
+
+
+        }
+
     }
 }

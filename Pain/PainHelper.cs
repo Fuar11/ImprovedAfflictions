@@ -40,8 +40,17 @@ namespace ImprovedAfflictions.Pain
 
             //if painkillers have been taken, dull the pain effects by how much drugs are in your system
            
-            painManager.m_PulseFxIntensity /= ac.IsOnPainkillers() ? ac.GetPainkillerLevel() / 10 : 1;
-            
+            painManager.m_PulseFxIntensity /= ac.GetPainkillerLevel() > 1 ? ac.GetPainkillerLevel() / 10 : 1;
+
+            if (ac.IsOnPainkillers())
+            {
+
+                //always less than 1
+                float painkillerMulti = ac.GetPainkillerLevel() / ac.m_PainkillerDecrementStartingAmount;
+
+                painManager.m_PulseFxIntensity *= ac.IsOnPainkillers() ? painkillerMulti : 1;
+            }
+
         }
 
         public PainAffliction GetPainInstance(AfflictionBodyArea location, string cause, ref int index)

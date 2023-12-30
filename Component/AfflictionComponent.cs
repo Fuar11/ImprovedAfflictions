@@ -59,10 +59,19 @@ namespace ImprovedAfflictions.Pain.Component
 
             float tODMinutes = GameManager.GetTimeOfDayComponent().GetTODMinutes(Time.deltaTime);
             float tODHours = GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
+            float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
 
-            foreach(var pain in m_PainInstances)
+            for (int num = m_PainInstances.Count - 1; num >= 0; num--)
             {
+                PainAffliction pain = m_PainInstances[num];
+
                 pain.DecreasePainLevel(tODHours);
+
+                if (hoursPlayedNotPaused > pain.m_EndTime)
+                {
+                    CurePainInstance(num);
+                    InterfaceManager.GetPanel<Panel_FirstAid>().UpdateDueToAfflictionHealed();
+                }
             }
 
             //constantly changing
@@ -284,19 +293,7 @@ namespace ImprovedAfflictions.Pain.Component
             m_PainHelper.UpdatePainEffects();
         }
 
-        public void MaybeCurePainInstance()
-        {
-            float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
-            for (int num = m_PainInstances.Count - 1; num >= 0; num--)
-            {
-                PainAffliction inst = m_PainInstances[num];
-                if (hoursPlayedNotPaused > inst.m_EndTime)
-                {
-                    CurePainInstance(num);
-                    InterfaceManager.GetPanel<Panel_FirstAid>().UpdateDueToAfflictionHealed();
-                }
-            }
-        }
+       
         public PainAffliction GetPainInstance(int index)
         {
             return m_PainInstances[index];

@@ -128,7 +128,7 @@ namespace ImprovedAfflictions.Pain
                 {
                     if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting() || GameManager.GetPlayerManagerComponent().PlayerIsWalking())
                     {
-                        float multi1 = ac.PainkillersInEffect(lowerLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference / 2, 1f, 1.5f) : UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference, 1f, 1.5f);
+                        float multi1 = ac.PainkillersInEffect(lowerLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference / 2, 1f, 1.35f) : UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference, 1f, 1.35f);
 
                         __result /= multi1;
                     }

@@ -140,8 +140,8 @@ namespace ImprovedAfflictions.Pain
                 }
                 else if (cause.ToLowerInvariant().Contains("fall")) //sprains
                 {
-                    __instance.m_AfflictionDurationHours = Random.Range(72f, 96f);
-                    maxDuration = 96f;
+                    __instance.m_AfflictionDurationHours = Random.Range(48f, 72f);
+                    maxDuration = 72f;
                     __instance.m_PulseFxIntensity = 0.65f;
                     __instance.m_PulseFxFrequencySeconds = 15f;
                     painLevel = 10f;

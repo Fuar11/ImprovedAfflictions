@@ -41,7 +41,7 @@ namespace ImprovedAfflictions.Scurvy
             public static void Prefix(ScurvyManager __instance)
             {
                 __instance.m_FatigueMultiplier = 2;
-                __instance.m_CarryCapacityDebuffKG = -7;
+                __instance.m_CarryCapacityDebuff = new Il2CppTLD.IntBackedUnit.ItemWeight(-7000000000);
             }
 
         }

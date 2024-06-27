@@ -178,6 +178,7 @@ namespace ImprovedAfflictions.Pain
                     __instance.m_PulseFxIntensity = 0.9f;
                     __instance.m_PulseFxFrequencySeconds = 10f;
                 }
+                
 
                 ac.AddPainInstance(cause, location, __instance.m_AfflictionDurationHours, maxDuration, painLevel , __instance.m_PulseFxIntensity, __instance.m_PulseFxFrequencySeconds);
 
@@ -386,7 +387,7 @@ namespace ImprovedAfflictions.Pain
                 }
                 GameManager.GetLogComponent().AddAffliction(AfflictionType.BloodLoss, cause);
 
-                GameManager.GetSprainPainComponent().ApplyAffliction(__instance.GetLocationOfLastAdded(), cause, options);
+                if(!cause.ToLowerInvariant().Contains("laceration")) GameManager.GetSprainPainComponent().ApplyAffliction(__instance.GetLocationOfLastAdded(), cause, options);
 
                 if (ExperienceModeManager.GetCurrentExperienceModeType() == ExperienceModeType.ChallengeHunted)
                 {

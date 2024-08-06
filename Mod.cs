@@ -8,13 +8,13 @@ using Il2Cpp;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine;
 using ImprovedAfflictions.Component;
-using ImprovedAfflictions.Pain.Component;
+using AfflictionComponent.Components;
 
 namespace ImprovedAfflictions;
-internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
+internal sealed class Mod : MelonMod, Moment.IScheduledEventExecutor
 {
-    internal static Implementation Instance { get; private set; }
-
+    internal static Mod Instance { get; private set; }
+    internal static PainManager painManager;
     internal static SaveDataManager sdm = new SaveDataManager();
 
     public string ScheduledEventExecutorId => "Fuar.ImprovedAfflictions";
@@ -56,19 +56,25 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
         Settings.OnLoad();
     }
 
-    public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+    public override void OnSceneWasInitialized(int buildIndex, string sceneName)
     {
-        if (sceneName.ToLowerInvariant().Contains("menu") || sceneName.ToLowerInvariant().Contains("dlc") || sceneName.ToLowerInvariant().Contains("boot") || sceneName.ToLowerInvariant() == "empty") return;
+        if (sceneName.ToLowerInvariant().Contains("boot") || sceneName.ToLowerInvariant().Contains("empty")) return;
+        if (sceneName.ToLowerInvariant().Contains("menu"))
+        {
+            UnityEngine.Object.Destroy(GameObject.Find("PainManager"));
+            painManager = null;
+            return;
+        }
 
         if (!sceneName.Contains("_SANDBOX") && !sceneName.Contains("_DLC") && !sceneName.Contains("_WILDLIFE"))
         {
-            if (!GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>())
+            if (painManager == null)
             {
-                GameObject.Find("SCRIPT_ConditionSystems").AddComponent<AfflictionComponent>();
+                GameObject PainManager = new() { name = "PainManager", layer = vp_Layer.Default };
+                UnityEngine.Object.Instantiate(PainManager, GameManager.GetVpFPSPlayer().transform);
+                UnityEngine.Object.DontDestroyOnLoad(PainManager);
+                painManager = PainManager.AddComponent<PainManager>();
             }
         }
     }
-
-   
-
 }

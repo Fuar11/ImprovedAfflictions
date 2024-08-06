@@ -100,7 +100,7 @@ namespace ImprovedAfflictions.FoodPoisoning
                 MelonLogger.Msg("Taking antibiotics");
 
                 int val = Random.Range(3, 8);
-                Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, val, 0), "takeEffectAntibiotics"));
+                Moment.Moment.ScheduleRelative(Mod.Instance, new Moment.EventRequest((0, val, 0), "takeEffectAntibiotics"));
             }
 
         } **/
@@ -161,13 +161,13 @@ namespace ImprovedAfflictions.FoodPoisoning
             {
 
                 FoodPoisoningHelper fph = new FoodPoisoningHelper();
-                SaveDataManager sdm = Implementation.sdm;
+                SaveDataManager sdm = Mod.sdm;
 
                 if (fph.RollFoodPoisoningChance(__instance.m_FoodItemEaten, __instance.m_FoodItemEatenStartingCalories) && sdm.LoadData("scheduledFoodPoisoning") != "true" && !GameManager.GetFoodPoisoningComponent().HasTakenAntibiotics())
                 {
                     int val = Random.Range(Settings.settings.fpMinTime, Settings.settings.fpMaxTime);
                     sdm.Save("true", "scheduledFoodPoisoning");
-                    Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, val, 0), "takeEffectFoodPoisoning", __instance.m_FoodItemEaten.DisplayName));
+                    Moment.Moment.ScheduleRelative(Mod.Instance, new Moment.EventRequest((0, val, 0), "takeEffectFoodPoisoning", __instance.m_FoodItemEaten.DisplayName));
                 }
             }
 

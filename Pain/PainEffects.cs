@@ -7,14 +7,16 @@ using MelonLoader;
 using HarmonyLib;
 using Il2Cpp;
 using UnityEngine;
-using ImprovedAfflictions.Pain.Component;
+using ImprovedAfflictions.Component;
 
 namespace ImprovedAfflictions.Pain
 {
     internal class PainEffects
     {
 
+        //NEED TO ADD MY OWN
 
+        /**
         public void IntensePainPulse(float amount)
         {
 
@@ -78,6 +80,6 @@ namespace ImprovedAfflictions.Pain
             }
 
         }
-
+        **/
     }
 }

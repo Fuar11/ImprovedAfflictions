@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using HarmonyLib;
 using Il2Cpp;
-using Il2CppNewtonsoft.Json;
 using ImprovedAfflictions.Utils;
 using UnityEngine;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using MelonLoader;
-using ImprovedAfflictions.Pain.Component;
 using Il2CppTLD.BigCarry;
 using Il2CppTLD.Interactions;
+using AfflictionComponent.Components;
+using ImprovedAfflictions.Component;
+using ImprovedAfflictions.Concussion;
 
 namespace ImprovedAfflictions.Pain
 {
@@ -22,25 +23,26 @@ namespace ImprovedAfflictions.Pain
 
         //pain debuffs
 
+
         [HarmonyPatch(typeof(Panel_BreakDown), nameof(Panel_BreakDown.UpdateDurationLabel))]
         public class UpdateBreakdownLabel
         {
             private static void Postfix(Panel_BreakDown __instance)
             {
-                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+                PainManager pm = Mod.painManager;
 
                 AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
                 AfflictionBodyArea[] upperLimbs = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight, AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmLeft };
 
                 //just hands
-                float handsPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands);
-                float handsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands, true);
+                float handsPainLevel = pm.GetTotalPainLevelForPainAtLocations(hands);
+                float handsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(hands, true);
                 float handsPainDifference = (handsPainLevel / handsStartingPainLevel) * 100;
 
                 //hands and arms
 
-                float upperLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(upperLimbs);
-                float upperLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(upperLimbs, true);
+                float upperLimbsPainLevel = pm.GetTotalPainLevelForPainAtLocations(upperLimbs);
+                float upperLimbsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(upperLimbs, true);
                 float upperLimbsPainDifference = (upperLimbsPainLevel / upperLimbsStartingPainLevel) * 100;
 
                 if (__instance.m_BreakDown.name.Contains("Limb") || __instance.m_BreakDown.name.Contains("Crate") || __instance.m_BreakDown.name.Contains("PalletPile") || __instance.m_BreakDown.name.Contains("Plank") || __instance.m_BreakDown.name.Contains("Shelf") || __instance.m_BreakDown.name.Contains("Cart") || __instance.m_BreakDown.name.Contains("Ladder") || __instance.m_BreakDown.name.Contains("Chair") || __instance.m_BreakDown.name.Contains("Table"))
@@ -48,7 +50,7 @@ namespace ImprovedAfflictions.Pain
 
                     if (upperLimbsPainDifference > 0)
                     {
-                        if (!ac.PainkillersInEffect(upperLimbsPainLevel))
+                        if (!pm.PainkillersInEffect(upperLimbsPainLevel))
                         {
                             __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(upperLimbsPainDifference, 1f, 1.5f);
                         }
@@ -62,7 +64,7 @@ namespace ImprovedAfflictions.Pain
                 {
                     if (handsPainDifference > 0)
                     {
-                        if (!ac.PainkillersInEffect(handsPainLevel))
+                        if (!pm.PainkillersInEffect(handsPainLevel))
                         {
                             __instance.m_DurationHours *= UtilityFunctions.MapPercentageToVariable(handsPainDifference);
                         }
@@ -83,18 +85,18 @@ namespace ImprovedAfflictions.Pain
             private static void Postfix(Panel_Crafting __instance, ref int __result)
             {
 
-                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+                PainManager pm = Mod.painManager;
 
                 AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
 
                 //just hands
-                float handsPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands);
-                float handsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands, true);
+                float handsPainLevel = pm.GetTotalPainLevelForPainAtLocations(hands);
+                float handsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(hands, true);
                 float handsPainDifference = (handsPainLevel / handsStartingPainLevel) * 100;
 
                 if (handsPainDifference > 0)
                 {
-                    float multi = ac.PainkillersInEffect(handsPainLevel) ? UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2) : UtilityFunctions.MapPercentageToVariable(handsPainDifference);
+                    float multi = pm.PainkillersInEffect(handsPainLevel) ? UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2) : UtilityFunctions.MapPercentageToVariable(handsPainDifference);
 
                     __result = (int)(__result * multi);
                 }
@@ -108,9 +110,9 @@ namespace ImprovedAfflictions.Pain
             public static void Postfix(ref float __result)
             {
 
-                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+                PainManager pm = Mod.painManager;
 
-                if (ac.m_PainInstances.Count == 0) return;
+                if (pm.am.m_Afflictions.Count == 0) return;
                 
                 SprainedAnkle sprains = new SprainedAnkle();
 
@@ -119,8 +121,8 @@ namespace ImprovedAfflictions.Pain
 
                 AfflictionBodyArea[] feetAndLegs = { AfflictionBodyArea.FootLeft, AfflictionBodyArea.FootRight, AfflictionBodyArea.LegLeft, AfflictionBodyArea.LegRight };
 
-                float lowerLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(feetAndLegs);
-                float lowerLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(feetAndLegs, true);
+                float lowerLimbsPainLevel = pm.GetTotalPainLevelForPainAtLocations(feetAndLegs);
+                float lowerLimbsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(feetAndLegs, true);
                 float lowerLimbsPainLevelDifference = (lowerLimbsPainLevel / lowerLimbsStartingPainLevel) * 100;
 
              
@@ -128,16 +130,16 @@ namespace ImprovedAfflictions.Pain
                 {
                     if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting() || GameManager.GetPlayerManagerComponent().PlayerIsWalking())
                     {
-                        float multi1 = ac.PainkillersInEffect(lowerLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference / 2, 1f, 1.35f) : UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference, 1f, 1.35f);
+                        float multi1 = pm.PainkillersInEffect(lowerLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference / 2, 1f, 1.35f) : UtilityFunctions.MapPercentageToVariable(lowerLimbsPainLevelDifference, 1f, 1.35f);
 
                         __result /= multi1;
                     }
                 }
                 else
                 {
-                    if (ac.IsHighOnPainkillers())
+                    if (pm.IsHighOnPainkillers())
                     {
-                        __result /= ac.IsOverdosing() ? 0.8f : 0.9f; 
+                        __result /= pm.IsOverdosing() ? 0.8f : 0.9f; 
                     }
                 }
             }
@@ -227,87 +229,85 @@ namespace ImprovedAfflictions.Pain
             public static float GetClimbSpeedMultiplier(PlayerClimbRope inst)
             {
 
-
-                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
-
+                PainManager pm = Mod.painManager;
 
                 AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
 
                 //just hands
-                float handsPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands);
-                float handsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(hands, true);
+                float handsPainLevel = pm.GetTotalPainLevelForPainAtLocations(hands);
+                float handsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(hands, true);
                 float handsPainDifference = (handsPainLevel / handsStartingPainLevel) * 100;
 
                 AfflictionBodyArea[] rLimbs = { AfflictionBodyArea.ArmRight, AfflictionBodyArea.HandRight };
 
                 //right arm and hand
-                float rLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(rLimbs);
-                float rLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(rLimbs, true);
+                float rLimbsPainLevel = pm.GetTotalPainLevelForPainAtLocations(rLimbs);
+                float rLimbsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(rLimbs, true);
                 float rLimbsPainDifference = (rLimbsPainLevel / rLimbsStartingPainLevel) * 100;
 
                 AfflictionBodyArea[] lLimbs = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.HandLeft };
 
                 //left arm and hand
-                float lLimbsPainLevel = ac.GetTotalPainLevelForPainAtLocations(lLimbs);
-                float lLimbsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(lLimbs, true);
+                float lLimbsPainLevel = pm.GetTotalPainLevelForPainAtLocations(lLimbs);
+                float lLimbsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(lLimbs, true);
                 float lLimbsPainDifference = (lLimbsPainLevel / lLimbsStartingPainLevel) * 100;
 
                 AfflictionBodyArea[] arms = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmRight };
 
                 //just arms
-                float armsPainLevel = ac.GetTotalPainLevelForPainAtLocations(arms);
-                float armsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(arms, true);
+                float armsPainLevel = pm.GetTotalPainLevelForPainAtLocations(arms);
+                float armsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(arms, true);
                 float armsPainDifference = (armsPainLevel / armsStartingPainLevel) * 100;
 
                 AfflictionBodyArea[] legs = { AfflictionBodyArea.LegLeft, AfflictionBodyArea.LegRight };
 
                 //just legs
-                float legsPainLevel = ac.GetTotalPainLevelForPainAtLocations(legs);
-                float legsStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(legs, true);
+                float legsPainLevel = pm.GetTotalPainLevelForPainAtLocations(legs);
+                float legsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(legs, true);
                 float legsPainDifference = (legsPainLevel / legsStartingPainLevel) * 100;
 
                 AfflictionBodyArea[] torso = { AfflictionBodyArea.Chest, AfflictionBodyArea.Stomach };
 
                 //just torso
-                float torsoPainLevel = ac.GetTotalPainLevelForPainAtLocations(torso);
-                float torsoStartingPainLevel = ac.GetTotalPainLevelForPainAtLocations(torso, true);
+                float torsoPainLevel = pm.GetTotalPainLevelForPainAtLocations(torso);
+                float torsoStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(torso, true);
                 float torsoPainDifference = (torsoPainLevel / torsoStartingPainLevel) * 100;
 
                 float multiUp = 1f;
                 float multiDown = 1f;
 
-                if (ac.GetTotalPainLevel() > 0)
+                if (pm.GetTotalPainLevel() > 0)
                 {
 
                     if (armsPainDifference > 30)
                     {
-                        multiUp /= ac.PainkillersInEffect(armsPainLevel) ? UtilityFunctions.MapPercentageToVariable(armsPainDifference / 2, 1.0f, 1.3f) : UtilityFunctions.MapPercentageToVariable(armsPainDifference, 1.0f, 1.3f);
-                        multiDown /= ac.PainkillersInEffect(armsPainLevel) ? UtilityFunctions.MapPercentageToVariable(armsPainDifference / 2, 1.0f, 1.25f) : UtilityFunctions.MapPercentageToVariable(armsPainDifference, 1.0f, 1.25f); 
+                        multiUp /= pm.PainkillersInEffect(armsPainLevel) ? UtilityFunctions.MapPercentageToVariable(armsPainDifference / 2, 1.0f, 1.3f) : UtilityFunctions.MapPercentageToVariable(armsPainDifference, 1.0f, 1.3f);
+                        multiDown /= pm.PainkillersInEffect(armsPainLevel) ? UtilityFunctions.MapPercentageToVariable(armsPainDifference / 2, 1.0f, 1.25f) : UtilityFunctions.MapPercentageToVariable(armsPainDifference, 1.0f, 1.25f); 
                     }
                     if (handsPainDifference > 30)
                     {
-                        multiUp /= ac.PainkillersInEffect(handsPainLevel) ? UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2, 1.0f, 1.3f) : UtilityFunctions.MapPercentageToVariable(handsPainDifference, 1.0f, 1.3f);
-                        multiDown /= ac.PainkillersInEffect(handsPainLevel) ? UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2, 1.0f, 1.25f) : UtilityFunctions.MapPercentageToVariable(handsPainDifference, 1.0f, 1.25f);
+                        multiUp /= pm.PainkillersInEffect(handsPainLevel) ? UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2, 1.0f, 1.3f) : UtilityFunctions.MapPercentageToVariable(handsPainDifference, 1.0f, 1.3f);
+                        multiDown /= pm.PainkillersInEffect(handsPainLevel) ? UtilityFunctions.MapPercentageToVariable(handsPainDifference / 2, 1.0f, 1.25f) : UtilityFunctions.MapPercentageToVariable(handsPainDifference, 1.0f, 1.25f);
                     }
                     if (rLimbsPainDifference > 30)
                     {
-                        multiUp /= ac.PainkillersInEffect(rLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference / 2, 1.0f, 1.2f) : UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference, 1.0f, 1.2f);
-                        multiDown /= ac.PainkillersInEffect(rLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference / 2, 1.0f, 1.15f) : UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference, 1.0f, 1.15f);
+                        multiUp /=  pm.PainkillersInEffect(rLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference / 2, 1.0f, 1.2f) : UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference, 1.0f, 1.2f);
+                        multiDown /= pm.PainkillersInEffect(rLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference / 2, 1.0f, 1.15f) : UtilityFunctions.MapPercentageToVariable(rLimbsPainDifference, 1.0f, 1.15f);
                     }
                     if (lLimbsPainDifference > 30)
                     {
-                        multiUp /= ac.PainkillersInEffect(lLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference / 2, 1.0f, 1.2f) : UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference, 1.0f, 1.2f);
-                        multiDown /= ac.PainkillersInEffect(lLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference / 2, 1.0f, 1.15f) : UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference, 1.0f, 1.15f);
+                        multiUp /= pm.PainkillersInEffect(lLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference / 2, 1.0f, 1.2f) : UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference, 1.0f, 1.2f);
+                        multiDown /= pm.PainkillersInEffect(lLimbsPainLevel) ? UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference / 2, 1.0f, 1.15f) : UtilityFunctions.MapPercentageToVariable(lLimbsPainDifference, 1.0f, 1.15f);
                     }
                     if (legsPainDifference > 30)
                     {
-                        multiUp /= ac.PainkillersInEffect(legsPainLevel) ? UtilityFunctions.MapPercentageToVariable(legsPainDifference / 2, 1.0f, 1.1f) : UtilityFunctions.MapPercentageToVariable(legsPainDifference, 1.0f, 1.1f);
-                        multiDown /= ac.PainkillersInEffect(legsPainLevel) ? UtilityFunctions.MapPercentageToVariable(legsPainDifference / 2, 1.0f, 1.05f) : UtilityFunctions.MapPercentageToVariable(legsPainDifference, 1.0f, 1.05f);
+                        multiUp /= pm.PainkillersInEffect(legsPainLevel) ? UtilityFunctions.MapPercentageToVariable(legsPainDifference / 2, 1.0f, 1.1f) : UtilityFunctions.MapPercentageToVariable(legsPainDifference, 1.0f, 1.1f);
+                        multiDown /= pm.PainkillersInEffect(legsPainLevel) ? UtilityFunctions.MapPercentageToVariable(legsPainDifference / 2, 1.0f, 1.05f) : UtilityFunctions.MapPercentageToVariable(legsPainDifference, 1.0f, 1.05f);
                     }
                     if (torsoPainDifference > 30)
                     {
-                        multiUp /= ac.PainkillersInEffect(torsoPainLevel) ? UtilityFunctions.MapPercentageToVariable(torsoPainDifference / 2, 1.0f, 1.1f) : UtilityFunctions.MapPercentageToVariable(torsoPainDifference, 1.0f, 1.1f);
-                        multiDown /= ac.PainkillersInEffect(torsoPainLevel) ? UtilityFunctions.MapPercentageToVariable(torsoPainDifference / 2, 1.0f, 1.05f) : UtilityFunctions.MapPercentageToVariable(torsoPainDifference, 1.0f, 1.05f);
+                        multiUp /= pm.PainkillersInEffect(torsoPainLevel) ? UtilityFunctions.MapPercentageToVariable(torsoPainDifference / 2, 1.0f, 1.1f) : UtilityFunctions.MapPercentageToVariable(torsoPainDifference, 1.0f, 1.1f);
+                        multiDown /= pm.PainkillersInEffect(torsoPainLevel) ? UtilityFunctions.MapPercentageToVariable(torsoPainDifference / 2, 1.0f, 1.05f) : UtilityFunctions.MapPercentageToVariable(torsoPainDifference, 1.0f, 1.05f);
                     }
                 }
                 
@@ -461,7 +461,7 @@ namespace ImprovedAfflictions.Pain
                 }
                 if (GameManager.GetConditionComponent().HasNonRiskAffliction())
                 {
-                    if(ph.HasConcussionInEffect())
+                    if(Concussion.Concussion.HasConcussion(true))
                     {
                         HUDMessage.AddMessage("Can't focus on reading with a concussion", false);
                         return true;
@@ -482,9 +482,9 @@ namespace ImprovedAfflictions.Pain
             public static void Postfix(ref bool __result)
             {
 
-                AfflictionComponent ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>();
+                PainManager pm = Mod.painManager;
 
-                if (ac.IsOverdosing() && !GameManager.GetEmergencyStimComponent().GetEmergencyStimActive())
+                if (pm.IsOverdosing() && !GameManager.GetEmergencyStimComponent().GetEmergencyStimActive())
                 {
                     __result = false;
                 }

@@ -9,6 +9,8 @@ using ImprovedAfflictions.Pain;
 using MelonLoader;
 using UnityEngine;
 using System.Collections;
+using ImprovedAfflictions.CustomAfflictions;
+using Random = UnityEngine.Random;
 
 namespace ImprovedAfflictions.ChemicalPoisoning
 {
@@ -36,16 +38,16 @@ namespace ImprovedAfflictions.ChemicalPoisoning
                 if (GameManager.m_IsPaused) return;
 
                 PainHelper ph = new PainHelper();
-                string cause = "Corrosive Chemical Burns";
+                string desc = "You've exposed your hands or feet to corrosive chemicals and have suffered severe burns. Take painkillers to numb the pain and wait for them to heal.";
 
                 if (!GameManager.GetPlayerManagerComponent().HasFootwearOn())
                 {
 
                     if (__instance.m_Toxicity >= 20 && __instance.m_InHazardZone)
                     {
-
-                        GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.FootLeft, cause, AfflictionOptions.None);
-                        GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.FootRight, cause, AfflictionOptions.None);
+                        float duration = Random.Range(96f, 240f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootLeft, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], 25f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootRight, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], 25f);
                     }
                 }
 
@@ -53,29 +55,11 @@ namespace ImprovedAfflictions.ChemicalPoisoning
                 {
                     if (__instance.m_Toxicity >= 35 && __instance.m_InHazardZone) 
                     {
-
-                        GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.HandLeft, cause, AfflictionOptions.None);
-                        GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.HandRight, cause, AfflictionOptions.None);
+                        float duration = Random.Range(72f, 120f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandLeft, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], 25f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandRight, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], 25f);
                     }
                 }
-            }
-
-            private static IEnumerator ApplyBurnsPain(string location, string cause)
-            {
-                float waitSeconds = 1f;
-                for (float t = 0f; t < waitSeconds; t += Time.deltaTime) yield return null;
-
-                if(location == "hands")
-                {
-                    GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.HandLeft, cause, AfflictionOptions.None);
-                    GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.HandRight, cause, AfflictionOptions.None);
-                }
-                else
-                {
-                    GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.FootLeft, cause, AfflictionOptions.None);
-                    GameManager.GetSprainPainComponent().ApplyAffliction(AfflictionBodyArea.FootRight, cause, AfflictionOptions.None);
-                }
-               
             }
         }
 

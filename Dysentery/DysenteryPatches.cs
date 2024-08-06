@@ -42,7 +42,7 @@ namespace ImprovedAfflictions.Dysentery
 
             public static void Postfix(Il2Cpp.Dysentery __instance)
             {
-                SaveDataManager sdm = Implementation.sdm;
+                SaveDataManager sdm = Mod.sdm;
                 sdm.Save("", "dysenteryCause");
             }
 

@@ -19,7 +19,7 @@ namespace ImprovedAfflictions.FoodPoisoning
 
         PainManager pm = Mod.painManager;
 
-        public float GetRemainingHours()
+        public static float GetRemainingHours()
         {
             float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
             return GameManager.GetFoodPoisoningComponent().m_DurationHours - hoursPlayedNotPaused;
@@ -27,9 +27,6 @@ namespace ImprovedAfflictions.FoodPoisoning
 
         public float CalculateConditionToDrain()
         {
-
-
-
             float conditionPerHour = GameManager.GetPlayerManagerComponent().PlayerIsSleeping() ? 7f : 10f;
 
             float fatigueAmt = GameManager.GetFatigueComponent().m_CurrentFatigue;

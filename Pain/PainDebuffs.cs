@@ -19,10 +19,7 @@ using ImprovedAfflictions.Concussion;
 namespace ImprovedAfflictions.Pain
 {
     internal class PainDebuffs
-    {
-
-        //pain debuffs
-
+    { 
 
         [HarmonyPatch(typeof(Panel_BreakDown), nameof(Panel_BreakDown.UpdateDurationLabel))]
         public class UpdateBreakdownLabel

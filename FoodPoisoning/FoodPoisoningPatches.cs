@@ -11,6 +11,7 @@ using System.Text.Json;
 using Il2CppSystem.Data;
 using ImprovedAfflictions.Utils;
 using UnityEngine;
+using AfflictionComponent;
 using MelonLoader;
 using Il2CppEpic.OnlineServices;
 
@@ -198,7 +199,18 @@ namespace ImprovedAfflictions.FoodPoisoning
 
 
         }
-        
-        
+
+        [HarmonyPatch(typeof(AfflictionComponent.Utilities.VanillaOverrides), nameof(AfflictionComponent.Utilities.VanillaOverrides.FoodPoisoningMethod))]
+
+        private static class FoodPoisoningOverride
+        {
+            public static void Postfix(ref Panel_FirstAid __instance, ref int selectedAfflictionIndex, ref int num, ref int num4)
+            {
+
+                Panel_FirstAid panel = InterfaceManager.GetPanel<Panel_FirstAid>();
+                panel.m_ObjectRestRemaining.SetActive(false);
+                num4 = Mathf.CeilToInt(FoodPoisoningHelper.GetRemainingHours() * 60f);
+            }
+        }
     }
 }

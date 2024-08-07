@@ -31,6 +31,13 @@
 		</Reference>
 	</ItemGroup>
 
+	<ItemGroup>
+		<Reference Include="ComplexLogger">
+			<HintPath>$(ModsPath)\ComplexLogger.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+
 	<!-- This is a build event. It will copy your dll to the currently defined TheLongDarkPath's Mods folder -->
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<!-- This copies the mods files to the games mod dir -->

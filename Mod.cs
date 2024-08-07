@@ -9,11 +9,15 @@ using UnityEngine.Rendering.PostProcessing;
 using UnityEngine;
 using ImprovedAfflictions.Component;
 using AfflictionComponent.Components;
+using ImprovedAfflictions.CustomAfflictions;
+using Random = UnityEngine.Random;
+using ComplexLogger;
 
 namespace ImprovedAfflictions;
 internal sealed class Mod : MelonMod, Moment.IScheduledEventExecutor
 {
     internal static Mod Instance { get; private set; }
+    internal static ComplexLogger<Mod> Logger = new();
     internal static PainManager painManager;
     internal static SaveDataManager sdm = new SaveDataManager();
 
@@ -75,6 +79,17 @@ internal sealed class Mod : MelonMod, Moment.IScheduledEventExecutor
                 UnityEngine.Object.DontDestroyOnLoad(PainManager);
                 painManager = PainManager.AddComponent<PainManager>();
             }
+        }
+    }
+
+    public override void OnUpdate()
+    {
+        if (InputManager.GetKeyDown(InputManager.m_CurrentContext, KeyCode.Keypad7))
+        {
+            float duration = Random.Range(96f, 240f);
+            string desc = "You've sufferred head trauma and are suffering from a concussion. Take painkillers to numb the debilitating effects while your head rests to heal.";
+            //apply concussion here
+            new CustomPainAffliction("Concussion", "Head Trauma", desc, "", AfflictionBodyArea.Head, "ico_injury_diabetes", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 40f);
         }
     }
 }

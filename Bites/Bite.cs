@@ -81,12 +81,12 @@ namespace ImprovedAfflictions.Bites
                     case "wolf":
                         desc = "You are suffering from a wolf bite. Take painkillers to numb the pain and wait for the wound to heal.";
 
-                        new CustomPainAffliction("Wolf Bite", "Wolf Attack", desc, "", location, "ico_injury_laceration", false, false, GetDurationByLocation(location), false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], GetPainLevelByLocation(location));
+                        new CustomPainAffliction("Wolf Bite", "Wolf Attack", desc, "", location, "ico_injury_laceration", false, false, GetDurationByLocation(location), false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], GetPainLevelByLocation(location));
                         break;
                     case "bear":
                         desc = "You are suffering from a bear bite. Take painkillers to numb the pain and wait for the wound to heal.";
 
-                        new CustomPainAffliction("Bear Bite", "Bear Attack", desc, "", location, "ico_injury_laceration", false, false, GetDurationByLocation(location), false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], GetPainLevelByLocation(location));
+                        new CustomPainAffliction("Bear Bite", "Bear Attack", desc, "", location, "ico_injury_laceration", false, false, GetDurationByLocation(location), false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], GetPainLevelByLocation(location));
                         break;
                 }
 

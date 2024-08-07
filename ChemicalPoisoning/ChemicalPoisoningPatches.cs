@@ -46,8 +46,8 @@ namespace ImprovedAfflictions.ChemicalPoisoning
                     if (__instance.m_Toxicity >= 20 && __instance.m_InHazardZone)
                     {
                         float duration = Random.Range(96f, 240f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootLeft, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], 25f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootRight, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], 25f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootLeft, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootRight, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
                     }
                 }
 
@@ -56,8 +56,8 @@ namespace ImprovedAfflictions.ChemicalPoisoning
                     if (__instance.m_Toxicity >= 35 && __instance.m_InHazardZone) 
                     {
                         float duration = Random.Range(72f, 120f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandLeft, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], 25f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandRight, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainkillers", 2, 1)], [], 25f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandLeft, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandRight, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
                     }
                 }
             }

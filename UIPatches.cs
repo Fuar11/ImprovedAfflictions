@@ -31,6 +31,7 @@ namespace ImprovedAfflictions
         public class AddBloodDrugLevelLabel : MonoBehaviour
         {
 
+
             public static void Postfix(Panel_FirstAid __instance)
             {
                 //make calories section smaller
@@ -76,7 +77,7 @@ namespace ImprovedAfflictions
 
             public static void Postfix(Panel_FirstAid __instance)
             {
-                //PainManager ac = GameObject.Find("SCRIPT_ConditionSystems").GetComponent<PainManager>();
+                PainManager pm = Mod.painManager;
                 GameObject statusBars = __instance.gameObject.transform.GetChild(2).gameObject;
                 GameObject bloodDrugLevel = statusBars.transform.GetChild(13).gameObject;
 
@@ -84,10 +85,9 @@ namespace ImprovedAfflictions
                 if (bloodDrugLevel)
                 {
                     bloodDrugLevel.transform.GetChild(1).GetComponent<UILabel>().text = "BLOOD DRUG LEVEL";
-                   // bloodDrugLevel.transform.GetChild(2).GetComponent<UILabel>().text = ac.GetPainkillerLevelPercent();
+                    bloodDrugLevel.transform.GetChild(2).GetComponent<UILabel>().text = pm.GetPainkillerLevelPercent();
                 }
             }
-
         }
     }
 }

@@ -26,16 +26,20 @@ namespace ImprovedAfflictions.CustomAfflictions
             float tODHours = GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
             m_PainLevel -= GetPainLevelDecreasePerHour() * tODHours;
 
-            if (Mod.painManager.m_PainkillerLevel <= m_PainLevel)
+            if (Mod.painManager.m_PainkillerLevel < m_PainLevel && Mod.painManager.m_PainkillerIncrementAmount == 0)
             {
-                if (!NeedsRemedy()) ResetRemedyItems(m_RemedyItems);
+                if (!NeedsRemedy()) ResetRemedyItems(ref m_RemedyItems);
+            }
+            else if(Mod.painManager.m_PainkillerLevel >= m_PainLevel && NeedsRemedy())
+            {
+                UpdatePainkillersOnTheFly();
             }
         }
 
-        public override void CureSymptoms()
+        protected override void CureSymptoms()
         {
         }
-        public override void OnCure()
+        protected override void OnCure()
         {
         }
 
@@ -44,6 +48,18 @@ namespace ImprovedAfflictions.CustomAfflictions
             return m_StartingPainLevel / m_EndTime;
         }
 
+        protected override bool ApplyRemedyCondition()
+        {
+            if (Mod.painManager.m_PainkillerLevel > m_PainLevel) return true;
+            else return false;
+            
+        }
        
+        //for now, as long as the arrays stay public
+        private void UpdatePainkillersOnTheFly()
+        {
+            m_RemedyItems = m_RemedyItems.Select(item => item.Item1 == "GEAR_BottlePainKillers" ? new Tuple<string, int, int>(item.Item1, item.Item2, item.Item3 - 1) : item).ToArray();
+        }
+
     }
 }

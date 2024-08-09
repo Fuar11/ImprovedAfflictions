@@ -46,8 +46,8 @@ namespace ImprovedAfflictions.ChemicalPoisoning
                     if (__instance.m_Toxicity >= 20 && __instance.m_InHazardZone)
                     {
                         float duration = Random.Range(96f, 240f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootLeft, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootRight, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootLeft, "ico_injury_majorBruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootRight, "ico_injury_majorBruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
                     }
                 }
 

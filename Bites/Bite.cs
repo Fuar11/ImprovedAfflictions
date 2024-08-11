@@ -80,6 +80,8 @@ namespace ImprovedAfflictions.Bites
 
                 string desc = "";
                 string key = "";
+                float frequency = 0f;
+                float intensity = 0f;
                 switch (cause.ToLowerInvariant())
                 {
                     case "wolf":
@@ -96,7 +98,7 @@ namespace ImprovedAfflictions.Bites
 
                 if (AfflictionHelper.ResetIfHasAffliction(name, location, true)) return;
 
-                new CustomPainAffliction(name, key + " Attack", desc, "", location, "ico_injury_laceration", false, false, GetDurationByLocation(location), false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], GetPainLevelByLocation(location));
+                new CustomPainAffliction(name, key + " Attack", desc, "", location, "ico_injury_laceration", false, false, GetDurationByLocation(location), false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], GetPainLevelByLocation(location), GetFxDurationByLocation(location), GetFxIntensityDurationByLocation(location));
 
                 if (ExperienceModeManager.GetCurrentExperienceModeType() == ExperienceModeType.ChallengeHunted)
                 {
@@ -145,6 +147,26 @@ namespace ImprovedAfflictions.Bites
             else if (location == AfflictionBodyArea.FootRight || location == AfflictionBodyArea.FootLeft) return Random.Range(48f, 96f);
             else return Random.Range(48f, 72f);
 
+        }
+
+        public static float GetFxDurationByLocation(AfflictionBodyArea location)
+        {
+            if (location == AfflictionBodyArea.Head) return 8f;
+            else if (location == AfflictionBodyArea.Neck || location == AfflictionBodyArea.Chest) return 9.7f;
+            else if (location == AfflictionBodyArea.HandRight || location == AfflictionBodyArea.HandLeft || location == AfflictionBodyArea.ArmLeft || location == AfflictionBodyArea.ArmRight) return 15f;
+            else if (location == AfflictionBodyArea.LegRight || location == AfflictionBodyArea.LegLeft) return 16f;
+            else if (location == AfflictionBodyArea.FootRight || location == AfflictionBodyArea.FootLeft) return 12f;
+            else return 18f;
+        }
+
+        public static float GetFxIntensityDurationByLocation(AfflictionBodyArea location)
+        {
+            if (location == AfflictionBodyArea.Head) return 1.1f;
+            else if (location == AfflictionBodyArea.Neck || location == AfflictionBodyArea.Chest) return 1f;
+            else if (location == AfflictionBodyArea.HandRight || location == AfflictionBodyArea.HandLeft || location == AfflictionBodyArea.ArmLeft || location == AfflictionBodyArea.ArmRight) return 0.7f;
+            else if (location == AfflictionBodyArea.LegRight || location == AfflictionBodyArea.LegLeft) return 0.6f;
+            else if (location == AfflictionBodyArea.FootRight || location == AfflictionBodyArea.FootLeft) return 0.85f;
+            else return 0.5f;
         }
 
     }

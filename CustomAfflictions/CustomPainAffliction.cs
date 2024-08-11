@@ -15,10 +15,13 @@ namespace ImprovedAfflictions.CustomAfflictions
     internal class CustomPainAffliction
         : CustomAffliction
     {
-        public CustomPainAffliction(string afflictionName, string cause, string desc, string noHealDesc, AfflictionBodyArea location, string spriteName, bool risk, bool buff, float duration, bool noTimer, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems, float painLevel) : base(afflictionName, cause, desc, noHealDesc, location, spriteName, risk, buff, duration, noTimer, instantHeal, remedyItems, altRemedyItems)
+        public CustomPainAffliction(string afflictionName, string cause, string desc, string noHealDesc, AfflictionBodyArea location, string spriteName, bool risk, bool buff, float duration, bool noTimer, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems, float painLevel, float frequency, float fxLevel) : base(afflictionName, cause, desc, noHealDesc, location, spriteName, risk, buff, duration, noTimer, instantHeal, remedyItems, altRemedyItems)
         {
             m_PainLevel = painLevel;
             m_StartingPainLevel = painLevel;
+
+            m_PulseFxFrequencySeconds = frequency;
+            m_PulseFxIntensity = fxLevel;
 
             Mod.painManager.m_PainStartingLevel += painLevel;
         }

@@ -34,7 +34,6 @@ namespace ImprovedAfflictions.Utils
                     return "You've exposed your hands or feet to corrosive chemicals and have suffered severe burns. Take painkillers to numb the pain and wait for them to heal.";
                 default: return Localization.Get("GAMEPLAY_SprainPainDesc");
             }
-
         }
 
         public static void ResetPainAffliction(CustomPainAffliction aff)

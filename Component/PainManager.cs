@@ -294,9 +294,13 @@ namespace ImprovedAfflictions.Component
             //overall pain level is not less than 20 percent of the most recent highest pain level
             if ((m_TotalPainLevel / m_PainStartingLevel) * 100 > 20)
             {
+                Mod.Logger.Log("Pain is sufficient to play effects", ComplexLogger.FlaggedLoggingLevel.Debug);
+
                 m_SecondsSinceLastPulseFx += Time.deltaTime;
                 if (m_SecondsSinceLastPulseFx > m_PulseFxFrequencySeconds)
                 {
+
+                    Mod.Logger.Log("Playing effects...", ComplexLogger.FlaggedLoggingLevel.Debug);
 
                     if (Concussion.Concussion.HasConcussion(true))
                     {

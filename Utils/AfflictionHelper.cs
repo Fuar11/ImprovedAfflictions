@@ -42,8 +42,6 @@ namespace ImprovedAfflictions.Utils
             Mod.painManager.m_PainStartingLevel -= aff.m_PainLevel;
             aff.ResetAffliction(false);
             aff.m_PainLevel = aff.m_StartingPainLevel;
-
-            Mod.Logger.Log("Reset pain affliction", ComplexLogger.FlaggedLoggingLevel.Debug);
         }
 
         public static bool ResetIfHasAffliction(string name, AfflictionBodyArea location, bool CheckForLocation)
@@ -91,10 +89,7 @@ namespace ImprovedAfflictions.Utils
 
             foreach (CustomPainAffliction aff in pm.am.m_Afflictions.OfType<CustomPainAffliction>())
             {
-                if (aff.m_AfflictionKey.ToLowerInvariant().Contains(name))
-                {
-                    return aff.m_Location == location ? true : false;
-                }
+                if (aff.m_AfflictionKey == name && aff.m_Location == location) return true;
             }
 
             return false;

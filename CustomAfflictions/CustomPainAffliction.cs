@@ -1,5 +1,7 @@
 ﻿using AfflictionComponent.Components;
 using Il2Cpp;
+using ImprovedAfflictions.Component;
+using ImprovedAfflictions.Pain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +19,13 @@ namespace ImprovedAfflictions.CustomAfflictions
         {
             m_PainLevel = painLevel;
             m_StartingPainLevel = painLevel;
+
+            Mod.painManager.m_PainStartingLevel += painLevel;
         }
         public float m_PainLevel { get; set; }
         public float m_StartingPainLevel { get; set; }
+        public float m_PulseFxIntensity { get; set; }
+        public float m_PulseFxFrequencySeconds { get; set; }
 
         public override void OnUpdate()
         {
@@ -41,6 +47,8 @@ namespace ImprovedAfflictions.CustomAfflictions
         }
         protected override void OnCure()
         {
+            Mod.painManager.m_PainStartingLevel = Mod.painManager.GetTotalPainStartingLevel();
+            PainEffects.UpdatePainEffects();
         }
 
         public float GetPainLevelDecreasePerHour()
@@ -60,6 +68,5 @@ namespace ImprovedAfflictions.CustomAfflictions
         {
             m_RemedyItems = m_RemedyItems.Select(item => item.Item1 == "GEAR_BottlePainKillers" ? new Tuple<string, int, int>(item.Item1, item.Item2, item.Item3 - 1) : item).ToArray();
         }
-
     }
 }

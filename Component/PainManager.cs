@@ -21,17 +21,23 @@ namespace ImprovedAfflictions.Component
     internal class PainManager : MonoBehaviour
     {
         private PainEffects m_PainEffects = new PainEffects();
-        private PainHelper m_PainHelper = new PainHelper();
+        private AfflictionHelper m_PainHelper = new AfflictionHelper();
 
         public float m_TotalPainLevel;
+        public float m_PainStartingLevel = 0;
 
         public float m_PainkillerLevel = 0f;
         public float m_PainkillerIncrementAmount;
         public float m_PainkillerDecrementStartingAmount;
 
         public float m_SecondsSinceLastODFx;
+        public float m_SecondsSinceLastPulseFx;
+
+        public float m_PulseFxIntensity;
+        public float m_PulseFxFrequencySeconds;
 
         private bool m_PainEffectsCheck = false;
+        private string m_PulseFxWwiseRtpcName;
 
         public AfflictionManager am = GameObject.Find("AfflictionManager").GetComponent<AfflictionManager>();
 
@@ -65,7 +71,7 @@ namespace ImprovedAfflictions.Component
 
                 if (!m_PainEffectsCheck)
                 {
-                    //m_PainHelper.UpdatePainEffects();
+                    PainEffects.UpdatePainEffects();
                     m_PainEffectsCheck = true;
                 }
 
@@ -80,7 +86,7 @@ namespace ImprovedAfflictions.Component
 
                 if (!m_PainEffectsCheck)
                 {
-                    //m_PainHelper.UpdatePainEffects();
+                    PainEffects.UpdatePainEffects();
                     m_PainEffectsCheck = true;
                 }
 
@@ -89,7 +95,7 @@ namespace ImprovedAfflictions.Component
                 GameManager.GetCameraStatusEffects().m_HeadacheVignetteIntensity = 0.3f;
             }
 
-            //MaybeDoPainEffects();
+            MaybeDoPainEffects();
 
         }
 
@@ -282,50 +288,50 @@ namespace ImprovedAfflictions.Component
 
         } **/
 
-        /**
+        
         public void MaybeDoPainEffects()
         {
             //overall pain level is not less than 20 percent of the most recent highest pain level
             if ((m_TotalPainLevel / m_PainStartingLevel) * 100 > 20)
             {
-                m_PainManager.m_SecondsSinceLastPulseFx += Time.deltaTime;
-                if (m_PainManager.m_SecondsSinceLastPulseFx > m_PainManager.m_PulseFxFrequencySeconds)
+                m_SecondsSinceLastPulseFx += Time.deltaTime;
+                if (m_SecondsSinceLastPulseFx > m_PulseFxFrequencySeconds)
                 {
 
-                    if (m_PainHelper.GetConcussion() is not null)
+                    if (Concussion.Concussion.HasConcussion(true))
                     {
-                        m_PainEffects.HeadTraumaPulse(m_PainManager.m_PulseFxIntensity);
+                        PainEffects.HeadTraumaPulse(m_PulseFxIntensity);
                     }
-                    else if (m_PainManager.m_PulseFxIntensity > 1f)
+                    else if (m_PulseFxIntensity > 1f)
                     {
-                        m_PainEffects.IntensePainPulse(m_PainManager.m_PulseFxIntensity);
+                        PainEffects.IntensePainPulse(m_PulseFxIntensity);
                     }
                     else
                     {
-                        GameManager.GetCameraEffects().SprainPulse(m_PainManager.m_PulseFxIntensity);
+                        GameManager.GetCameraEffects().SprainPulse(m_PulseFxIntensity);
                     }
 
 
                     //random variation between pain pulses
                     //__instance.m_PulseFxFrequencySeconds = Random.Range(3f, __instance.m_PulseFxFrequencySeconds + 5f);
-                    m_PainManager.m_SecondsSinceLastPulseFx = 0f;
+                    m_SecondsSinceLastPulseFx = 0f;
                 }
             }
             else
             {
                 GameManager.GetCameraEffects().SprainPulse(0f);
-                m_PainManager.m_SecondsSinceLastPulseFx = 0f;
+                m_SecondsSinceLastPulseFx = 0f;
             }
-            if (!string.IsNullOrEmpty(m_PainManager.m_PulseFxWwiseRtpcName))
+            if (!string.IsNullOrEmpty(m_PulseFxWwiseRtpcName))
             {
 
-                float val = m_PainHelper.IsOnPainkillers() ? 100f : 50f;
+                float val = IsOnPainkillers() ? 100f : 50f;
 
                 float in_value = GameManager.GetCameraStatusEffects().m_SprainAmountSin * val;
                 GameObject soundEmitterFromGameObject = GameAudioManager.GetSoundEmitterFromGameObject(GameManager.GetPlayerObject());
-                AkSoundEngine.SetRTPCValue(m_PainManager.m_PulseFxWwiseRtpcName, in_value, soundEmitterFromGameObject);
+                AkSoundEngine.SetRTPCValue(m_PulseFxWwiseRtpcName, in_value, soundEmitterFromGameObject);
             }
-        } **/
+        } 
 
         public void ApplyPainkillerDamage()
         {

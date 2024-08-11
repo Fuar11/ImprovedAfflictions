@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Il2Cpp;
 using HarmonyLib;
-using ImprovedAfflictions.Pain;
 using MelonLoader;
 using UnityEngine;
 using System.Collections;
 using ImprovedAfflictions.CustomAfflictions;
 using Random = UnityEngine.Random;
+using ImprovedAfflictions.Utils;
 
 namespace ImprovedAfflictions.ChemicalPoisoning
 {
@@ -37,17 +37,27 @@ namespace ImprovedAfflictions.ChemicalPoisoning
 
                 if (GameManager.m_IsPaused) return;
 
-                PainHelper ph = new PainHelper();
+                AfflictionHelper ph = new AfflictionHelper();
                 string desc = "You've exposed your hands or feet to corrosive chemicals and have suffered severe burns. Take painkillers to numb the pain and wait for them to heal.";
 
                 if (!GameManager.GetPlayerManagerComponent().HasFootwearOn())
                 {
 
+                    float duration = Random.Range(96f, 240f);
+
+
                     if (__instance.m_Toxicity >= 20 && __instance.m_InHazardZone)
                     {
-                        float duration = Random.Range(96f, 240f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootLeft, "ico_injury_majorBruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootRight, "ico_injury_majorBruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+
+                        if (!AfflictionHelper.ResetIfHasAffliction("Chemical Burns", AfflictionBodyArea.FootLeft, true))
+                        {
+                            new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootLeft, "ico_injury_majorBruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+                        }
+
+                        if (!AfflictionHelper.ResetIfHasAffliction("Chemical Burns", AfflictionBodyArea.FootRight, true))
+                        {
+                            new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.FootRight, "ico_injury_majorBruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+                        }
                     }
                 }
 
@@ -56,8 +66,16 @@ namespace ImprovedAfflictions.ChemicalPoisoning
                     if (__instance.m_Toxicity >= 35 && __instance.m_InHazardZone) 
                     {
                         float duration = Random.Range(72f, 120f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandLeft, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandRight, "ico_major_bruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+
+                        if (!AfflictionHelper.ResetIfHasAffliction("Chemical Burns", AfflictionBodyArea.HandLeft, true))
+                        {
+                            new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandLeft, "ico_injury_majorBruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+                        }
+
+                        if (!AfflictionHelper.ResetIfHasAffliction("Chemical Burns", AfflictionBodyArea.HandRight, true))
+                        {
+                            new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", AfflictionBodyArea.HandRight, "ico_injury_majorBruising", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 25f);
+                        }
                     }
                 }
             }

@@ -155,7 +155,7 @@ namespace ImprovedAfflictions.Pain
             public static void Postfix(RopeClimbPoint __instance)
             {
 
-                PainHelper ph = new PainHelper();
+                AfflictionHelper ph = new AfflictionHelper();
 
                 if (!GameManager.GetEmergencyStimComponent().GetEmergencyStimActive())
                 {
@@ -205,7 +205,7 @@ namespace ImprovedAfflictions.Pain
 
         public class ClimbSpeedModifier
         {
-            static PainHelper ph = new PainHelper();
+            static AfflictionHelper ph = new AfflictionHelper();
             public static void Postfix(PlayerClimbRope __instance)
             {
 
@@ -331,7 +331,7 @@ namespace ImprovedAfflictions.Pain
             {
                 if(__instance.gameObject.name == "INTERACT_CLIMB_ENABLED" || __instance.gameObject.name == "INTERACT_CLIMBDOWN_ENABLED")
                 {
-                    if (!PainHelper.CanClimbRocks())
+                    if (!AfflictionHelper.CanClimbRocks())
                     {
                         GameAudioManager.PlayGUIError();
                         HUDMessage.AddMessage("Can't climb while injured.");
@@ -424,7 +424,7 @@ namespace ImprovedAfflictions.Pain
             private static bool ShouldPreventReading()
             {
 
-                PainHelper ph = new PainHelper();
+                AfflictionHelper ph = new AfflictionHelper();
 
                 if (GameManager.GetWeatherComponent().IsTooDarkForAction(ActionsToBlock.Reading))
                 {

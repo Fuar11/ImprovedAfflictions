@@ -1,7 +1,6 @@
 ﻿using Il2Cpp;
 using Il2CppTLD.Stats;
 using ImprovedAfflictions.CustomAfflictions;
-using ImprovedAfflictions.Pain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +10,14 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using HarmonyLib;
 using ImprovedAfflictions.Component;
+using ImprovedAfflictions.Utils;
 
 namespace ImprovedAfflictions.Concussion
 {
     internal static class Concussion
     {
         static PainManager pm = Mod.painManager;
+        public static string KEY = "Concussion";
         public static void MaybeConcuss(float chance)
         {
             GearItem hardHat = GameManager.GetInventoryComponent().GearInInventory("GEAR_MinersHelmet", 1);
@@ -31,41 +32,44 @@ namespace ImprovedAfflictions.Concussion
 
             if (Il2Cpp.Utils.RollChance(chance))
             {
+
+                if (AfflictionHelper.ResetIfHasAffliction(KEY, AfflictionBodyArea.Head, false)) return;
+
                 float duration = Random.Range(96f, 240f);
                 string desc = "You've sufferred head trauma and are suffering from a concussion. Take painkillers to numb the debilitating effects while your head rests to heal.";
                 //apply concussion here
-                new CustomPainAffliction("Concussion", "Head Trauma", desc, "", AfflictionBodyArea.Head, "ico_injury_diabetes", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 40f);
+                new CustomPainAffliction(KEY, "Head Trauma", desc, "", AfflictionBodyArea.Head, "ico_injury_diabetes", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 40f);
                 GameManager.GetCameraEffects().PainPulse(1f);
             }
 
         }
 
-        public static bool HasConcussion(bool active)
+        public static bool HasConcussion(bool checkForPainkillers)
         {
             if (pm.am.m_Afflictions.Count == 0) return false;
 
             foreach (CustomPainAffliction aff in pm.am.m_Afflictions.OfType<CustomPainAffliction>())
             {
-                if (aff.m_AfflictionKey.ToLowerInvariant().Contains("concussion"))
+                if (aff.m_AfflictionKey == KEY)
                 {
-                    return active ? pm.PainkillersInEffect(aff.m_PainLevel) : true;
+                    return checkForPainkillers ? pm.PainkillersInEffect(aff.m_PainLevel) : true;
                 }
             }
 
             return false;
         }
 
+       
+
         //adds concussion on chance when falling off rope
         [HarmonyPatch(typeof(FallDamage), nameof(FallDamage.ApplyFallDamage))]
         public class ConcussionTrigger
         {
-
             public static bool Prefix() { return false; }
-
             public static void Postfix(ref float height, ref float damageOverride, FallDamage __instance)
             {
 
-                PainHelper ph = new PainHelper();
+                AfflictionHelper ph = new AfflictionHelper();
 
                 if (GameManager.GetPlayerManagerComponent().m_God)
                 {

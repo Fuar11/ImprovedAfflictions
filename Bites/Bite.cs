@@ -9,6 +9,7 @@ using Il2CppTLD.Stats;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using ImprovedAfflictions.CustomAfflictions;
+using ImprovedAfflictions.Utils;
 
 namespace ImprovedAfflictions.Bites
 {
@@ -74,21 +75,28 @@ namespace ImprovedAfflictions.Bites
                     PlayerDamageEvent.SpawnDamageEvent(__instance.m_LocalizedDisplayName.m_LocalizationID, "GAMEPLAY_Affliction", "ico_injury_bloodLoss", InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
                 }
                 GameManager.GetLogComponent().AddAffliction(AfflictionType.BloodLoss, cause);
+
                 AfflictionBodyArea location = __instance.GetLocationOfLastAdded();
-                string desc;
+
+                string desc = "";
+                string key = "";
                 switch (cause.ToLowerInvariant())
                 {
                     case "wolf":
                         desc = "You are suffering from a wolf bite. Take painkillers to numb the pain and wait for the wound to heal.";
-
-                        new CustomPainAffliction("Wolf Bite", "Wolf Attack", desc, "", location, "ico_injury_laceration", false, false, GetDurationByLocation(location), false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], GetPainLevelByLocation(location));
+                        key = "Wolf";
                         break;
                     case "bear":
                         desc = "You are suffering from a bear bite. Take painkillers to numb the pain and wait for the wound to heal.";
-
-                        new CustomPainAffliction("Bear Bite", "Bear Attack", desc, "", location, "ico_injury_laceration", false, false, GetDurationByLocation(location), false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], GetPainLevelByLocation(location));
+                        key = "Bear";
                         break;
                 }
+
+                string name = key + " Bite";
+
+                if (AfflictionHelper.ResetIfHasAffliction(name, location, true)) return;
+
+                new CustomPainAffliction(name, key + " Attack", desc, "", location, "ico_injury_laceration", false, false, GetDurationByLocation(location), false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], GetPainLevelByLocation(location));
 
                 if (ExperienceModeManager.GetCurrentExperienceModeType() == ExperienceModeType.ChallengeHunted)
                 {

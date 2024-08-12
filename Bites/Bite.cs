@@ -80,20 +80,17 @@ namespace ImprovedAfflictions.Bites
 
                 string desc = "";
                 string key = "";
-                float frequency = 0f;
-                float intensity = 0f;
-                switch (cause.ToLowerInvariant())
+                if (cause.ToLowerInvariant().Contains("wolf"))
                 {
-                    case "wolf":
-                        desc = "You are suffering from a wolf bite. Take painkillers to numb the pain and wait for the wound to heal.";
-                        key = "Wolf";
-                        break;
-                    case "bear":
-                        desc = "You are suffering from a bear bite. Take painkillers to numb the pain and wait for the wound to heal.";
-                        key = "Bear";
-                        break;
+                    desc = "You are suffering from a wolf bite. Take painkillers to numb the pain and wait for the wound to heal.";
+                    key = "Wolf";
                 }
-
+                else if (cause.ToLowerInvariant().Contains("bear"))
+                {
+                    desc = "You are suffering from a bear bite. Take painkillers to numb the pain and wait for the wound to heal.";
+                    key = "Bear";
+                }
+                
                 string name = key + " Bite";
 
                 if (AfflictionHelper.ResetIfHasAffliction(name, location, true)) return;

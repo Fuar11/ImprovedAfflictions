@@ -24,6 +24,7 @@ namespace ImprovedAfflictions.CustomAfflictions
             m_PulseFxIntensity = fxLevel;
 
             Mod.painManager.m_PainStartingLevel += painLevel;
+            PainEffects.UpdatePainEffects();
         }
         public float m_PainLevel { get; set; }
         public float m_StartingPainLevel { get; set; }

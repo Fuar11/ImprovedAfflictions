@@ -31,10 +31,12 @@ namespace ImprovedAfflictions.Component
         public float m_PainkillerDecrementStartingAmount;
 
         public float m_SecondsSinceLastODFx;
-        public float m_SecondsSinceLastPulseFx;
+        public float m_ODPulseFxFrequencySeconds = 4f;
+        public float m_ODPulseFxIntensity = 2f;
 
-        public float m_PulseFxIntensity;
+        public float m_SecondsSinceLastPulseFx;
         public float m_PulseFxFrequencySeconds;
+        public float m_PulseFxIntensity;
 
         private bool m_PainEffectsCheck = false;
         private string m_PulseFxWwiseRtpcName;
@@ -58,6 +60,8 @@ namespace ImprovedAfflictions.Component
             //constantly changing
             m_TotalPainLevel = GetTotalPainLevel();
 
+            MaybeApplyOverdoseOrRisk();
+
             if (m_PainkillerLevel < m_PainkillerIncrementAmount)
             {
                 m_SecondsSinceLastODFx += Time.deltaTime;
@@ -76,7 +80,7 @@ namespace ImprovedAfflictions.Component
                 }
 
                 m_SecondsSinceLastODFx += Time.deltaTime;
-                //MaybeDoOverdoseEffects();
+                MaybeDoOverdoseEffects();
                 DecrementPainkillerLevel(tODHours);
 
             }
@@ -96,6 +100,8 @@ namespace ImprovedAfflictions.Component
             }
 
             MaybeDoPainEffects();
+
+            
 
         }
 
@@ -242,7 +248,7 @@ namespace ImprovedAfflictions.Component
 
         //OVERDOSE
 
-        /**
+        
         public void MaybeDoOverdoseEffects()
         {
 
@@ -255,7 +261,7 @@ namespace ImprovedAfflictions.Component
 
                 if(m_SecondsSinceLastODFx > m_ODPulseFxFrequencySeconds)
                 {
-                    effects.OverdoseVignette(m_ODPulseFxIntensity);
+                    PainEffects.OverdoseVignette(m_ODPulseFxIntensity);
                     m_SecondsSinceLastODFx = 0;
                 }
 
@@ -276,7 +282,6 @@ namespace ImprovedAfflictions.Component
                 }
                 else
                 {
-
                     if(GameManager.GetVpFPSCamera().m_BasePitch != 0f &&
                     GameManager.GetVpFPSCamera().m_BaseRoll != 0f)
                     {
@@ -286,7 +291,7 @@ namespace ImprovedAfflictions.Component
 
             }
 
-        } **/
+        }
 
         
         public void MaybeDoPainEffects()
@@ -345,11 +350,26 @@ namespace ImprovedAfflictions.Component
                 float fatigueValue = fatigueIncreasePerHour * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
                 GameManager.GetFatigueComponent().AddFatigue(fatigueValue);
             }
-
-
-
         }
 
+        public void MaybeApplyOverdoseOrRisk()
+        {
+
+            string riskDesc = "You have consumed too many meds and your blood drug level is rising. You are at risk of an overdose.";
+            string riskDesc2 = "Refrain from taking medications and rest to let the drugs leave your system.";
+
+            string odDesc = "You have consumed too much medication and your blood drug level is dangerously high. You are suffering from an overdose.";
+            string odDesc2 = "Refrain from taking any medication and rest to let the drugs leave your system.";
+
+            if(IsHighOnPainkillers() && !IsOverdosing() && !am.HasAfflictionOfType(typeof(OverdoseRisk)))
+            {
+                new OverdoseRisk("Overdose Risk", "Painkillers", riskDesc, riskDesc2, AfflictionBodyArea.Chest, "ico_units_pill", true, false, 0, true, true, [], []);
+            }
+            else if(IsOverdosing() && !am.HasAfflictionOfType(typeof(Overdose)))
+            {
+                new Overdose("Overdose", "Painkillers", odDesc, odDesc2, AfflictionBodyArea.Chest, "ico_units_pill", false, false, 0, true, true, [], []);
+            }
+        }
 
     }
 }

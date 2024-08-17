@@ -363,11 +363,11 @@ namespace ImprovedAfflictions.Component
 
             if(IsHighOnPainkillers() && !IsOverdosing() && !am.HasAfflictionOfType(typeof(OverdoseRisk)))
             {
-                new OverdoseRisk("Overdose Risk", "Painkillers", riskDesc, riskDesc2, AfflictionBodyArea.Chest, "ico_units_pill", true, false, 0, true, true, [], []);
+                new OverdoseRisk("Overdose Risk", "Painkillers", riskDesc, riskDesc2, "ico_units_pill", AfflictionBodyArea.Chest, true, [], []).Start();
             }
             else if(IsOverdosing() && !am.HasAfflictionOfType(typeof(Overdose)))
             {
-                new Overdose("Overdose", "Painkillers", odDesc, odDesc2, AfflictionBodyArea.Chest, "ico_units_pill", false, false, 0, true, true, [], []);
+                new Overdose("Overdose", "Painkillers", odDesc, odDesc2, "ico_units_pill", AfflictionBodyArea.Chest, true, [], []).Start();
             }
         }
 

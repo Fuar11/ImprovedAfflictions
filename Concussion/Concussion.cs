@@ -38,7 +38,7 @@ namespace ImprovedAfflictions.Concussion
                 float duration = Random.Range(96f, 240f);
                 string desc = "You've sufferred head trauma and are suffering from a concussion. Take painkillers to numb the debilitating effects while your head rests to heal.";
                 //apply concussion here
-                new CustomPainAffliction(KEY, "Head Trauma", desc, "", AfflictionBodyArea.Head, "ico_injury_diabetes", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 40f, 6f, 2.5f);
+                new CustomPainAffliction(KEY, "Head Trauma", desc, "", "ico_injury_diabetes", AfflictionBodyArea.Head, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], duration, 40f, 6f, 2.5f);
                 GameManager.GetCameraEffects().PainPulse(1f);
             }
 
@@ -50,7 +50,7 @@ namespace ImprovedAfflictions.Concussion
 
             foreach (CustomPainAffliction aff in pm.am.m_Afflictions.OfType<CustomPainAffliction>())
             {
-                if (aff.m_AfflictionKey == KEY)
+                if (aff.m_Name == KEY)
                 {
                     return checkForPainkillers ? !pm.PainkillersInEffect(aff.m_PainLevel) : true;
                 }

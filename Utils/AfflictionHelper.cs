@@ -77,7 +77,7 @@ namespace ImprovedAfflictions.Utils
 
             foreach (CustomPainAffliction aff in pm.am.m_Afflictions.OfType<CustomPainAffliction>())
             {
-                return aff.m_AfflictionKey == name ? true : false;
+                return aff.m_Name == name ? true : false;
             }
 
             return false;
@@ -88,7 +88,7 @@ namespace ImprovedAfflictions.Utils
 
             foreach (CustomPainAffliction aff in pm.am.m_Afflictions.OfType<CustomPainAffliction>())
             {
-                if (aff.m_AfflictionKey == name && aff.m_Location == location) return true;
+                if (aff.m_Name == name && aff.m_Location == location) return true;
             }
 
             return false;
@@ -100,7 +100,7 @@ namespace ImprovedAfflictions.Utils
 
             if (pm.am.m_Afflictions.Count == 0) return new List<CustomPainAffliction>();
 
-            return pm.am.m_Afflictions.OfType<CustomPainAffliction>().Where(aff => aff.m_AfflictionKey == name).ToList();
+            return pm.am.m_Afflictions.OfType<CustomPainAffliction>().Where(aff => aff.m_Name == name).ToList();
         }
         public static List<CustomPainAffliction> GetPainAfflictionsAtLocation(string name, AfflictionBodyArea location)
         {
@@ -108,7 +108,7 @@ namespace ImprovedAfflictions.Utils
 
             if (pm.am.m_Afflictions.Count == 0) return new List<CustomPainAffliction>();
 
-            return pm.am.m_Afflictions.OfType<CustomPainAffliction>().Where(aff => aff.m_AfflictionKey == name && aff.m_Location == location).ToList();
+            return pm.am.m_Afflictions.OfType<CustomPainAffliction>().Where(aff => aff.m_Name == name && aff.m_Location == location).ToList();
         }
 
         public bool CanClimbRope()

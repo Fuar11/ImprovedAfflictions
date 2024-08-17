@@ -1,5 +1,5 @@
 ﻿using AfflictionComponent.Components;
-using AfflictionComponent.Interfaces.Risk;
+using AfflictionComponent.Interfaces;
 using Il2Cpp;
 using ImprovedAfflictions.Component;
 using System;
@@ -13,13 +13,18 @@ namespace ImprovedAfflictions.CustomAfflictions
     internal class OverdoseRisk : CustomAffliction, IRiskPercentage
     {
 
+        public bool Risk { get; set; }
         private float m_RiskPercentage;
         private float m_LastUpdateTime;
-        public OverdoseRisk(string afflictionName, string cause, string desc, string noHealDesc, AfflictionBodyArea location, string spriteName, bool risk, bool buff, float duration, bool noTimer, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems) : base(afflictionName, cause, desc, noHealDesc, location, spriteName, risk, buff, duration, noTimer, instantHeal, remedyItems, altRemedyItems)
-        {
-        }
+
+        
 
         private PainManager pm = Mod.painManager;
+
+        public OverdoseRisk(string name, string causeText, string description, string? descriptionNoHeal, string spriteName, AfflictionBodyArea location, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems) : base(name, causeText, description, descriptionNoHeal, spriteName, location, instantHeal, remedyItems, altRemedyItems)
+        {
+            Risk = true;
+        }
 
         public override void OnUpdate()
         {

@@ -1,22 +1,21 @@
 ﻿using AfflictionComponent.Components;
+using AfflictionComponent.Interfaces;
 using Il2Cpp;
-using ImprovedAfflictions.Component;
 using ImprovedAfflictions.Pain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace ImprovedAfflictions.CustomAfflictions
 {
 
     internal class CustomPainAffliction
-        : CustomAffliction
+        : CustomAffliction, IDuration
     {
-        public CustomPainAffliction(string afflictionName, string cause, string desc, string noHealDesc, AfflictionBodyArea location, string spriteName, bool risk, bool buff, float duration, bool noTimer, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems, float painLevel, float frequency, float fxLevel) : base(afflictionName, cause, desc, noHealDesc, location, spriteName, risk, buff, duration, noTimer, instantHeal, remedyItems, altRemedyItems)
+
+        public CustomPainAffliction(string name, string causeText, string description, string? descriptionNoHeal, string spriteName, AfflictionBodyArea location, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems, float duration, float painLevel, float frequency, float fxLevel) : base(name, causeText, description, descriptionNoHeal, spriteName, location, instantHeal, remedyItems, altRemedyItems)
         {
+
+            Duration = duration;
+
             m_PainLevel = painLevel;
             m_StartingPainLevel = painLevel;
 
@@ -26,6 +25,10 @@ namespace ImprovedAfflictions.CustomAfflictions
             Mod.painManager.m_PainStartingLevel += painLevel;
             PainEffects.UpdatePainEffects();
         }
+
+        public float Duration { get; set; }
+        public float EndTime { get; set; }
+
         public float m_PainLevel { get; set; }
         public float m_StartingPainLevel { get; set; }
         public float m_PulseFxIntensity { get; set; }
@@ -57,7 +60,7 @@ namespace ImprovedAfflictions.CustomAfflictions
 
         public float GetPainLevelDecreasePerHour()
         {
-            return m_StartingPainLevel / m_EndTime;
+            return m_StartingPainLevel / InterfaceDuration.EndTime;
         }
 
         protected override bool ApplyRemedyCondition()

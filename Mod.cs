@@ -91,7 +91,7 @@ internal sealed class Mod : MelonMod, Moment.IScheduledEventExecutor
 
             if (AfflictionHelper.ResetIfHasAffliction("Concussion", AfflictionBodyArea.Head, false)) return;
 
-            new CustomPainAffliction("Concussion", "Head Trauma", desc, "", AfflictionBodyArea.Head, "ico_injury_diabetes", false, false, duration, false, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], 40f, 6f, 2.5f);
+            new CustomPainAffliction("Concussion", "Head Trauma", desc, "", "ico_injury_diabetes", AfflictionBodyArea.Head, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], duration, 40f, 6f, 2.5f).Start();
         }
     }
 }

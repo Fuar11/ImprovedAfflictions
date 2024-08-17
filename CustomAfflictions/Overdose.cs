@@ -11,7 +11,7 @@ namespace ImprovedAfflictions.CustomAfflictions
 {
     internal class Overdose : CustomAffliction
     {
-        public Overdose(string afflictionName, string cause, string desc, string noHealDesc, AfflictionBodyArea location, string spriteName, bool risk, bool buff, float duration, bool noTimer, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems) : base(afflictionName, cause, desc, noHealDesc, location, spriteName, risk, buff, duration, noTimer, instantHeal, remedyItems, altRemedyItems)
+        public Overdose(string name, string causeText, string description, string? descriptionNoHeal, string spriteName, AfflictionBodyArea location, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems) : base(name, causeText, description, descriptionNoHeal, spriteName, location, instantHeal, remedyItems, altRemedyItems)
         {
         }
 
@@ -19,7 +19,6 @@ namespace ImprovedAfflictions.CustomAfflictions
         {
             if (!Mod.painManager.IsOverdosing()) Cure();
         }
-
         protected override void CureSymptoms()
         {
         }

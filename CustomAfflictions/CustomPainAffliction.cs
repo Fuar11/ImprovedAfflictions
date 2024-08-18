@@ -1,20 +1,24 @@
 ﻿using AfflictionComponent.Components;
 using AfflictionComponent.Interfaces;
+using AfflictionComponent.Resources;
 using Il2Cpp;
 using ImprovedAfflictions.Pain;
+using ImprovedAfflictions.Utils;
 using UnityEngine;
 
 namespace ImprovedAfflictions.CustomAfflictions
 {
 
     internal class CustomPainAffliction
-        : CustomAffliction, IDuration, IRemedies
+        : CustomAffliction, IDuration, IRemedies, IInstance
     {
 
         public CustomPainAffliction(string name, string causeText, string description, string? descriptionNoHeal, string spriteName, AfflictionBodyArea location, bool instantHeal, Tuple<string, int, int>[] remedyItems, float duration, float painLevel, float frequency, float fxLevel) : base(name, causeText, description, descriptionNoHeal, spriteName, location)
         {
 
             Duration = duration;
+
+            SetInstanceTypeBasedOnName();
 
             RemedyItems = remedyItems;
             AltRemedyItems = [];
@@ -39,8 +43,7 @@ namespace ImprovedAfflictions.CustomAfflictions
         public bool InstantHeal { get; set; }
         public Tuple<string, int, int>[] RemedyItems { get; set; }
         public Tuple<string, int, int>[] AltRemedyItems { get; set; }
-
-
+        public InstanceType type { get; set; }
 
         public override void OnUpdate()
         {
@@ -84,6 +87,22 @@ namespace ImprovedAfflictions.CustomAfflictions
         private void UpdatePainkillersOnTheFly()
         {
             RemedyItems = RemedyItems.Select(item => item.Item1 == "GEAR_BottlePainKillers" ? new Tuple<string, int, int>(item.Item1, item.Item2, item.Item3 - 1) : item).ToArray();
+        }
+
+        private void SetInstanceTypeBasedOnName()
+        {
+            if (m_Name.ToLowerInvariant().Contains("concussion")) type = InstanceType.Single;
+            else if (m_Name.ToLowerInvariant().Contains("bite")) type= InstanceType.Open;
+            else if (m_Name.ToLowerInvariant().Contains("chemical")) type= InstanceType.SingleLocation;
+            else if (m_Name.ToLowerInvariant().Contains("sprain")) type= InstanceType.SingleLocation;
+        }
+
+        public void OnFoundExistingInstance(CustomAffliction aff)
+        {
+            if(aff is CustomPainAffliction paff)
+            {
+                AfflictionHelper.ResetPainAffliction(paff);
+            }
         }
     }
 }

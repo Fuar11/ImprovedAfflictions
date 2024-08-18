@@ -43,34 +43,6 @@ namespace ImprovedAfflictions.Utils
             aff.m_PainLevel = aff.m_StartingPainLevel;
         }
 
-        public static bool ResetIfHasAffliction(string name, AfflictionBodyArea location, bool CheckForLocation)
-        {
-            if (CheckForLocation)
-            {
-                if (HasPainAfflictionAtLocation(name, location))
-                {
-                    foreach (var aff in GetPainAfflictionsAtLocation(name, location))
-                    {
-                        ResetPainAffliction(aff);
-                    }
-                    return true;
-                }
-                else return false;
-            }
-            else
-            {
-                if (HasPainAffliction(name))
-                {
-                    foreach (var aff in GetPainAfflictions(name))
-                    {
-                        ResetPainAffliction(aff);
-                    }
-                    return true;
-                }
-                else return false;
-            }
-        }
-
         public static bool HasPainAffliction(string name)
         {
             if (pm.am.m_Afflictions.Count == 0) return false;

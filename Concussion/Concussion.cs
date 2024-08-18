@@ -32,9 +32,6 @@ namespace ImprovedAfflictions.Concussion
 
             if (Il2Cpp.Utils.RollChance(chance))
             {
-
-                if (AfflictionHelper.ResetIfHasAffliction(KEY, AfflictionBodyArea.Head, false)) return;
-
                 float duration = Random.Range(96f, 240f);
                 string desc = "You've sufferred head trauma and are suffering from a concussion. Take painkillers to numb the debilitating effects while your head rests to heal.";
                 //apply concussion here

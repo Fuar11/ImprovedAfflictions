@@ -89,7 +89,7 @@ internal sealed class Mod : MelonMod, Moment.IScheduledEventExecutor
             float duration = Random.Range(96f, 240f);
             string desc = "You've sufferred head trauma and are suffering from a concussion. Take painkillers to numb the debilitating effects while your head rests to heal.";
 
-            if (AfflictionHelper.ResetIfHasAffliction("Concussion", AfflictionBodyArea.Head, false)) return;
+            //if (AfflictionHelper.ResetIfHasAffliction("Concussion", AfflictionBodyArea.Head, false)) return;
 
             new CustomPainAffliction("Concussion", "Head Trauma", desc, "", "ico_injury_diabetes", AfflictionBodyArea.Head, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 40f, 6f, 2.5f).Start();
         }

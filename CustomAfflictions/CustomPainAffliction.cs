@@ -8,13 +8,17 @@ namespace ImprovedAfflictions.CustomAfflictions
 {
 
     internal class CustomPainAffliction
-        : CustomAffliction, IDuration
+        : CustomAffliction, IDuration, IRemedies
     {
 
-        public CustomPainAffliction(string name, string causeText, string description, string? descriptionNoHeal, string spriteName, AfflictionBodyArea location, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems, float duration, float painLevel, float frequency, float fxLevel) : base(name, causeText, description, descriptionNoHeal, spriteName, location, instantHeal, remedyItems, altRemedyItems)
+        public CustomPainAffliction(string name, string causeText, string description, string? descriptionNoHeal, string spriteName, AfflictionBodyArea location, bool instantHeal, Tuple<string, int, int>[] remedyItems, float duration, float painLevel, float frequency, float fxLevel) : base(name, causeText, description, descriptionNoHeal, spriteName, location)
         {
 
             Duration = duration;
+
+            RemedyItems = remedyItems;
+            AltRemedyItems = [];
+            InstantHeal = instantHeal;
 
             m_PainLevel = painLevel;
             m_StartingPainLevel = painLevel;
@@ -28,11 +32,15 @@ namespace ImprovedAfflictions.CustomAfflictions
 
         public float Duration { get; set; }
         public float EndTime { get; set; }
-
         public float m_PainLevel { get; set; }
         public float m_StartingPainLevel { get; set; }
         public float m_PulseFxIntensity { get; set; }
         public float m_PulseFxFrequencySeconds { get; set; }
+        public bool InstantHeal { get; set; }
+        public Tuple<string, int, int>[] RemedyItems { get; set; }
+        public Tuple<string, int, int>[] AltRemedyItems { get; set; }
+
+
 
         public override void OnUpdate()
         {
@@ -41,7 +49,10 @@ namespace ImprovedAfflictions.CustomAfflictions
 
             if (Mod.painManager.m_PainkillerLevel < m_PainLevel && Mod.painManager.m_PainkillerIncrementAmount == 0)
             {
-                if (!NeedsRemedy()) ResetRemedyItems(ref m_RemedyItems);
+                if (!NeedsRemedy())
+                {
+                    ResetRemedyItems(InterfaceRemedies);
+                }
             }
             else if(Mod.painManager.m_PainkillerLevel >= m_PainLevel && NeedsRemedy())
             {
@@ -70,10 +81,9 @@ namespace ImprovedAfflictions.CustomAfflictions
             
         }
        
-        //for now, as long as the arrays stay public
         private void UpdatePainkillersOnTheFly()
         {
-            m_RemedyItems = m_RemedyItems.Select(item => item.Item1 == "GEAR_BottlePainKillers" ? new Tuple<string, int, int>(item.Item1, item.Item2, item.Item3 - 1) : item).ToArray();
+            RemedyItems = RemedyItems.Select(item => item.Item1 == "GEAR_BottlePainKillers" ? new Tuple<string, int, int>(item.Item1, item.Item2, item.Item3 - 1) : item).ToArray();
         }
     }
 }

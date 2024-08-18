@@ -21,7 +21,7 @@ namespace ImprovedAfflictions.CustomAfflictions
 
         private PainManager pm = Mod.painManager;
 
-        public OverdoseRisk(string name, string causeText, string description, string? descriptionNoHeal, string spriteName, AfflictionBodyArea location, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems) : base(name, causeText, description, descriptionNoHeal, spriteName, location, instantHeal, remedyItems, altRemedyItems)
+        public OverdoseRisk(string name, string causeText, string description, string? descriptionNoHeal, string spriteName, AfflictionBodyArea location, bool instantHeal, Tuple<string, int, int>[] remedyItems, Tuple<string, int, int>[] altRemedyItems) : base(name, causeText, description, descriptionNoHeal, spriteName, location)
         {
             Risk = true;
         }

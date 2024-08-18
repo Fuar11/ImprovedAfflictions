@@ -29,7 +29,7 @@ namespace ImprovedAfflictions.Sprains
 
                 if (AfflictionHelper.ResetIfHasAffliction(name, location, true)) return false;
 
-                new CustomPainAffliction(name, name, AfflictionHelper.GetAfflictionDescription(name), "", "ico_CarryRestrictions", location, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], [], duration, 10f, 15f, 0.65f).Start();
+                new CustomPainAffliction(name, name, AfflictionHelper.GetAfflictionDescription(name), "", "ico_CarryRestrictions", location, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 15f, 15f, 0.65f).Start();
 
                 return false;
             }

@@ -11,7 +11,7 @@ using ImprovedAfflictions.Utils;
 using ImprovedAfflictions.CustomAfflictions;
 using ImprovedAfflictions.Pain;
 using AfflictionComponent.Components;
-using System.Text.Json;
+using Newtonsoft.Json;
 using MelonLoader;
 using Random = UnityEngine.Random;
 
@@ -108,22 +108,48 @@ namespace ImprovedAfflictions.Component
         //DATA
         public void LoadData()
         {
-            SaveDataManager sdm = Mod.sdm;
 
-            string? data = sdm.LoadData("component");
+            string? data = Mod.sdm.LoadData("component");
 
             if (data is not null)
             {
+                PainManagerSaveDataProxy? ldp = JsonConvert.DeserializeObject<PainManagerSaveDataProxy>(data);
 
-              
+                if(ldp is not null)
+                {
+                    m_PainkillerLevel = ldp.m_PainkillerLevel;
+                    m_PainkillerIncrementAmount = ldp.m_PainkillerIncrementAmount;
+                    m_PainkillerDecrementStartingAmount = ldp.m_PainkillerDecrementStartingAmount;
+                    m_SecondsSinceLastODFx = ldp.m_SecondsSinceLastODFx;
+                    m_SecondsSinceLastPulseFx = ldp.m_SecondsSinceLastPulseFx;
+                    m_PulseFxFrequencySeconds = ldp.m_PulseFxFrequencySeconds;
+                    m_PulseFxIntensity = ldp.m_PulseFxIntensity;
+                }
+                else
+                {
+                    Mod.Logger.Log("Pain manager load data is null", ComplexLogger.FlaggedLoggingLevel.Debug);
+                }
+
             }
         }
 
         public void SaveData()
         {
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Formatting = Formatting.Indented
+            };
 
-           
-
+            Mod.Logger.Log("Saving pain manager data", ComplexLogger.FlaggedLoggingLevel.Debug);
+            PainManagerSaveDataProxy dataToSave = new PainManagerSaveDataProxy(m_PainkillerLevel, m_PainkillerIncrementAmount, m_PainkillerDecrementStartingAmount, m_SecondsSinceLastODFx, m_SecondsSinceLastPulseFx, m_PulseFxFrequencySeconds, m_PulseFxIntensity);
+            string json = JsonConvert.SerializeObject(dataToSave, settings);
+            if (json is null)
+            {
+                Mod.Logger.Log("JSON DATA IS NULL", ComplexLogger.FlaggedLoggingLevel.Error);
+                return;
+            }
+            Mod.sdm.Save(json, "component");
         }
 
         //PAINKILLERS

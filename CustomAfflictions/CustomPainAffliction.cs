@@ -2,6 +2,7 @@
 using AfflictionComponent.Interfaces;
 using AfflictionComponent.Resources;
 using Il2Cpp;
+using ImprovedAfflictions.Component;
 using ImprovedAfflictions.Pain;
 using ImprovedAfflictions.Utils;
 using UnityEngine;
@@ -54,7 +55,7 @@ namespace ImprovedAfflictions.CustomAfflictions
             {
                 if (!NeedsRemedy())
                 {
-                    ResetRemedyItems(InterfaceRemedies);
+                    ResetRemedyItems(this);
                 }
             }
             else if(Mod.painManager.m_PainkillerLevel >= m_PainLevel && NeedsRemedy())
@@ -63,10 +64,10 @@ namespace ImprovedAfflictions.CustomAfflictions
             }
         }
 
-        protected override void CureSymptoms()
+        public void CureSymptoms()
         {
         }
-        protected override void OnCure()
+        public void OnCure()
         {
             Mod.painManager.m_PainStartingLevel = Mod.painManager.GetTotalPainStartingLevel();
             PainEffects.UpdatePainEffects();
@@ -74,7 +75,7 @@ namespace ImprovedAfflictions.CustomAfflictions
 
         public float GetPainLevelDecreasePerHour()
         {
-            return m_StartingPainLevel / InterfaceDuration.EndTime;
+            return m_StartingPainLevel / EndTime;
         }
 
         protected override bool ApplyRemedyCondition()
@@ -91,10 +92,18 @@ namespace ImprovedAfflictions.CustomAfflictions
 
         private void SetInstanceTypeBasedOnName()
         {
+            if(m_Name is null)
+            {
+                Mod.Logger.Log("Name is null", ComplexLogger.FlaggedLoggingLevel.Error);
+
+                if (type != InstanceType.Open) Mod.Logger.Log("Type is not default", ComplexLogger.FlaggedLoggingLevel.Debug);
+                return;
+            }
+
             if (m_Name.ToLowerInvariant().Contains("concussion")) type = InstanceType.Single;
-            else if (m_Name.ToLowerInvariant().Contains("bite")) type= InstanceType.Open;
-            else if (m_Name.ToLowerInvariant().Contains("chemical")) type= InstanceType.SingleLocation;
-            else if (m_Name.ToLowerInvariant().Contains("sprain")) type= InstanceType.SingleLocation;
+            else if (m_Name.ToLowerInvariant().Contains("bite")) type = InstanceType.Open;
+            else if (m_Name.ToLowerInvariant().Contains("chemical")) type = InstanceType.SingleLocation;
+            else if (m_Name.ToLowerInvariant().Contains("sprain")) type = InstanceType.SingleLocation;
         }
 
         public void OnFoundExistingInstance(CustomAffliction aff)

@@ -19,11 +19,11 @@ namespace ImprovedAfflictions.CustomAfflictions
         {
             if (!Mod.painManager.IsOverdosing()) Cure();
         }
-        protected override void CureSymptoms()
+        protected void CureSymptoms()
         {
         }
 
-        protected override void OnCure()
+        protected void OnCure()
         {
         }
     }

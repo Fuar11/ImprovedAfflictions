@@ -42,11 +42,11 @@ namespace ImprovedAfflictions.CustomAfflictions
             return ((x - 60f) / 20f) * 100f;
         }
 
-        protected override void CureSymptoms()
+        protected void CureSymptoms()
         {
         }
 
-        protected override void OnCure()
+        protected void OnCure()
         {
         }
 

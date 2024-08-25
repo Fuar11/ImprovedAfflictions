@@ -11,6 +11,8 @@ using System.Collections;
 using ImprovedAfflictions.CustomAfflictions;
 using Random = UnityEngine.Random;
 using ImprovedAfflictions.Utils;
+using static UnityEngine.ParticleSystem;
+using static Il2CppSystem.Decimal.DecCalc;
 
 namespace ImprovedAfflictions.ChemicalPoisoning
 {
@@ -48,8 +50,12 @@ namespace ImprovedAfflictions.ChemicalPoisoning
 
                     if (__instance.m_Toxicity >= 20 && __instance.m_InHazardZone)
                     {
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", "ico_injury_majorBruising", AfflictionBodyArea.FootLeft, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 25f, 10f, 0.9f).Start();
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", "ico_injury_majorBruising", AfflictionBodyArea.FootRight, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 25f, 10f, 0.9f).Start();
+                        var burn1 = new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", "ico_injury_majorBruising", AfflictionBodyArea.FootLeft, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 25f, 10f, 0.9f);
+                        burn1.SetInstanceTypeBasedOnName();
+                        burn1.Start();
+                        var burn2 = new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", "ico_injury_majorBruising", AfflictionBodyArea.FootRight, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 25f, 10f, 0.9f);
+                        burn2.SetInstanceTypeBasedOnName();
+                        burn2.Start();
                     }
                 }
 
@@ -60,9 +66,12 @@ namespace ImprovedAfflictions.ChemicalPoisoning
                         float duration = Random.Range(72f, 120f);
 
 
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", "ico_injury_majorBruising", AfflictionBodyArea.HandLeft, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 25f, 10f, 0.9f).Start();
-                        new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", "ico_injury_majorBruising", AfflictionBodyArea.HandRight, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 25f, 10f, 0.9f).Start();
-
+                        var burn1 = new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", "ico_injury_majorBruising", AfflictionBodyArea.HandLeft, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 25f, 10f, 0.9f);
+                        burn1.SetInstanceTypeBasedOnName();
+                        burn1.Start();
+                        var burn2 = new CustomPainAffliction("Chemical Burns", "Corrosive Chemicals", desc, "", "ico_injury_majorBruising", AfflictionBodyArea.HandRight, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 25f, 10f, 0.9f);
+                        burn2.SetInstanceTypeBasedOnName();
+                        burn2.Start();
                     }
                 }
             }

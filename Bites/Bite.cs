@@ -93,7 +93,9 @@ namespace ImprovedAfflictions.Bites
                 
                 string name = key + " Bite";
 
-                new CustomPainAffliction(name, key + " Attack", desc, "", "ico_injury_laceration", location, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], GetDurationByLocation(location), GetPainLevelByLocation(location), GetFxDurationByLocation(location), GetFxIntensityDurationByLocation(location)).Start();
+                var bite = new CustomPainAffliction(name, key + " Attack", desc, "", "ico_injury_laceration", location, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], GetDurationByLocation(location), GetPainLevelByLocation(location), GetFxDurationByLocation(location), GetFxIntensityDurationByLocation(location));
+                bite.SetInstanceTypeBasedOnName();
+                bite.Start();
 
                 if (ExperienceModeManager.GetCurrentExperienceModeType() == ExperienceModeType.ChallengeHunted)
                 {

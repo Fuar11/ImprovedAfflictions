@@ -141,12 +141,10 @@ namespace ImprovedAfflictions.Component
                 Formatting = Formatting.Indented
             };
 
-            Mod.Logger.Log("Saving pain manager data", ComplexLogger.FlaggedLoggingLevel.Debug);
             PainManagerSaveDataProxy dataToSave = new PainManagerSaveDataProxy(m_PainkillerLevel, m_PainkillerIncrementAmount, m_PainkillerDecrementStartingAmount, m_SecondsSinceLastODFx, m_SecondsSinceLastPulseFx, m_PulseFxFrequencySeconds, m_PulseFxIntensity);
             string json = JsonConvert.SerializeObject(dataToSave, settings);
             if (json is null)
             {
-                Mod.Logger.Log("JSON DATA IS NULL", ComplexLogger.FlaggedLoggingLevel.Error);
                 return;
             }
             Mod.sdm.Save(json, "component");

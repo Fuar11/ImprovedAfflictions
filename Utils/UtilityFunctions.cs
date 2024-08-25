@@ -1,5 +1,8 @@
-﻿using Il2Cpp;
+﻿using AfflictionComponent.Components;
+using Il2Cpp;
 using Il2CppTLD.Gameplay;
+using ImprovedAfflictions.Component;
+using ImprovedAfflictions.CustomAfflictions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +14,7 @@ namespace ImprovedAfflictions.Utils
     internal class UtilityFunctions
     {
 
+        public static PainManager pm = Mod.painManager;
         public static float MapPercentageToVariable(double percentage, float minVariableValue = 1.0f, float maxVariableValue = 2.0f)
         {
 
@@ -29,6 +33,5 @@ namespace ImprovedAfflictions.Utils
             if (ExperienceModeManager.GetCurrentExperienceModeType() == ExperienceModeType.Interloper || GameManager.InCustomMode() && GameManager.GetCustomMode().m_ItemDecayRate == Il2CppTLD.Gameplay.Tunable.CustomTunableLMHV.VeryHigh) return true;
             else return false;
         }
-
     }
 }

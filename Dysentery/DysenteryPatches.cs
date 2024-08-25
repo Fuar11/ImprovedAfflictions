@@ -13,6 +13,8 @@ using ImprovedAfflictions.Utils;
 using MelonLoader;
 using UnityEngine;
 using Microsoft.Extensions.Logging;
+using ImprovedAfflictions.FoodPoisoning;
+using ComplexLogger;
 
 namespace ImprovedAfflictions.Dysentery
 {
@@ -21,7 +23,7 @@ namespace ImprovedAfflictions.Dysentery
 
         [HarmonyPatch(typeof(Il2Cpp.Dysentery), nameof(Il2Cpp.Dysentery.DysenteryStart))]
 
-        public class DysenteryOverride
+        public class DysenteryStartOverride
         {
 
             public static void Postfix(Il2Cpp.Dysentery __instance)
@@ -42,11 +44,21 @@ namespace ImprovedAfflictions.Dysentery
 
             public static void Postfix(Il2Cpp.Dysentery __instance)
             {
-                SaveDataManager sdm = Implementation.sdm;
+                SaveDataManager sdm = Mod.sdm;
                 sdm.Save("", "dysenteryCause");
             }
 
         }
 
+        [HarmonyPatch(typeof(AfflictionComponent.Utilities.VanillaOverrides), nameof(AfflictionComponent.Utilities.VanillaOverrides.DysenteryMethod))]
+
+        private static class DysenteryOverride
+        {
+            public static void Prefix(ref Panel_FirstAid __instance, ref int selectedAfflictionIndex, ref int num, ref int num4)
+            {
+                Panel_FirstAid panel = InterfaceManager.GetPanel<Panel_FirstAid>();
+                panel.m_SelectedAffButton.m_LabelCause.text = Mod.sdm.LoadData("dysenteryCause");
+            }
+        }
     }
 }

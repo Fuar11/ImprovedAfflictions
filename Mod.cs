@@ -8,13 +8,17 @@ using Il2Cpp;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine;
 using ImprovedAfflictions.Component;
-using ImprovedAfflictions.Pain.Component;
+using AfflictionComponent.Components;
+using ImprovedAfflictions.CustomAfflictions;
+using Random = UnityEngine.Random;
+using ComplexLogger;
 
 namespace ImprovedAfflictions;
-internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
+internal sealed class Mod : MelonMod, Moment.IScheduledEventExecutor
 {
-    internal static Implementation Instance { get; private set; }
-
+    internal static Mod Instance { get; private set; }
+    internal static ComplexLogger<Mod> Logger = new();
+    internal static PainManager painManager;
     internal static SaveDataManager sdm = new SaveDataManager();
 
     public string ScheduledEventExecutorId => "Fuar.ImprovedAfflictions";
@@ -56,19 +60,38 @@ internal sealed class Implementation : MelonMod, Moment.IScheduledEventExecutor
         Settings.OnLoad();
     }
 
-    public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+    public override void OnSceneWasInitialized(int buildIndex, string sceneName)
     {
-        if (sceneName.ToLowerInvariant().Contains("menu") || sceneName.ToLowerInvariant().Contains("dlc") || sceneName.ToLowerInvariant().Contains("boot") || sceneName.ToLowerInvariant() == "empty") return;
+        if (sceneName.ToLowerInvariant().Contains("boot") || sceneName.ToLowerInvariant().Contains("empty")) return;
+        if (sceneName.ToLowerInvariant().Contains("menu"))
+        {
+            UnityEngine.Object.Destroy(GameObject.Find("PainManager"));
+            painManager = null;
+            return;
+        }
 
         if (!sceneName.Contains("_SANDBOX") && !sceneName.Contains("_DLC") && !sceneName.Contains("_WILDLIFE"))
         {
-            if (!GameObject.Find("SCRIPT_ConditionSystems").GetComponent<AfflictionComponent>())
+            if (painManager == null)
             {
-                GameObject.Find("SCRIPT_ConditionSystems").AddComponent<AfflictionComponent>();
+                GameObject PainManager = new() { name = "PainManager", layer = vp_Layer.Default };
+                UnityEngine.Object.Instantiate(PainManager, GameManager.GetVpFPSPlayer().transform);
+                UnityEngine.Object.DontDestroyOnLoad(PainManager);
+                painManager = PainManager.AddComponent<PainManager>();
             }
         }
     }
 
-   
+    public override void OnUpdate()
+    {
+        if (InputManager.GetKeyDown(InputManager.m_CurrentContext, KeyCode.Keypad7))
+        {
+            float duration = Random.Range(96f, 240f);
+            string desc = "You've sufferred head trauma and are suffering from a concussion. Take painkillers to numb the debilitating effects while your head rests to heal.";
 
+            //if (AfflictionHelper.ResetIfHasAffliction("Concussion", AfflictionBodyArea.Head, false)) return;
+
+            new CustomPainAffliction("Concussion", "Head Trauma", desc, "", "ico_injury_diabetes", AfflictionBodyArea.Head, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 40f, 6f, 2.5f).Start();
+        }
+    }
 }

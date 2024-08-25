@@ -8,48 +8,44 @@ using HarmonyLib;
 using Il2Cpp;
 using UnityEngine;
 using ImprovedAfflictions.Utils;
-using ImprovedAfflictions.Component;
-using System.Text.Json;
+using ImprovedAfflictions.CustomAfflictions;
+using ImprovedAfflictions.Pain;
+using AfflictionComponent.Components;
+using Newtonsoft.Json;
 using MelonLoader;
 using Random = UnityEngine.Random;
 
-namespace ImprovedAfflictions.Pain.Component
+namespace ImprovedAfflictions.Component
 {
     [RegisterTypeInIl2Cpp]
-    internal class AfflictionComponent : MonoBehaviour
+    internal class PainManager : MonoBehaviour
     {
-
-        public List<PainAffliction> m_PainInstances = new List<PainAffliction>();
-
-        public SprainPain m_PainManager = GameManager.GetSprainPainComponent();
         private PainEffects m_PainEffects = new PainEffects();
-        private PainHelper m_PainHelper = new PainHelper();
+        private AfflictionHelper m_PainHelper = new AfflictionHelper();
 
-        public float m_PainLevel = 0;
+        public float m_TotalPainLevel;
         public float m_PainStartingLevel = 0;
-        public float m_PainkillerLevel = 0;
 
-        public bool m_PainEffectsCheck;
-        public float m_PainkillerStandardAmount = 20f;
-
-        public float m_SecondsSinceLastODFx;
-        public float m_ODPulseFxFrequencySeconds = 4f;
-        public float m_ODPulseFxIntensity = 2f; //default, might change
-
-        public float m_ConcussionDrugLevel;
-        public float m_InsomniaDrugLevel;
-
+        public float m_PainkillerLevel = 0f;
         public float m_PainkillerIncrementAmount;
         public float m_PainkillerDecrementStartingAmount;
 
-        public bool m_HasConcussion;
+        public float m_SecondsSinceLastODFx;
+        public float m_ODPulseFxFrequencySeconds = 4f;
+        public float m_ODPulseFxIntensity = 2f;
+
+        public float m_SecondsSinceLastPulseFx;
+        public float m_PulseFxFrequencySeconds;
+        public float m_PulseFxIntensity;
+
+        private bool m_PainEffectsCheck = false;
+        private string m_PulseFxWwiseRtpcName;
+
+        public AfflictionManager am = GameObject.Find("AfflictionManager").GetComponent<AfflictionManager>();
 
         public void Start()
         {
-
             LoadData();
-            m_PainEffectsCheck = false;
-
         }
 
         public void Update()
@@ -61,27 +57,16 @@ namespace ImprovedAfflictions.Pain.Component
             float tODHours = GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
             float hoursPlayedNotPaused = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused();
 
-            for (int num = m_PainInstances.Count - 1; num >= 0; num--)
-            {
-                PainAffliction pain = m_PainInstances[num];
-
-                pain.DecreasePainLevel(tODHours);
-
-                if (hoursPlayedNotPaused > pain.m_EndTime)
-                {
-                    CurePainInstance(num);
-                    InterfaceManager.GetPanel<Panel_FirstAid>().UpdateDueToAfflictionHealed();
-                }
-            }
-
             //constantly changing
-            m_PainLevel = GetTotalPainLevel();
+            m_TotalPainLevel = GetTotalPainLevel();
+
+            MaybeApplyOverdoseOrRisk();
 
             if (m_PainkillerLevel < m_PainkillerIncrementAmount)
             {
                 m_SecondsSinceLastODFx += Time.deltaTime;
                 IncrementPainkillerLevel(tODMinutes / 20);
-                MaybeDoOverdoseEffects();
+                //MaybeDoOverdoseEffects();
                 m_PainEffectsCheck = false;
             }
             else if (IsOnPainkillers())
@@ -90,7 +75,7 @@ namespace ImprovedAfflictions.Pain.Component
 
                 if (!m_PainEffectsCheck)
                 {
-                    m_PainHelper.UpdatePainEffects();
+                    PainEffects.UpdatePainEffects();
                     m_PainEffectsCheck = true;
                 }
 
@@ -105,7 +90,7 @@ namespace ImprovedAfflictions.Pain.Component
 
                 if (!m_PainEffectsCheck)
                 {
-                    m_PainHelper.UpdatePainEffects();
+                    PainEffects.UpdatePainEffects();
                     m_PainEffectsCheck = true;
                 }
 
@@ -116,46 +101,53 @@ namespace ImprovedAfflictions.Pain.Component
 
             MaybeDoPainEffects();
 
+            
+
         }
 
         //DATA
         public void LoadData()
         {
-            SaveDataManager sdm = Implementation.sdm;
 
-            string? data = sdm.LoadData("component");
+            string? data = Mod.sdm.LoadData("component");
 
             if (data is not null)
             {
+                PainManagerSaveDataProxy? ldp = JsonConvert.DeserializeObject<PainManagerSaveDataProxy>(data);
 
-                AfflictionComponentSaveDataProxy? sdp = JsonSerializer.Deserialize<AfflictionComponentSaveDataProxy>(data);
-
-                if (sdp is not null)
+                if(ldp is not null)
                 {
-                    m_PainInstances = sdp.m_PainInstances;
-                    m_PainLevel = sdp.m_PainLevel;
-                    m_PainStartingLevel = sdp.m_PainStartingLevel;
-                    m_PainkillerLevel = sdp.m_PainkillerLevel;
-                    m_HasConcussion = sdp.m_HasConcussion;
-                    m_InsomniaDrugLevel = sdp.m_InsomniaDrugLevel;
-                    m_ConcussionDrugLevel = sdp.m_ConcussionDrugLevel;
-                    m_PainkillerIncrementAmount = sdp.m_PainkillerIncrementAmount;
-                    m_PainkillerDecrementStartingAmount = sdp.m_PainkillerDecrementStartingAmount;
+                    m_PainkillerLevel = ldp.m_PainkillerLevel;
+                    m_PainkillerIncrementAmount = ldp.m_PainkillerIncrementAmount;
+                    m_PainkillerDecrementStartingAmount = ldp.m_PainkillerDecrementStartingAmount;
+                    m_SecondsSinceLastODFx = ldp.m_SecondsSinceLastODFx;
+                    m_SecondsSinceLastPulseFx = ldp.m_SecondsSinceLastPulseFx;
+                    m_PulseFxFrequencySeconds = ldp.m_PulseFxFrequencySeconds;
+                    m_PulseFxIntensity = ldp.m_PulseFxIntensity;
                 }
+                else
+                {
+                    Mod.Logger.Log("Pain manager load data is null", ComplexLogger.FlaggedLoggingLevel.Debug);
+                }
+
             }
         }
 
         public void SaveData()
         {
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Formatting = Formatting.Indented
+            };
 
-            SaveDataManager sdm = Implementation.sdm;
-
-            AfflictionComponentSaveDataProxy sdp = new AfflictionComponentSaveDataProxy(m_PainInstances, m_PainLevel, m_PainStartingLevel, m_PainkillerLevel, m_ConcussionDrugLevel, m_InsomniaDrugLevel, m_PainkillerIncrementAmount, m_PainkillerDecrementStartingAmount, m_HasConcussion);
-
-            string data = JsonSerializer.Serialize<AfflictionComponentSaveDataProxy>(sdp);
-
-            sdm.Save(data, "component");
-
+            PainManagerSaveDataProxy dataToSave = new PainManagerSaveDataProxy(m_PainkillerLevel, m_PainkillerIncrementAmount, m_PainkillerDecrementStartingAmount, m_SecondsSinceLastODFx, m_SecondsSinceLastPulseFx, m_PulseFxFrequencySeconds, m_PulseFxIntensity);
+            string json = JsonConvert.SerializeObject(dataToSave, settings);
+            if (json is null)
+            {
+                return;
+            }
+            Mod.sdm.Save(json, "component");
         }
 
         //PAINKILLERS
@@ -180,23 +172,14 @@ namespace ImprovedAfflictions.Pain.Component
 
         public bool PainkillersInEffect()
         {
-            return m_PainkillerLevel >= m_PainLevel;
+            return m_PainkillerLevel >= m_TotalPainLevel;
         }
 
         public bool PainkillersInEffect(float num, bool forIndex = false)
         {
-
-            if (num == 0 && !forIndex) return false;
-
-            //if forIndex is true then the value passed is being used as index and not value to check for. 
-            if (forIndex)
-            {
-                return m_PainkillerLevel >= m_PainInstances[(int)num].m_PainLevel;
-            }
-
             return m_PainkillerLevel >= num;
         }
-
+        
         public bool IsOnPainkillers()
         {
             return m_PainkillerLevel > 0;
@@ -245,92 +228,28 @@ namespace ImprovedAfflictions.Pain.Component
             m_PainkillerDecrementStartingAmount = m_PainkillerIncrementAmount;
         }
 
-        //PAIN
-        public void AddPainInstance(string cause, AfflictionBodyArea location, float duration, float maxDuration, float painLevel, float pulseFxIntensity, float pulseFxFrequencySeconds)
-        {
-
-            PainAffliction newPain = new PainAffliction();
-            newPain.m_Cause = cause;
-            newPain.m_Location = location;
-            newPain.m_EndTime = GameManager.GetTimeOfDayComponent().GetHoursPlayedNotPaused() + duration;
-            newPain.m_MaxDuration = maxDuration;
-            newPain.m_PainLevel = painLevel;
-            newPain.m_StartingPainLevel = painLevel;
-            newPain.m_PulseFxIntensity = pulseFxIntensity;
-            newPain.m_PulseFxFrequencySeconds = pulseFxFrequencySeconds;
-            newPain.m_PulseFxMaxDuration = duration;
-
-            m_PainStartingLevel += newPain.m_PainLevel;
-
-            m_PainInstances.Add(newPain);
-        }
-
-        public void UpdatePainInstance(int index, PainAffliction pi)
-        {
-
-            float newDuration = Random.Range(pi.m_PulseFxMaxDuration, pi.m_MaxDuration);
-            pi.m_PulseFxMaxDuration = newDuration;
-
-            string cause = pi.m_Cause;
-            AfflictionBodyArea location = pi.m_Location;
-
-            if (cause.ToLowerInvariant() != "fall" && cause.ToLowerInvariant() != "broken rib" && cause.ToLowerInvariant() != "console" && !cause.ToLowerInvariant().Contains("chemical"))
-            {
-                PlayerDamageEvent.SpawnDamageEvent(UIPatches.GetAfflictionNameBasedOnCause(cause, location), "GAMEPLAY_Affliction", UIPatches.GetIconNameBasedOnCause(cause), InterfaceManager.m_FirstAidRedColor, fadeout: true, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventDisplaySeconds, InterfaceManager.GetPanel<Panel_HUD>().m_DamageEventFadeOutSeconds);
-            }
-
-            m_PainStartingLevel -= m_PainInstances[index].m_PainLevel;
-            m_PainInstances[index] = pi;
-            m_PainStartingLevel += pi.m_PainLevel;
-        }
-        public void CurePainInstance(int index)
-        {
-
-            PlayerDamageEvent.SpawnAfflictionEvent(UIPatches.GetAfflictionNameBasedOnCause(m_PainInstances[index].m_Cause, m_PainInstances[index].m_Location), "GAMEPLAY_Healed", UIPatches.GetIconNameBasedOnCause(m_PainInstances[index].m_Cause), InterfaceManager.m_FirstAidBuffColor);
-
-            m_PainInstances.RemoveAt(index);
-            m_PainStartingLevel = GetTotalPainStartingLevel();
-            m_PainHelper.UpdatePainEffects();
-        }
-
-       
-        public PainAffliction GetPainInstance(int index)
-        {
-            return m_PainInstances[index];
-        }
-
-        public PainAffliction? GetPainInstanceAtLocation(AfflictionBodyArea location)
-        {
-            return (m_PainInstances.Count == 0) ? null : m_PainInstances.Find(p => p.m_Location == location);
-        }
-
-        public PainAffliction? GetPainInstanceAtLocationWithCause(AfflictionBodyArea location, string cause)
-        {
-            return (m_PainInstances.Count == 0) ? null : m_PainInstances.Find(p => p.m_Location == location && p.m_Cause == cause);
-        }
-
         public float GetTotalPainLevel()
         {
-            if (m_PainInstances.Count == 0) return 0;
+            if (am.m_Afflictions.Count == 0) return 0;
 
             float total = 0;
 
-            foreach (var pain in m_PainInstances)
+            foreach (CustomPainAffliction aff in am.m_Afflictions.OfType<CustomPainAffliction>())
             {
-                total += pain.m_PainLevel;
+                total += aff.m_PainLevel;
             }
 
             return total;
         }
         public float GetTotalPainLevelForPainAtLocations(AfflictionBodyArea[] locations, bool checkForStartingLevel = false)
         {
-            if (m_PainInstances.Count == 0) return 0;
+            if (am.m_Afflictions.Count == 0) return 0;
 
             float total = 0;
 
-            foreach (var pain in m_PainInstances)
+            foreach (CustomPainAffliction aff in am.m_Afflictions.OfType<CustomPainAffliction>())
             {
-                if(locations.Contains(pain.m_Location)) total += checkForStartingLevel ? pain.m_StartingPainLevel : pain.m_PainLevel;
+                if (locations.Contains(aff.m_Location)) total += checkForStartingLevel ? aff.m_StartingPainLevel : aff.m_PainLevel;
             }
 
             return total;
@@ -338,19 +257,22 @@ namespace ImprovedAfflictions.Pain.Component
         }
         public float GetTotalPainStartingLevel()
         {
-            if (m_PainInstances.Count == 0) return 0;
+
+            if (am.m_Afflictions.Count == 0) return 0;
 
             float total = 0;
 
-            foreach (var pain in m_PainInstances)
+            foreach (CustomPainAffliction aff in am.m_Afflictions.OfType<CustomPainAffliction>())
             {
-                total += pain.m_StartingPainLevel;
+                total += aff.m_StartingPainLevel;
             }
 
             return total;
         }
 
         //OVERDOSE
+
+        
         public void MaybeDoOverdoseEffects()
         {
 
@@ -363,7 +285,7 @@ namespace ImprovedAfflictions.Pain.Component
 
                 if(m_SecondsSinceLastODFx > m_ODPulseFxFrequencySeconds)
                 {
-                    effects.OverdoseVignette(m_ODPulseFxIntensity);
+                    PainEffects.OverdoseVignette(m_ODPulseFxIntensity);
                     m_SecondsSinceLastODFx = 0;
                 }
 
@@ -384,7 +306,6 @@ namespace ImprovedAfflictions.Pain.Component
                 }
                 else
                 {
-
                     if(GameManager.GetVpFPSCamera().m_BasePitch != 0f &&
                     GameManager.GetVpFPSCamera().m_BaseRoll != 0f)
                     {
@@ -396,49 +317,48 @@ namespace ImprovedAfflictions.Pain.Component
 
         }
 
+        
         public void MaybeDoPainEffects()
         {
             //overall pain level is not less than 20 percent of the most recent highest pain level
-            if ((m_PainLevel / m_PainStartingLevel) * 100 > 20)
+            if ((m_TotalPainLevel / m_PainStartingLevel) * 100 > 20)
             {
-                m_PainManager.m_SecondsSinceLastPulseFx += Time.deltaTime;
-                if (m_PainManager.m_SecondsSinceLastPulseFx > m_PainManager.m_PulseFxFrequencySeconds)
+                m_SecondsSinceLastPulseFx += Time.deltaTime;
+                if (m_SecondsSinceLastPulseFx > m_PulseFxFrequencySeconds)
                 {
-
-                    if (m_PainHelper.GetConcussion() is not null)
+                    if (Concussion.Concussion.HasConcussion(true))
                     {
-                        m_PainEffects.HeadTraumaPulse(m_PainManager.m_PulseFxIntensity);
+                        PainEffects.HeadTraumaPulse(m_PulseFxIntensity);
                     }
-                    else if (m_PainManager.m_PulseFxIntensity > 1f)
+                    else if (m_PulseFxIntensity > 1f)
                     {
-                        m_PainEffects.IntensePainPulse(m_PainManager.m_PulseFxIntensity);
+                        PainEffects.IntensePainPulse(m_PulseFxIntensity);
                     }
                     else
                     {
-                        GameManager.GetCameraEffects().SprainPulse(m_PainManager.m_PulseFxIntensity);
+                        GameManager.GetCameraEffects().SprainPulse(m_PulseFxIntensity);
                     }
-
 
                     //random variation between pain pulses
                     //__instance.m_PulseFxFrequencySeconds = Random.Range(3f, __instance.m_PulseFxFrequencySeconds + 5f);
-                    m_PainManager.m_SecondsSinceLastPulseFx = 0f;
+                    m_SecondsSinceLastPulseFx = 0f;
                 }
             }
             else
             {
                 GameManager.GetCameraEffects().SprainPulse(0f);
-                m_PainManager.m_SecondsSinceLastPulseFx = 0f;
+                m_SecondsSinceLastPulseFx = 0f;
             }
-            if (!string.IsNullOrEmpty(m_PainManager.m_PulseFxWwiseRtpcName))
+            if (!string.IsNullOrEmpty(m_PulseFxWwiseRtpcName))
             {
 
-                float val = m_PainHelper.IsOnPainkillers() ? 100f : 50f;
+                float val = IsOnPainkillers() ? 100f : 50f;
 
                 float in_value = GameManager.GetCameraStatusEffects().m_SprainAmountSin * val;
                 GameObject soundEmitterFromGameObject = GameAudioManager.GetSoundEmitterFromGameObject(GameManager.GetPlayerObject());
-                AkSoundEngine.SetRTPCValue(m_PainManager.m_PulseFxWwiseRtpcName, in_value, soundEmitterFromGameObject);
+                AkSoundEngine.SetRTPCValue(m_PulseFxWwiseRtpcName, in_value, soundEmitterFromGameObject);
             }
-        }
+        } 
 
         public void ApplyPainkillerDamage()
         {
@@ -454,11 +374,26 @@ namespace ImprovedAfflictions.Pain.Component
                 float fatigueValue = fatigueIncreasePerHour * GameManager.GetTimeOfDayComponent().GetTODHours(Time.deltaTime);
                 GameManager.GetFatigueComponent().AddFatigue(fatigueValue);
             }
-
-
-
         }
 
+        public void MaybeApplyOverdoseOrRisk()
+        {
+
+            string riskDesc = "You have consumed too many meds and your blood drug level is rising. You are at risk of an overdose.";
+            string riskDesc2 = "Refrain from taking medications and rest to let the drugs leave your system.";
+
+            string odDesc = "You have consumed too much medication and your blood drug level is dangerously high. You are suffering from an overdose.";
+            string odDesc2 = "Refrain from taking any medication and rest to let the drugs leave your system.";
+
+            if(IsHighOnPainkillers() && !IsOverdosing() && !am.HasAfflictionOfType(typeof(OverdoseRisk)))
+            {
+                new OverdoseRisk("Overdose Risk", "Painkillers", riskDesc, riskDesc2, "ico_units_pill", AfflictionBodyArea.Chest, true, [], []).Start();
+            }
+            else if(IsOverdosing() && !am.HasAfflictionOfType(typeof(Overdose)))
+            {
+                new Overdose("Overdose", "Painkillers", odDesc, odDesc2, "ico_units_pill", AfflictionBodyArea.Chest, true, [], []).Start();
+            }
+        }
 
     }
 }

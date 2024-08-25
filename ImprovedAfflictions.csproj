@@ -22,11 +22,22 @@
 		<PackageReference Include="STBlade.Modding.TLD.Il2CppAssemblies.Windows" Version="2.28.0" />
 		<PackageReference Include="stblade.Modding.TLD.ModData" Version="1.5.1" />
 		<PackageReference Include="stblade.Modding.TLD.ModSettings" Version="1.9.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 
 		<Reference Include="Moment.dll">
 			<HintPath>$(ModsPath)\Moment.dll</HintPath>
 		</Reference>
+		<Reference Include="AfflictionComponent.dll">
+			<HintPath>$(ModsPath)\AfflictionComponent.dll</HintPath>
+		</Reference>
 	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="ComplexLogger">
+			<HintPath>$(ModsPath)\ComplexLogger.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
 
 	<!-- This is a build event. It will copy your dll to the currently defined TheLongDarkPath's Mods folder -->
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

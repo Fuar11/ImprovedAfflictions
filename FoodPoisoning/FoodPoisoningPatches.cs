@@ -11,6 +11,7 @@ using System.Text.Json;
 using Il2CppSystem.Data;
 using ImprovedAfflictions.Utils;
 using UnityEngine;
+using AfflictionComponent;
 using MelonLoader;
 using Il2CppEpic.OnlineServices;
 
@@ -100,7 +101,7 @@ namespace ImprovedAfflictions.FoodPoisoning
                 MelonLogger.Msg("Taking antibiotics");
 
                 int val = Random.Range(3, 8);
-                Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, val, 0), "takeEffectAntibiotics"));
+                Moment.Moment.ScheduleRelative(Mod.Instance, new Moment.EventRequest((0, val, 0), "takeEffectAntibiotics"));
             }
 
         } **/
@@ -161,13 +162,13 @@ namespace ImprovedAfflictions.FoodPoisoning
             {
 
                 FoodPoisoningHelper fph = new FoodPoisoningHelper();
-                SaveDataManager sdm = Implementation.sdm;
+                SaveDataManager sdm = Mod.sdm;
 
                 if (fph.RollFoodPoisoningChance(__instance.m_FoodItemEaten, __instance.m_FoodItemEatenStartingCalories) && sdm.LoadData("scheduledFoodPoisoning") != "true" && !GameManager.GetFoodPoisoningComponent().HasTakenAntibiotics())
                 {
                     int val = Random.Range(Settings.settings.fpMinTime, Settings.settings.fpMaxTime);
                     sdm.Save("true", "scheduledFoodPoisoning");
-                    Moment.Moment.ScheduleRelative(Implementation.Instance, new Moment.EventRequest((0, val, 0), "takeEffectFoodPoisoning", __instance.m_FoodItemEaten.DisplayName));
+                    Moment.Moment.ScheduleRelative(Mod.Instance, new Moment.EventRequest((0, val, 0), "takeEffectFoodPoisoning", __instance.m_FoodItemEaten.DisplayName));
                 }
             }
 
@@ -198,7 +199,18 @@ namespace ImprovedAfflictions.FoodPoisoning
 
 
         }
-        
-        
+
+        [HarmonyPatch(typeof(AfflictionComponent.Utilities.VanillaOverrides), nameof(AfflictionComponent.Utilities.VanillaOverrides.FoodPoisoningMethod))]
+
+        private static class FoodPoisoningOverride
+        {
+            public static void Postfix(ref Panel_FirstAid __instance, ref int selectedAfflictionIndex, ref int num, ref int num4)
+            {
+
+                Panel_FirstAid panel = InterfaceManager.GetPanel<Panel_FirstAid>();
+                panel.m_ObjectRestRemaining.SetActive(false);
+                num4 = Mathf.CeilToInt(FoodPoisoningHelper.GetRemainingHours() * 60f);
+            }
+        }
     }
 }

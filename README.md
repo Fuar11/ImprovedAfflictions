@@ -14,11 +14,7 @@ A bite from a wolf or bear during an attack can cause blood loss or a sprain. Up
 
 ### Falls
 
-Falling from a rope, heights or simply tripping on an incline or slope can cause a sprained ankle or sprained wrist. While you can stabilize the afflicted area, the pain will last for a couple more (up to 5) days. This affliction is most similar to vanilla pain, but lasts much longer.
-
-### Broken Ribs
-
-Unlike in vanilla, broken ribs and pain are separate. Upon breaking a rib or two, the pain will be afflicted and lasts as long as it takes the rib to heal. Painkillers can be taken on the pain affliction itself. Broken ribs are a common affliction from moose attacks, but with IA falling off ropes and getting pummeled by a bear can also cause broken ribs. 
+Falling from a rope, heights or simply tripping on an incline or slope can cause a sprained ankle or sprained wrist. While you can stabilize the afflicted area (vanilla affliction), the pain will last for a couple more (up to 5) days. This affliction is most similar to vanilla pain, but lasts much longer.
 
 ### Concussion
 
@@ -93,8 +89,10 @@ you will get tired and colder much quicker. Along with a slight increase the car
 * Install MelonLoader by downloading and running [MelonLoader.Installer.exe](https://github.com/HerpDerpinstine/MelonLoader/releases/latest/download/MelonLoader.Installer.exe)
 * Install the following dependencies in your mods folder: 
 
+- [AfflictionComponent](https://github.com/TLD-Mods/AfflictionComponent/releases/latest)
 - [ModData](https://github.com/dommrogers/ModData/releases/latest)
 - [Moment](https://github.com/No3371/TLD-Moment/releases/latest)
 - [ModSettings](https://github.com/DigitalzombieTLD/ModSettings/releases/latest)
+- [ComplexLogger](https://github.com/Arkhorse/Complex-Logger/releases/latest)
 
 * Install the latest release and drop it in your mods folder

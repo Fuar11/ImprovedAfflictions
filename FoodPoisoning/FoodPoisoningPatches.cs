@@ -168,6 +168,7 @@ namespace ImprovedAfflictions.FoodPoisoning
                 {
                     int val = Random.Range(Settings.settings.fpMinTime, Settings.settings.fpMaxTime);
                     sdm.Save("true", "scheduledFoodPoisoning");
+                    Mod.Logger.Log($"Scheduled food poisoning in {val} hours", ComplexLogger.FlaggedLoggingLevel.Debug);
                     Moment.Moment.ScheduleRelative(Mod.Instance, new Moment.EventRequest((0, val, 0), "takeEffectFoodPoisoning", __instance.m_FoodItemEaten.DisplayName));
                 }
             }

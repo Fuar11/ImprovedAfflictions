@@ -71,7 +71,7 @@ namespace ImprovedAfflictions.Pain
                         }
                     }
                 }
-                __instance.m_DurationLabel.text = Il2Cpp.Utils.GetExpandedDurationString(Mathf.RoundToInt(__instance.m_DurationHours * 60f));
+                //__instance.m_DurationLabel.text = Il2Cpp.Utils.GetExpandedDurationString(Mathf.RoundToInt(__instance.m_DurationHours * 60f));
 
             }
         }

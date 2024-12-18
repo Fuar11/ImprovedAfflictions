@@ -36,14 +36,9 @@ namespace ImprovedAfflictions.Pain
             {
                 PainManager pm = Mod.painManager;
 
-                Mod.Logger.Log("Using first aid item", ComplexLogger.FlaggedLoggingLevel.Debug);
-
                 if (__instance.m_FirstAidItemUsed.name.ToLowerInvariant().Contains("painkiller"))
                 {
                     float amount = __instance.m_FirstAidItemUsed.m_GearItem.m_CurrentHP < 45 ? 20f * ((__instance.m_FirstAidItemUsed.m_GearItem.m_CurrentHP + 20) / 100) : 20f;
-
-                    Mod.Logger.Log("Big testo", ComplexLogger.FlaggedLoggingLevel.Debug);
-
                     pm.AdministerPainkillers(amount);
                 }
             }

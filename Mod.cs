@@ -35,7 +35,7 @@ internal sealed class Mod : MelonMod, Moment.IScheduledEventExecutor
                     GameManager.GetDysenteryComponent().DysenteryStart(displayIcon: true);
                     sdm.Save(eventId, "dysenteryCause");
                 }
-                else if (eventId.ToLowerInvariant().Contains("pinnacle") || eventId.ToLowerInvariant().Contains("dog") || eventId.ToLowerInvariant().Contains("milk") || eventId.ToLowerInvariant().Contains("corn"))
+                else if (eventId.ToLowerInvariant().Contains("pinnacle") || eventId.ToLowerInvariant().Contains("dog") || eventId.ToLowerInvariant().Contains("milk") || eventId.ToLowerInvariant().Contains("corn") || eventId.ToLowerInvariant().Contains("soup"))
                 {
 
                     if (Il2Cpp.Utils.RollChance(50f)) GameManager.GetFoodPoisoningComponent().FoodPoisoningStart(eventId, displayIcon: true);
@@ -47,6 +47,7 @@ internal sealed class Mod : MelonMod, Moment.IScheduledEventExecutor
                 }
                 else
                 {
+                    Logger.Log("Starting food poisoning", FlaggedLoggingLevel.Debug);
                     GameManager.GetFoodPoisoningComponent().FoodPoisoningStart(eventId, displayIcon: true);
                 }
                 break;
@@ -79,19 +80,6 @@ internal sealed class Mod : MelonMod, Moment.IScheduledEventExecutor
                 UnityEngine.Object.DontDestroyOnLoad(PainManager);
                 painManager = PainManager.AddComponent<PainManager>();
             }
-        }
-    }
-
-    public override void OnUpdate()
-    {
-        if (InputManager.GetKeyDown(InputManager.m_CurrentContext, KeyCode.Keypad7))
-        {
-            float duration = Random.Range(96f, 240f);
-            string desc = "You've sufferred head trauma and are suffering from a concussion. Take painkillers to numb the debilitating effects while your head rests to heal.";
-
-            //if (AfflictionHelper.ResetIfHasAffliction("Concussion", AfflictionBodyArea.Head, false)) return;
-
-            new CustomPainAffliction("Concussion", "Head Trauma", desc, "", "ico_injury_diabetes", AfflictionBodyArea.Head, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 40f, 6f, 2.5f).Start();
         }
     }
 }

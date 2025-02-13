@@ -35,10 +35,20 @@ namespace ImprovedAfflictions.Pain
             public static void Postfix(PlayerManager __instance)
             {
                 PainManager pm = Mod.painManager;
+                FirstAidItem fia = __instance.m_FirstAidItemUsed;
 
-                if (__instance.m_FirstAidItemUsed.name.ToLowerInvariant().Contains("painkiller"))
+                if (fia == null) fia = InterfaceManager.GetPanel<Panel_Affliction>().m_FirstAidItem;
+
+                if (fia == null)
                 {
-                    float amount = __instance.m_FirstAidItemUsed.m_GearItem.m_CurrentHP < 45 ? 20f * ((__instance.m_FirstAidItemUsed.m_GearItem.m_CurrentHP + 20) / 100) : 20f;
+                    Mod.Logger.Log("First aid item is null, applying base painkiller value", ComplexLogger.FlaggedLoggingLevel.Error);
+                    pm.AdministerPainkillers(5f);
+                    return;
+                }
+
+                if (fia.name.ToLowerInvariant().Contains("painkiller"))
+                {
+                    float amount = fia.m_GearItem.m_CurrentHP < 45 ? 20f * ((fia.m_GearItem.m_CurrentHP + 20) / 100) : 20f;
                     pm.AdministerPainkillers(amount);
                 }
             }
@@ -51,6 +61,9 @@ namespace ImprovedAfflictions.Pain
 
             public static void Postfix(PlayerManager __instance)
             {
+
+                Mod.Logger.Log("Use food item called", ComplexLogger.FlaggedLoggingLevel.Debug);
+
                 if (__instance.m_FoodItemEaten.name.ToLowerInvariant().Contains("rosehiptea"))
                 {
                     Random rand = new Random();
@@ -58,6 +71,7 @@ namespace ImprovedAfflictions.Pain
                     int amount = rand.Next(5, 10);
 
                     Mod.painManager.AdministerPainkillers(amount);
+                    Mod.Logger.Log("Adding painkillers from food item", ComplexLogger.FlaggedLoggingLevel.Debug);
                 }
 
             }

@@ -70,7 +70,7 @@ namespace ImprovedAfflictions.FoodPoisoning
                 return true;
             }
 
-            float percent = 100f - gi.GetNormalizedCondition();
+            float percent = 100f - gi.GetNormalizedCondition() * 100f;
 
             //if player has scurvy, they have a much higher chance of getting food poisoning, regardless of food type
             if (GameManager.GetScurvyComponent().HasAffliction()) percent += 25;

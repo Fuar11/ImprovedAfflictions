@@ -19,8 +19,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="STBlade.Modding.TLD.Il2CppAssemblies.Windows" Version="2.51.0" />
-		<PackageReference Include="STBlade.Modding.TLD.ModData" Version="1.5.1" />
+		<PackageReference Include="Waltz.Modding.TLD.Il2CppAssemblies.Windows" Version="2.52.0" />
 
 		<Reference Include="ModSettings.dll">
 			<HintPath>$(ModsPath)\ModSettings.dll</HintPath>
@@ -30,6 +29,9 @@
 		</Reference>
 		<Reference Include="AfflictionComponent.dll">
 			<HintPath>$(ModsPath)\AfflictionComponent.dll</HintPath>
+		</Reference>
+		<Reference Include="ModData.dll">
+			<HintPath>$(ModsPath)\ModData.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

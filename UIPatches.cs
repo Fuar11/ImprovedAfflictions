@@ -18,7 +18,6 @@ using Il2CppSystem.Xml.Schema;
 using ImprovedAfflictions.FoodPoisoning;
 using ImprovedAfflictions.Component;
 using Il2CppSystem.Security;
-using Unity.VisualScripting;
 using Il2CppTLD.IntBackedUnit;
 
 namespace ImprovedAfflictions

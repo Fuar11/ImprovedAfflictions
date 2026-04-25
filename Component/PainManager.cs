@@ -394,6 +394,5 @@ namespace ImprovedAfflictions.Component
                 new Overdose("Overdose", "Painkillers", odDesc, odDesc2, "ico_units_pill", AfflictionBodyArea.Chest, true, [], []).Start();
             }
         }
-
     }
 }

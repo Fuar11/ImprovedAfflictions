@@ -15,6 +15,7 @@ using Il2CppTLD.Interactions;
 using AfflictionComponent.Components;
 using ImprovedAfflictions.Component;
 using ImprovedAfflictions.Concussion;
+using ImprovedAfflictions.CustomAfflictions;
 
 namespace ImprovedAfflictions.Pain
 {
@@ -111,18 +112,12 @@ namespace ImprovedAfflictions.Pain
 
                 if (pm.am.m_Afflictions.Count == 0) return;
                 
-                SprainedAnkle sprains = new SprainedAnkle();
-
-                //if player has sprained ankle, they are limping which means the speed is already being modified enough
-                if (sprains.HasSprainedAnkle()) return;
-
                 AfflictionBodyArea[] feetAndLegs = { AfflictionBodyArea.FootLeft, AfflictionBodyArea.FootRight, AfflictionBodyArea.LegLeft, AfflictionBodyArea.LegRight };
 
                 float lowerLimbsPainLevel = pm.GetTotalPainLevelForPainAtLocations(feetAndLegs);
                 float lowerLimbsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(feetAndLegs, true);
                 float lowerLimbsPainLevelDifference = (lowerLimbsPainLevel / lowerLimbsStartingPainLevel) * 100;
 
-             
                 if (lowerLimbsPainLevelDifference > 0)
                 {
                     if (GameManager.GetPlayerManagerComponent().PlayerIsSprinting() || GameManager.GetPlayerManagerComponent().PlayerIsWalking())
@@ -136,7 +131,7 @@ namespace ImprovedAfflictions.Pain
                 {
                     if (pm.IsHighOnPainkillers())
                     {
-                        __result /= pm.IsOverdosing() ? 0.8f : 0.9f; 
+                        __result /= pm.IsOverdosing() ? 0.7f : 0.9f; 
                     }
                 }
             }
@@ -485,6 +480,24 @@ namespace ImprovedAfflictions.Pain
                 {
                     __result = false;
                 }
+            }
+
+        }
+
+        [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.PlayerCantSprintBecauseOfInjury))]
+
+        public class PainSprintRestriction
+        {
+
+            public static void Postfix(ref bool __result)
+            {
+
+                PainManager pm = Mod.painManager;
+
+                if (pm.am.GetAfflictionsOfType(typeof(CustomPainAffliction)).Any(aff => aff.HasLimp())){
+                    __result = true;
+                }
+
             }
 
         }

@@ -11,7 +11,7 @@ namespace ImprovedAfflictions.CustomAfflictions
 {
 
     internal class CustomPainAffliction
-        : CustomAffliction, IDuration, IRemedies, IInstance
+        : CustomAffliction, IDuration, IRemedies, IInstance, ILimp
     {
 
         public CustomPainAffliction(string name, string causeText, string description, string? descriptionNoHeal, string spriteName, AfflictionBodyArea location, bool instantHeal, Tuple<string, int, int>[] remedyItems, float duration, float painLevel, float frequency, float fxLevel) : base(name, causeText, description, descriptionNoHeal, spriteName, location)
@@ -44,6 +44,7 @@ namespace ImprovedAfflictions.CustomAfflictions
         public bool InstantHeal { get; set; }
         public Tuple<string, int, int>[] RemedyItems { get; set; }
         public Tuple<string, int, int>[] AltRemedyItems { get; set; }
+        public bool IsLimping { get; set; }
         public InstanceType Type { get; set; }
 
         public override void OnUpdate()
@@ -53,6 +54,8 @@ namespace ImprovedAfflictions.CustomAfflictions
 
             if (Mod.painManager.m_PainkillerLevel < m_PainLevel && Mod.painManager.m_PainkillerIncrementAmount == 0)
             {
+                IsLimping = true;
+
                 if (!NeedsRemedy())
                 {
                     ResetRemedyItems(this);
@@ -60,6 +63,7 @@ namespace ImprovedAfflictions.CustomAfflictions
             }
             else if(Mod.painManager.m_PainkillerLevel >= m_PainLevel && NeedsRemedy())
             {
+                IsLimping = false;
                 UpdatePainkillersOnTheFly();
             }
         }

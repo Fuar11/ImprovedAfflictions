@@ -13,7 +13,6 @@ using ImprovedAfflictions.Utils;
 using UnityEngine;
 using AfflictionComponent;
 using MelonLoader;
-using Il2CppEpic.OnlineServices;
 
 namespace ImprovedAfflictions.FoodPoisoning
 {

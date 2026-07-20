@@ -24,6 +24,10 @@ Blunt trauma to the head may result in a concussion, a new affliction that lasts
 
 When exposed to toxic chemicals, the risk of chemical poisoning will increase much quicker than in vanilla. Alongside this, walking through corrosive fumes with exposed hands or feet will result in getting burned on those exposed very quickly. Corrosive chemical burns will be applied to both hands and feet and last up to 5 to 10 days depending on severity and the area. 
 
+### Sprains
+
+Sprains now last much longer and cannot be stabilized with a bandage. Instead, they use the pain system (see below) and require painkillers to stabilize the pain, which if left untreated limits movement speed and sprinting. 
+
 ## Pain
 
 While the pain affliction has been repurposed, these new afflictions are not without pain. Each affliction now has it's own pain level. When an affliction is contracted, the pain level is at it's maximum and will go down over time as the wound heals. Various afflictions have differing levels of pain, but pain will always go down at a consistent rate per affliction. Once the affliction has healed enough and it's pain has reduced to 30% of it's maximum, the effects will be lessened.
@@ -32,11 +36,12 @@ The effects of pain depend on the severity, affliction and where it's located. B
 
 * Blurred and distorted visual effects
 * Tunnel vision for concussions and intense pain pulses
-* Slower walk speed for lower body injuries on legs and feet
+* Slower walk speed for lower body injuries on legs and feet, as well as limited sprinting
 * Slower break down and crafting speed for upper body injuries on arms and hands
 * Climbing restriction on ropes and rocks (two hands, hand and arm, both arms, combination of those 3, etc...)
 * Slower climbing speed if you are able to climb
 * Reading restriction if you have a concussion
+* Weapon wielding restriction if you have arm or hand injuries
 * Etc...
 
 ## Painkillers

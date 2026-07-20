@@ -1,8 +1,7 @@
 ﻿using AfflictionComponent.Components;
 using Il2Cpp;
 using Il2CppTLD.Gameplay;
-using ImprovedAfflictions.Component;
-using ImprovedAfflictions.CustomAfflictions;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +13,6 @@ namespace ImprovedAfflictions.Utils
     internal class UtilityFunctions
     {
 
-        public static PainManager pm = Mod.painManager;
         public static float MapPercentageToVariable(double percentage, float minVariableValue = 1.0f, float maxVariableValue = 2.0f)
         {
 

@@ -1,6 +1,7 @@
 ﻿using Il2Cpp;
 using Il2CppTLD.Stats;
-using ImprovedAfflictions.CustomAfflictions;
+using PainComponent.CustomAfflictions;
+using PainComponent.Component;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using HarmonyLib;
-using ImprovedAfflictions.Component;
 using ImprovedAfflictions.Utils;
 
 namespace ImprovedAfflictions.Concussion

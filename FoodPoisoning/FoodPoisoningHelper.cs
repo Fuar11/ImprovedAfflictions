@@ -9,8 +9,7 @@ using ImprovedAfflictions.Utils;
 using UnityEngine;
 using MelonLoader;
 using Il2Cpp;
-using ImprovedAfflictions.Pain;
-using ImprovedAfflictions.Component;
+using PainComponent.Component;
 
 namespace ImprovedAfflictions.FoodPoisoning
 {

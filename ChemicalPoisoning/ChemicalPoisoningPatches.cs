@@ -8,7 +8,7 @@ using HarmonyLib;
 using MelonLoader;
 using UnityEngine;
 using System.Collections;
-using ImprovedAfflictions.CustomAfflictions;
+using PainComponent.CustomAfflictions;
 using Random = UnityEngine.Random;
 using ImprovedAfflictions.Utils;
 using static UnityEngine.ParticleSystem;

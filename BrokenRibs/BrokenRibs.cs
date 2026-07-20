@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 using System.Text.Json;
 using Il2CppSystem.Data;
 using ImprovedAfflictions.Utils;
-using ImprovedAfflictions.Pain;
+
 
 namespace ImprovedAfflictions.BrokenRibs
 {

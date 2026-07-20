@@ -2,8 +2,8 @@
 using Il2Cpp;
 using Il2CppSystem.Data;
 using Il2CppTLD.Stats;
-using ImprovedAfflictions.Component;
-using ImprovedAfflictions.CustomAfflictions;
+using PainComponent.CustomAfflictions;
+using PainComponent.Component;
 using ImprovedAfflictions.Utils;
 using System;
 using System.Collections.Generic;
@@ -61,7 +61,7 @@ namespace ImprovedAfflictions.Sprains
                 float duration = Random.Range(48f, 72f);
 
                 string name = "Sprained Wrist";
-                var sprain = new CustomPainAffliction(name, name, AfflictionHelper.GetAfflictionDescription(name), "", "ico_injury_sprainedWrist", afflictionBodyArea, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 15f, 15f, 0.65f);
+                var sprain = new CustomSprainAffliction(name, name, AfflictionHelper.GetAfflictionDescription(name), "", "ico_injury_sprainedWrist", afflictionBodyArea, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 15f, 15f, 0.65f);
                 sprain.SetInstanceTypeBasedOnName();
                 sprain.Start();
 
@@ -114,52 +114,12 @@ namespace ImprovedAfflictions.Sprains
                 float duration = Random.Range(48f, 72f);
 
                 string name = "Sprained Ankle";
-                var sprain = new CustomPainAffliction(name, name, AfflictionHelper.GetAfflictionDescription(name), "", "ico_injury_sprainedAnkle", afflictionBodyArea, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 15f, 15f, 0.65f);
+                var sprain = new CustomSprainAffliction(name, name, AfflictionHelper.GetAfflictionDescription(name), "", "ico_injury_sprainedAnkle", afflictionBodyArea, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 15f, 15f, 0.65f);
                 sprain.SetInstanceTypeBasedOnName();
                 sprain.Start();
 
             }
 
-        }
-
-        [HarmonyPatch(typeof(SprainedWrist), nameof(SprainedWrist.CanEquipItem))]
-
-        public class EquipRestriction
-        {
-
-            public static void Postfix(ref GearItem gi, ref SprainedWrist.CanEquipItemResult __result)
-            {
-
-                if (gi == null) return;
-
-                PainManager pm = Mod.painManager;
-
-                if (gi.IsTwoHandedWeapon())
-                {
-                    AfflictionBodyArea[] hands = { AfflictionBodyArea.HandLeft, AfflictionBodyArea.HandRight };
-
-                    //just hands
-                    float handsPainLevel = pm.GetTotalPainLevelForPainAtLocations(hands);
-                    float handsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(hands, true);
-                    float handsPainDifference = (handsPainLevel / handsStartingPainLevel) * 100;
-
-                    AfflictionBodyArea[] arms = { AfflictionBodyArea.ArmLeft, AfflictionBodyArea.ArmRight };
-
-                    //just arms
-                    float armsPainLevel = pm.GetTotalPainLevelForPainAtLocations(arms);
-                    float armsStartingPainLevel = pm.GetTotalPainLevelForPainAtLocations(arms, true);
-                    float armsPainDifference = (armsPainLevel / armsStartingPainLevel) * 100;
-
-
-                    if (pm.GetTotalPainLevel() > 0)
-                    {
-                        if (handsPainDifference > 30 || armsPainDifference > 30) //hands or arms are hurting too much to wield a two handed weapon
-                        {
-                            __result = SprainedWrist.CanEquipItemResult.CannotEquip2HandedWeapon;
-                        }
-                    }
-                }
-            }
         }
     }
 }

@@ -8,7 +8,7 @@ using HarmonyLib;
 using Il2CppTLD.Stats;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using ImprovedAfflictions.CustomAfflictions;
+using PainComponent.CustomAfflictions;
 using ImprovedAfflictions.Utils;
 
 namespace ImprovedAfflictions.Bites

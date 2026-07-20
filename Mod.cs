@@ -2,14 +2,13 @@
 using ModData;
 using ImprovedAfflictions.Utils;
 using Moment;
-using ImprovedAfflictions.Pain;
 using System.Text.Json;
 using Il2Cpp;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine;
-using ImprovedAfflictions.Component;
+using PainComponent.Component;
 using AfflictionComponent.Components;
-using ImprovedAfflictions.CustomAfflictions;
+
 using Random = UnityEngine.Random;
 using ComplexLogger;
 

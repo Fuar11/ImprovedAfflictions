@@ -61,7 +61,7 @@ namespace ImprovedAfflictions.Sprains
                 float duration = Random.Range(48f, 72f);
 
                 string name = "Sprained Wrist";
-                var sprain = new CustomSprainAffliction(name, name, AfflictionHelper.GetAfflictionDescription(name), "", "ico_injury_sprainedWrist", afflictionBodyArea, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 15f, 15f, 0.65f);
+                var sprain = new CustomPainAffliction(name, name, AfflictionHelper.GetAfflictionDescription(name), "", "ico_injury_sprainedWrist", afflictionBodyArea, false, [Tuple.Create("GEAR_BottlePainKillers", 2, 1)], duration, 15f, 15f, 0.65f);
                 sprain.SetInstanceTypeBasedOnName();
                 sprain.Start();
 
